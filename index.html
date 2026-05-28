@@ -1,0 +1,2442 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>AIDLC Phases</title>
+<script src="https://cdn.jsdelivr.net/npm/marked@9.1.6/marked.min.js"></script>
+<style>
+  :root {
+    --aidlc-inception: #4A90E2;
+    --aidlc-construction: #7ED321;
+    --aidlc-operations: #F5A623;
+    --sdlc-blue: #2C7BC4;
+    --sdlc-blue-dark: #1F5C92;
+    --sdlc-accent: #F5A623;
+    --text: #2A3142;
+    --text-soft: #5B6577;
+    --border: #D7E3F0;
+  }
+
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    font-family: 'Segoe UI', 'Apple SD Gothic Neo', 'Malgun Gothic', '맑은 고딕', sans-serif;
+    color: var(--text);
+    background: linear-gradient(180deg, #FAFBFE 0%, #EEF3FA 100%);
+    min-height: 100vh;
+  }
+
+  /* ============ Header / Toolbar ============ */
+  header {
+    padding: 24px 32px 8px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+  .title-block h1 {
+    margin: 0;
+    font-size: 32px;
+    color: var(--sdlc-blue);
+    letter-spacing: 0.5px;
+    font-weight: 800;
+  }
+  .title-block .subtitle {
+    color: var(--text-soft);
+    font-size: 14px;
+    margin-top: 4px;
+  }
+  .toolbar { display: flex; gap: 8px; }
+  .toolbar button {
+    background: white;
+    border: 1.5px solid var(--sdlc-blue);
+    color: var(--sdlc-blue);
+    padding: 8px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    transition: all .15s ease;
+  }
+  .toolbar button:hover { background: var(--sdlc-blue); color: white; }
+  .toolbar button.active {
+    background: var(--sdlc-accent);
+    border-color: var(--sdlc-accent);
+    color: white;
+  }
+  .toolbar button.danger { border-color: #c44; color: #c44; }
+  .toolbar button.danger:hover { background: #c44; color: white; }
+
+  /* ============ Main board ============ */
+  main {
+    padding: 16px 32px 48px;
+    overflow-x: auto;
+  }
+  .board { min-width: 1400px; }
+
+  /* AIDLC phase sections - stacked full-width banners */
+  .aidlc-row {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+  }
+
+  .phase-section {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+
+  /* Phase header - full-width prominent banner */
+  .phase-header {
+    padding: 22px 28px;
+    border-radius: 14px;
+    color: white;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 28px;
+  }
+  .phase-header .phase-num {
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    opacity: 0.92;
+    text-transform: uppercase;
+    padding: 6px 14px;
+    background: rgba(255,255,255,0.18);
+    border-radius: 20px;
+    white-space: nowrap;
+  }
+  .phase-header .phase-name {
+    font-size: 30px;
+    font-weight: 800;
+    letter-spacing: 2px;
+    line-height: 1.1;
+  }
+  .phase-header .phase-tagline {
+    font-size: 13px;
+    opacity: 0.92;
+    margin-top: 6px;
+    font-weight: 500;
+  }
+  .phase-header .phase-question {
+    font-size: 13px;
+    opacity: 0.92;
+    font-style: italic;
+    text-align: right;
+    white-space: nowrap;
+  }
+  .phase-header.inception { background: linear-gradient(135deg, #4A90E2, #2C6FB8); }
+  .phase-header.construction { background: linear-gradient(135deg, #7ED321, #5BAA13); }
+  .phase-header.operations { background: linear-gradient(135deg, #F5A623, #C7841A); }
+
+  .phase-header-clickable { cursor: pointer; transition: transform .15s ease; }
+  .phase-header-clickable:hover { transform: translateY(-2px); }
+
+  /* Step row - horizontal columns of steps under each phase, with → arrows between */
+  .step-row {
+    display: flex;
+    align-items: stretch;
+    gap: 0;
+  }
+  .step-col {
+    flex: 1 1 0;
+    min-width: 170px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .step-arrow-h {
+    flex: 0 0 28px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding-top: 22px;
+    font-size: 22px;
+    font-weight: 800;
+    line-height: 1;
+    user-select: none;
+  }
+  .step-arrow-h.inception    { color: var(--aidlc-inception); }
+  .step-arrow-h.construction { color: var(--aidlc-construction); }
+  .step-arrow-h.operations   { color: var(--aidlc-operations); }
+
+  /* Phase-to-phase ↓ arrow between phase sections */
+  .phase-flow-arrow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: -10px 0;
+    font-size: 32px;
+    line-height: 1;
+    color: var(--sdlc-blue);
+    text-shadow: 0 2px 4px rgba(0,0,0,0.15);
+    user-select: none;
+  }
+
+  /* Activity-to-activity ↓ arrow within a step column */
+  .activity-flow-arrow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 12px;
+    margin: -2px 0;
+    font-size: 13px;
+    line-height: 1;
+    user-select: none;
+    opacity: 0.7;
+  }
+  .activity-flow-arrow.inception    { color: var(--aidlc-inception); }
+  .activity-flow-arrow.construction { color: #4F8E1A; }
+  .activity-flow-arrow.operations   { color: #B6791A; }
+
+  /* Step header - now a mini phase-style header */
+  .step-header {
+    border-radius: 8px;
+    padding: 12px 10px;
+    color: white;
+    text-align: center;
+    cursor: pointer;
+    transition: all .15s ease;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    min-height: 64px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 3px;
+  }
+  .step-header:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 14px rgba(0,0,0,0.18);
+  }
+  .step-header .step-num {
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    opacity: 0.88;
+  }
+  .step-header .step-title {
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1.3;
+  }
+  .step-header.inception { background: linear-gradient(135deg, #5BA0E8, #3A7BC4); }
+  .step-header.construction { background: linear-gradient(135deg, #8DD935, #6BB81F); }
+  .step-header.operations { background: linear-gradient(135deg, #F6B23A, #D08F1E); }
+
+  /* Step badges - applicability & execution mode markers */
+  .step-badges {
+    display: flex;
+    justify-content: center;
+    gap: 4px;
+    margin-top: 5px;
+    flex-wrap: wrap;
+  }
+  .step-badge {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.2px;
+    padding: 2px 7px;
+    border-radius: 10px;
+    background: rgba(255,255,255,0.22);
+    color: white;
+    white-space: nowrap;
+    border: 1px solid rgba(255,255,255,0.35);
+    line-height: 1.4;
+  }
+  .step-badge.always       { background: rgba(255,255,255,0.32); border-color: rgba(255,255,255,0.5); }
+  .step-badge.conditional  { background: rgba(255,200,150,0.42); border-color: rgba(255,200,150,0.55); }
+  .step-badge.inactive     { background: rgba(180,180,180,0.45); border-color: rgba(220,220,220,0.5); }
+  .step-badge.both         { background: rgba(255,255,255,0.18); border-color: rgba(255,255,255,0.35); }
+  .step-badge.brownfield   { background: rgba(200,120,40,0.55);  border-color: rgba(255,200,140,0.7); }
+  .step-badge.greenfield   { background: rgba(80,180,80,0.55);   border-color: rgba(180,255,180,0.7); }
+
+  /* Legend bar */
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    align-items: center;
+    padding: 10px 14px;
+    margin-bottom: 16px;
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 12px;
+    color: var(--text-soft);
+  }
+  .legend-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .legend-group-label {
+    font-weight: 700;
+    color: var(--text);
+    font-size: 11px;
+    letter-spacing: 0.3px;
+  }
+  .legend-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .legend .step-badge {
+    color: var(--text);
+    background: #f0f0f0;
+    border-color: #d8d8d8;
+  }
+  .legend .step-badge.always       { background: #E8F1FB; border-color: #B6D5F1; color: #1F5C92; }
+  .legend .step-badge.conditional  { background: #FFEEDB; border-color: #F5C892; color: #B5751A; }
+  .legend .step-badge.inactive     { background: #EDEDED; border-color: #CFCFCF; color: #666; }
+  .legend .step-badge.both         { background: #F0F4F9; border-color: #D7E3F0; color: var(--text); }
+  .legend .step-badge.brownfield   { background: #F9E1C6; border-color: #D8A767; color: #7A4A12; }
+  .legend .step-badge.greenfield   { background: #DAF3DA; border-color: #88C988; color: #2F6B2F; }
+  .legend-sep {
+    width: 1px;
+    height: 22px;
+    background: var(--border);
+  }
+
+  /* Activity boxes - small detail boxes cascading below each step */
+  .activity-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .activity-box {
+    position: relative;
+    background: white;
+    border-radius: 6px;
+    padding: 8px 24px 8px 24px;
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1.35;
+    cursor: pointer;
+    transition: all .12s ease;
+    text-align: center;
+  }
+  .activity-hitl,
+  .activity-doc {
+    position: absolute;
+    top: 4px;
+    width: 18px;
+    height: 18px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    font-size: 11px;
+    line-height: 1;
+  }
+  .activity-hitl {
+    right: 4px;
+    background: #FFD93D;
+    color: #5A4300;
+    border: 1px solid #C5A700;
+  }
+  .activity-doc {
+    left: 4px;
+    background: #DCE9F8;
+    color: #1F5C92;
+    border: 1px solid #6FA5D8;
+  }
+  .activity-box:hover .activity-hitl { background: #FFE680; }
+  .activity-box:hover .activity-doc  { background: #EAF2FB; }
+  .activity-box:hover {
+    transform: translateX(2px);
+  }
+  .activity-box.inception {
+    border: 1.5px solid var(--aidlc-inception);
+    color: var(--aidlc-inception);
+  }
+  .activity-box.inception:hover {
+    background: var(--aidlc-inception);
+    color: white;
+  }
+  .activity-box.construction {
+    border: 1.5px solid var(--aidlc-construction);
+    color: #4F8E1A;
+  }
+  .activity-box.construction:hover {
+    background: var(--aidlc-construction);
+    color: white;
+  }
+  .activity-box.operations {
+    border: 1.5px solid var(--aidlc-operations);
+    color: #B6791A;
+  }
+  .activity-box.operations:hover {
+    background: var(--aidlc-operations);
+    color: white;
+  }
+
+  /* Cross-cutting brackets */
+  .brackets {
+    margin-top: 32px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .bracket {
+    border: 2px solid var(--sdlc-blue);
+    border-radius: 8px;
+    padding: 14px 18px;
+    color: var(--sdlc-accent);
+    font-weight: 800;
+    font-size: 16px;
+    letter-spacing: 1.5px;
+    background: white;
+    cursor: pointer;
+    transition: all .15s ease;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .bracket:hover {
+    background: #FFF7EB;
+    box-shadow: 0 4px 10px rgba(245,166,35,0.2);
+  }
+  .bracket-label { flex: 0 0 auto; }
+  .bracket-desc {
+    color: var(--text-soft);
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0;
+    flex: 1;
+  }
+
+  /* Change Control row */
+  .change-row {
+    margin-top: 32px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .change-box {
+    background: var(--sdlc-blue);
+    color: white;
+    padding: 14px 20px;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 13px;
+    min-width: 220px;
+    text-align: center;
+    cursor: pointer;
+    transition: all .15s ease;
+    box-shadow: 0 2px 6px rgba(44,123,196,0.25);
+  }
+  .change-box:hover {
+    background: var(--sdlc-blue-dark);
+    transform: translateY(-1px);
+  }
+  .change-arrow {
+    flex: 1;
+    height: 2px;
+    background: var(--sdlc-blue);
+    position: relative;
+    max-width: 500px;
+  }
+  .change-arrow::after {
+    content: '';
+    position: absolute;
+    right: -2px; top: 50%;
+    transform: translateY(-50%);
+    border-top: 6px solid transparent;
+    border-bottom: 6px solid transparent;
+    border-left: 9px solid var(--sdlc-blue);
+  }
+
+  /* ============ Clickable file link ============ */
+  .file-link {
+    cursor: pointer;
+    color: var(--sdlc-blue);
+    text-decoration: underline dotted;
+    text-underline-offset: 2px;
+  }
+  .file-link:hover {
+    color: var(--sdlc-blue-dark);
+    background: #EAF2FB;
+    border-radius: 3px;
+  }
+  .file-link::before {
+    content: "📄 ";
+    font-size: 0.9em;
+    opacity: 0.7;
+  }
+
+  /* ============ MD viewer modal ============ */
+  .mdv-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(20, 30, 50, 0.65);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 200;
+    padding: 24px;
+  }
+  .mdv-backdrop.open { display: flex; }
+  .mdv {
+    background: white;
+    border-radius: 14px;
+    max-width: 920px;
+    width: 100%;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 24px 60px rgba(0,0,0,0.35);
+  }
+  .mdv-header {
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    background: #FAFBFE;
+    border-radius: 14px 14px 0 0;
+  }
+  .mdv-header h2 {
+    margin: 0;
+    font-size: 16px;
+    color: var(--sdlc-blue);
+    font-family: 'Consolas', 'SF Mono', Menlo, monospace;
+  }
+  .mdv-header .mdv-path {
+    font-size: 11px;
+    color: var(--text-soft);
+    margin-top: 2px;
+    font-family: 'Consolas', 'SF Mono', Menlo, monospace;
+  }
+  .mdv-close {
+    background: transparent;
+    border: none;
+    font-size: 22px;
+    cursor: pointer;
+    color: var(--text-soft);
+    line-height: 1;
+    padding: 4px 8px;
+  }
+  .mdv-close:hover { color: var(--text); }
+  .mdv-body {
+    padding: 24px 28px;
+    overflow-y: auto;
+    flex: 1;
+    line-height: 1.6;
+    color: var(--text);
+  }
+  .mdv-body h1 { font-size: 24px; color: var(--sdlc-blue); margin: 0 0 14px; padding-bottom: 8px; border-bottom: 2px solid var(--border); }
+  .mdv-body h2 { font-size: 19px; color: var(--text); margin: 22px 0 10px; }
+  .mdv-body h3 { font-size: 16px; color: var(--text); margin: 18px 0 8px; }
+  .mdv-body h4 { font-size: 14px; color: var(--text); margin: 14px 0 6px; }
+  .mdv-body p { margin: 8px 0; }
+  .mdv-body ul, .mdv-body ol { padding-left: 24px; margin: 8px 0; }
+  .mdv-body li { margin: 4px 0; }
+  .mdv-body code {
+    background: #F0F4F9;
+    padding: 1px 6px;
+    border-radius: 3px;
+    font-size: 0.9em;
+    color: #C25C00;
+    font-family: 'Consolas', 'SF Mono', Menlo, monospace;
+  }
+  .mdv-body pre {
+    background: #2A3142;
+    color: #E8EBF0;
+    padding: 12px 16px;
+    border-radius: 6px;
+    overflow-x: auto;
+    margin: 12px 0;
+    font-size: 12px;
+  }
+  .mdv-body pre code { background: none; padding: 0; color: inherit; font-size: 12px; }
+  .mdv-body blockquote {
+    border-left: 4px solid var(--sdlc-blue);
+    padding: 4px 14px;
+    margin: 12px 0;
+    color: var(--text-soft);
+    background: #F0F4F9;
+    border-radius: 0 6px 6px 0;
+  }
+  .mdv-body table { border-collapse: collapse; margin: 12px 0; width: 100%; }
+  .mdv-body th, .mdv-body td { border: 1px solid var(--border); padding: 6px 12px; text-align: left; }
+  .mdv-body th { background: #F0F4F9; font-weight: 700; }
+  .mdv-body a { color: var(--sdlc-blue); }
+  .mdv-status {
+    padding: 40px;
+    text-align: center;
+    color: var(--text-soft);
+    font-size: 14px;
+  }
+  .mdv-error {
+    padding: 16px 20px;
+    background: #FEF0F0;
+    border: 1px solid #F5B6B6;
+    border-radius: 6px;
+    color: #8B2424;
+    font-size: 13px;
+    margin: 16px;
+  }
+  .mdv-error code { color: inherit; background: rgba(0,0,0,0.05); }
+  .mdv-sample-note {
+    background: #FFF8E1;
+    border: 1px solid #F5D87A;
+    padding: 8px 12px;
+    border-radius: 6px;
+    color: #7A5C00;
+    font-size: 12px;
+    margin: 0 16px 14px;
+  }
+
+  /* ============ Modal ============ */
+  .modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(20, 30, 50, 0.55);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    padding: 24px;
+  }
+  .modal-backdrop.open { display: flex; }
+  .modal {
+    background: white;
+    border-radius: 14px;
+    max-width: 720px;
+    width: 100%;
+    max-height: 88vh;
+    overflow: auto;
+    box-shadow: 0 24px 60px rgba(0,0,0,0.3);
+    animation: modalIn .18s ease-out;
+  }
+  @keyframes modalIn {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+  .modal-header {
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    position: sticky;
+    top: 0;
+    background: white;
+    border-radius: 14px 14px 0 0;
+  }
+  .modal-header h2 {
+    margin: 0;
+    font-size: 22px;
+    color: var(--sdlc-blue);
+  }
+  .modal-header .phase-meta {
+    font-size: 12px;
+    color: var(--text-soft);
+    margin-top: 4px;
+  }
+  .modal-close {
+    background: transparent;
+    border: none;
+    font-size: 22px;
+    cursor: pointer;
+    color: var(--text-soft);
+    line-height: 1;
+    padding: 4px 8px;
+  }
+  .modal-close:hover { color: var(--text); }
+
+  .modal-body { padding: 20px 24px 24px; }
+  .modal-section { margin-bottom: 22px; }
+  .modal-section h3 {
+    font-size: 13px;
+    color: var(--sdlc-blue);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin: 0 0 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .modal-section p, .modal-section li {
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--text);
+  }
+  .modal-section ul {
+    margin: 0;
+    padding-left: 20px;
+  }
+  .aidlc-mapping-chip {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 14px;
+    color: white;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+  }
+
+  /* Edit mode */
+  body.edit-mode [contenteditable="true"] {
+    outline: 1.5px dashed var(--sdlc-accent);
+    border-radius: 4px;
+    padding: 2px 4px;
+    background: #FFFCF3;
+  }
+  body.edit-mode [contenteditable="true"]:focus {
+    outline: 2px solid var(--sdlc-accent);
+    background: white;
+  }
+  .list-edit-controls { display: none; gap: 6px; margin-top: 8px; }
+  body.edit-mode .list-edit-controls { display: flex; }
+  .list-edit-controls button {
+    background: white;
+    border: 1px solid var(--sdlc-blue);
+    color: var(--sdlc-blue);
+    padding: 3px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 11px;
+  }
+  .list-edit-controls button:hover { background: var(--sdlc-blue); color: white; }
+
+  .edit-badge {
+    background: var(--sdlc-accent);
+    color: white;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 700;
+    margin-left: 8px;
+    display: none;
+  }
+  body.edit-mode .edit-badge { display: inline-block; }
+
+  footer {
+    padding: 16px 32px 32px;
+    text-align: center;
+    color: var(--text-soft);
+    font-size: 12px;
+  }
+  footer a { color: var(--sdlc-blue); text-decoration: none; }
+  footer a:hover { text-decoration: underline; }
+
+  .file-input { display: none; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="title-block">
+    <h1>AIDLC PHASES <span class="edit-badge">EDIT MODE</span></h1>
+    <div class="subtitle">AWS Labs <a href="https://github.com/awslabs/aidlc-workflows" target="_blank">aidlc-workflows</a> — AI Development Life Cycle 가이드</div>
+  </div>
+  <div class="toolbar">
+    <button id="btnEdit">✎ Edit</button>
+    <button id="btnExport">⬇ Export</button>
+    <button id="btnImport">⬆ Import</button>
+    <button id="btnReset" class="danger">↺ Reset</button>
+    <input type="file" id="fileInput" class="file-input" accept="application/json">
+  </div>
+</header>
+
+<main>
+  <div class="board">
+    <div class="legend">
+      <div class="legend-group">
+        <span class="legend-group-label">실행 시점</span>
+        <span class="legend-item"><span class="step-badge always">항상</span><span>모든 프로젝트에서 항상 실행</span></span>
+        <span class="legend-item"><span class="step-badge conditional">조건부</span><span>조건 충족 시에만 실행</span></span>
+        <span class="legend-item"><span class="step-badge inactive">비활성</span><span>현재 미구현 (placeholder)</span></span>
+      </div>
+      <div class="legend-sep"></div>
+      <div class="legend-group">
+        <span class="legend-group-label">적용 대상</span>
+        <span class="legend-item"><span class="step-badge both">공통</span><span>Greenfield + Brownfield</span></span>
+        <span class="legend-item"><span class="step-badge brownfield">Brownfield</span><span>기존 코드베이스 전용</span></span>
+        <span class="legend-item"><span class="step-badge greenfield">Greenfield</span><span>신규 프로젝트 전용</span></span>
+      </div>
+      <div class="legend-sep"></div>
+      <div class="legend-group">
+        <span class="legend-group-label">상세 단계</span>
+        <span class="legend-item">
+          <span style="display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;background:#DCE9F8;color:#1F5C92;border-radius:50%;border:1px solid #6FA5D8;font-size:11px;">📄</span>
+          <span>산출물 생성 활동</span>
+        </span>
+        <span class="legend-item">
+          <span style="display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;background:#FFD93D;color:#5A4300;border-radius:50%;border:1px solid #C5A700;font-size:11px;">👤</span>
+          <span>Human-in-the-loop (사용자 입력·승인 필요)</span>
+        </span>
+      </div>
+    </div>
+    <div class="aidlc-row" id="aidlcRow"></div>
+    <div class="brackets" id="bracketsRow"></div>
+    <div class="change-row" id="changeRow"></div>
+  </div>
+</main>
+
+<div class="mdv-backdrop" id="mdvBackdrop">
+  <div class="mdv">
+    <div class="mdv-header">
+      <div>
+        <h2 id="mdvTitle">filename.md</h2>
+        <div class="mdv-path" id="mdvPath"></div>
+      </div>
+      <button class="mdv-close" id="mdvClose">✕</button>
+    </div>
+    <div class="mdv-body" id="mdvBody"></div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="modalBackdrop">
+  <div class="modal" id="modal">
+    <div class="modal-header">
+      <div>
+        <h2 id="modalTitle">제목</h2>
+        <div class="phase-meta" id="modalMeta"></div>
+      </div>
+      <button class="modal-close" id="modalClose">✕</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+
+<footer>
+  데이터는 브라우저 LocalStorage 에 자동 저장됩니다. 다른 환경으로 옮기려면 Export 후 Import 하세요.
+</footer>
+
+<script>
+/* ============================================================
+   기본 데이터 (AIDLC 3 phase + sub-stages)
+   ============================================================ */
+const DEFAULT_DATA = {
+  meta: { title: "AIDLC PHASES", version: 3, source: "awslabs/aidlc-workflows · aidlc-rules/aws-aidlc-rule-details/" },
+
+  aidlcPhases: [
+    {
+      id: "inception",
+      number: "Phase 1",
+      name: "INCEPTION",
+      tagline: "계획 · 요구사항 · 아키텍처 결정",
+      taglineEn: "Planning, requirements gathering, and architectural decisions",
+      question: "무엇을, 왜 만드는가?",
+      color: "#4A90E2",
+      colorKey: "inception",
+      description: "프로젝트 계획·요구사항 수집·아키텍처 결정을 수행합니다. AI 에이전트가 workspace 를 분석하여 greenfield/brownfield 여부를 판별하고, 요구사항·user story·application design 을 정리한 뒤 construction 을 위한 units of work 로 분해합니다.",
+      activities: [
+        "Workspace Detection",
+        "Reverse Engineering (brownfield only)",
+        "Requirements Analysis",
+        "User Stories",
+        "Workflow Planning",
+        "Application Design",
+        "Units Generation"
+      ],
+      deliverables: [
+        "aidlc-docs/aidlc-state.md (workspace 상태)",
+        "Reverse engineering artifacts (brownfield)",
+        "requirements.md",
+        "user-stories.md / personas.md",
+        "execution-plan.md (Mermaid 워크플로우 시각화)",
+        "application-design.md, components.md, services.md, component-dependency.md",
+        "unit-of-work.md, unit-of-work-dependency.md, unit-of-work-story-map.md"
+      ],
+      ruleFiles: [
+        "inception/workspace-detection.md",
+        "inception/reverse-engineering.md",
+        "inception/requirements-analysis.md",
+        "inception/user-stories.md",
+        "inception/workflow-planning.md",
+        "inception/application-design.md",
+        "inception/units-generation.md"
+      ],
+      subStages: [
+        {
+          id: "inception-workspace-detection",
+          title: "워크스페이스 감지",
+          titleEn: "Workspace Detection",
+          description: "워크스페이스 상태를 판별하고 기존 AI-DLC 프로젝트가 있는지 확인하여, 신규(greenfield)인지 기존 코드 기반(brownfield)인지 결정하고 적절한 다음 단계를 식별합니다.",
+          executionNote: "항상 실행 (구조화된 분석)",
+          inputs: [
+            "현재 워크스페이스 디렉토리 및 파일 시스템",
+            "기존 aidlc-docs/ 디렉토리 내용",
+            "코드베이스 수정 timestamp (brownfield)"
+          ],
+          deliverables: [
+            "Workspace 상태 문서 (코드/언어/빌드 시스템/구조 식별)",
+            "aidlc-docs/aidlc-state.md (프로젝트 타입·단계·코드 위치 규칙)",
+            "완료 메시지 (다음 단계 확인)",
+            "Brownfield 플래그 (true/false)"
+          ],
+          ruleFile: "inception/workspace-detection.md",
+          activities: [
+            { title: "기존 aidlc-state.md 확인", titleEn: "Check existing aidlc-state.md", description: "aidlc-docs/aidlc-state.md 파일 존재 여부를 확인합니다." },
+            { title: "소스 코드 스캔 (다중 언어)", titleEn: "Scan source code (multi-language)", description: "워크스페이스를 스캔하여 여러 프로그래밍 언어의 소스 코드 파일을 식별합니다." },
+            { title: "빌드 파일·구조 확인", titleEn: "Check build files & structure", description: "빌드 파일과 프로젝트 구조 indicator 를 확인합니다." },
+            { title: "Workspace 루트 식별", titleEn: "Identify workspace root", description: "워크스페이스 루트 디렉토리를 식별합니다." },
+            { title: "프로젝트 타입 판별", titleEn: "Determine project type", description: "greenfield 인지 brownfield 인지 프로젝트 타입을 판별합니다." },
+            { title: "Reverse engineering 산출물 확인", titleEn: "Check reverse engineering artifacts", description: "brownfield 프로젝트의 경우 기존 reverse engineering 산출물 존재 여부 및 staleness 를 평가합니다." },
+            { title: "초기 aidlc-state.md 생성", titleEn: "Create initial aidlc-state.md", description: "초기 aidlc-docs/aidlc-state.md 상태 파일을 생성합니다." },
+            { title: "완료 메시지 제시", titleEn: "Present completion message", description: "findings 를 정리한 완료 메시지를 제시합니다." },
+            { title: "다음 Phase 로 자동 진행", titleEn: "Auto-proceed to next phase", description: "적절한 다음 phase 로 자동 진행합니다." }
+          ]
+        },
+        {
+          id: "inception-reverse-engineering",
+          title: "리버스 엔지니어링",
+          titleEn: "Reverse Engineering",
+          description: "기존 코드베이스를 분석하여 종합적인 설계 산출물을 생성합니다. 모든 문서가 현재 코드 상태를 반영하도록 보장합니다.",
+          executionNote: "조건부 — brownfield 프로젝트만; 산출물 존재 시 skip",
+          inputs: [
+            "기존 워크스페이스 코드베이스",
+            "설정 파일 (package.json, 빌드 설정, CDK, Terraform)",
+            "소스 코드 파일"
+          ],
+          deliverables: [
+            "business-overview.md",
+            "architecture.md",
+            "code-structure.md",
+            "api-documentation.md",
+            "component-inventory.md",
+            "technology-stack.md",
+            "dependencies.md",
+            "code-quality-assessment.md",
+            "reverse-engineering-timestamp.md",
+            "Updated aidlc-state.md"
+          ],
+          ruleFile: "inception/reverse-engineering.md",
+          activities: [
+            { title: "다중 패키지 탐색", titleEn: "Multi-Package Discovery", description: "워크스페이스의 모든 패키지/관계, 비즈니스 컨텍스트·트랜잭션, 인프라(CDK/Terraform/CloudFormation), 빌드 시스템·의존성, 서비스 아키텍처(Lambda/컨테이너/API), 코드 품질 indicator 를 분석합니다." },
+            { title: "비즈니스 개요 문서 생성", titleEn: "Generate Business Overview Documentation", description: "비즈니스 컨텍스트 다이어그램, 비즈니스 설명·트랜잭션, 비즈니스 사전(dictionary) 을 생성합니다." },
+            { title: "아키텍처 문서 생성", titleEn: "Generate Architecture Documentation", description: "시스템 개요·아키텍처 다이어그램, 컴포넌트 설명·의존성, 데이터 흐름·통합 지점, 인프라 컴포넌트를 문서화합니다." },
+            { title: "코드 구조 문서 생성", titleEn: "Generate Code Structure Documentation", description: "빌드 시스템 상세, 기존 파일 인벤토리(목적 포함), 디자인 패턴·핵심 의존성을 식별합니다." },
+            { title: "API 문서 생성", titleEn: "Generate API Documentation", description: "REST 및 내부 API 를 문서화하고 데이터 모델을 정의합니다." },
+            { title: "컴포넌트·기술 스택·의존성·품질 문서 생성", titleEn: "Generate Component / Tech Stack / Dependencies / Code Quality Docs", description: "컴포넌트 인벤토리(개수 포함), 언어·프레임워크 목록, 내부·외부 의존성 매핑, 테스트 커버리지·코드 품질 평가를 생성합니다." },
+            { title: "Timestamp 파일 생성·State 갱신", titleEn: "Create Timestamp File & Update State", description: "reverse-engineering-timestamp.md 파일을 생성하고 aidlc-state.md state tracking 을 갱신합니다." },
+            { title: "완료 메시지·승인 대기", titleEn: "Present Completion Message & Await Approval", description: "완료 메시지를 제시하고 사용자 승인을 대기합니다." }
+          ]
+        },
+        {
+          id: "inception-requirements-analysis",
+          title: "요구사항 분석",
+          titleEn: "Requirements Analysis",
+          description: "프로덕트 오너 역할로 사용자 요청을 분석하여 완전한 요구사항을 수집합니다. depth level 을 결정하고 모든 모호함을 해결한 후 설계 활동으로 진행합니다.",
+          executionNote: "항상 실행; depth(minimal/standard/comprehensive) 는 요청 명확성·복잡도에 따라 적응적으로 조정",
+          inputs: [
+            "사용자 요청 또는 설명",
+            "Reverse engineering artifacts (brownfield 시)",
+            "기존 요구사항 문서",
+            "Workspace 의 Extension opt-in 파일",
+            "이전 단계 audit trail"
+          ],
+          deliverables: [
+            "aidlc-docs/inception/requirements/requirement-verification-questions.md",
+            "aidlc-docs/inception/requirements/requirements-clarification-questions.md (조건부 — 답변에 모순/모호함 감지 시)",
+            "aidlc-docs/inception/requirements/requirements.md",
+            "Updated aidlc-docs/aidlc-state.md (stage complete)",
+            "Updated aidlc-docs/audit.md (timestamp 포함 승인 기록)",
+            "완료 공지 (AI 요약 + 워크플로우 옵션)"
+          ],
+          ruleFile: "inception/requirements-analysis.md",
+          activities: [
+            { title: "Reverse Engineering 컨텍스트 로드", titleEn: "Load Reverse Engineering Context", description: "brownfield 프로젝트의 경우 reverse engineering 컨텍스트를 로드합니다." },
+            { title: "사용자 요청 Intent 분석", titleEn: "Analyze User Request via Intent Analysis", description: "요청 명확성(clear/vague/incomplete), 요청 타입(feature/bug/refactor/upgrade/migration/enhancement/new project), 초기 scope, 초기 complexity 를 평가합니다." },
+            { title: "요구사항 Depth 결정", titleEn: "Determine Requirements Depth", description: "minimal / standard / comprehensive 중 적절한 depth 를 결정합니다." },
+            { title: "현재 요구사항 평가", titleEn: "Assess Current Requirements", description: "제공된 자료로부터 현재 요구사항을 평가합니다." },
+            { title: "6 영역 완성도 분석", titleEn: "Thorough Completeness Analysis", description: "Functional Requirements, Non-Functional Requirements, User Scenarios, Business Context, Technical Context, Quality Attributes 6 영역에 걸친 완성도 분석을 수행합니다." },
+            { title: "Extension Opt-In 스캔·처리", titleEn: "Scan & Process Extension Opt-In Prompts", description: "Workspace 의 *.opt-in.md 파일을 스캔하고 처리합니다." },
+            { title: "명확화 질문 문서 생성", titleEn: "Generate Clarifying Questions Document", description: "명확화(verification) 질문 문서를 생성하여 사용자 답변을 받습니다. 요구사항이 예외적으로 명확한 경우 skip.", outputs: ["aidlc-docs/inception/requirements/requirement-verification-questions.md"] },
+            { title: "[GATE] 답변 대기·검증", titleEn: "[GATE] Await & Validate User Answers", description: "사용자 답변을 대기하고 모든 답변을 검증합니다. 답변 완료 전 진행 불가." },
+            { title: "Requirements 문서 생성", titleEn: "Generate Requirements Document", description: "답변을 통합하여 requirements.md 를 생성합니다." },
+            { title: "State Tracking 갱신", titleEn: "Update State Tracking", description: "aidlc-state.md 의 stage 진행 상태를 갱신합니다." },
+            { title: "완료 기록", titleEn: "Log Completion", description: "구조화된 요약과 워크플로우 메시지로 완료를 audit.md 에 기록합니다.", outputs: ["aidlc-docs/audit.md (timestamp 포함 승인 기록)"] }
+          ]
+        },
+        {
+          id: "inception-user-stories",
+          title: "사용자 스토리",
+          titleEn: "User Stories",
+          description: "요구사항을 사용자 중심 narrative 와 acceptance criteria 로 변환합니다. 다중 요소 평가(multi-factor assessment) 로 실행 여부를 결정하며, 사용자 워크플로우에 영향을 미치는 feature 에 대해 실행됩니다.",
+          executionNote: "조건부 — 사용자 워크플로우 영향 feature 에 실행; 순수 refactoring/bug fix 는 skip",
+          inputs: [
+            "완료된 Workspace Detection",
+            "Requirements Analysis (선택)",
+            "Workflow Planning (User Stories 단계 표시)",
+            "명확화 질문에 대한 사용자 응답"
+          ],
+          deliverables: [
+            "aidlc-docs/inception/plans/user-stories-assessment.md",
+            "aidlc-docs/inception/plans/story-generation-plan.md ([Answer]: 태그 포함)",
+            "aidlc-docs/inception/plans/story-planning-clarification-questions.md (조건부 — 답변에 모순/모호함 감지 시)",
+            "aidlc-docs/inception/user-stories/stories.md (INVEST 기준 + acceptance criteria)",
+            "aidlc-docs/inception/user-stories/personas.md",
+            "Updated audit.md (approval timestamps)",
+            "Updated aidlc-state.md"
+          ],
+          ruleFile: "inception/user-stories.md",
+          activities: [
+            { title: "User Stories 필요성 검증", titleEn: "Validate User Stories Need", description: "Planning Phase — assessment 를 수행하고 결정을 문서화하며, 정당화된 경우에만 진행합니다." },
+            { title: "Story Plan 생성 (Product Owner)", titleEn: "Create Story Plan (product owner role)", description: "Planning Phase — product owner 역할로 종합적인 실행 checklist 를 생성합니다." },
+            { title: "컨텍스트 기반 질문 생성", titleEn: "Generate Context-Appropriate Questions", description: "Planning Phase — 요구사항을 분석하여 [Answer]: 태그가 포함된 질문을 story-generation-plan.md 에 embed 합니다.", outputs: ["aidlc-docs/inception/plans/story-generation-plan.md ([Answer]: 태그 포함)"] },
+            { title: "필수 Story 산출물 포함", titleEn: "Include Mandatory Story Artifacts in Plan", description: "Planning Phase — stories.md, personas.md (INVEST 기준) 같은 필수 산출물을 계획에 포함시킵니다." },
+            { title: "Story 옵션 제시", titleEn: "Present Story Options", description: "Planning Phase — user journey-based, feature-based, persona-based, domain-based, epic-based 등 접근 옵션을 제시합니다." },
+            { title: "Story Plan 저장", titleEn: "Store Story Plan", description: "Planning Phase — 계획을 aidlc-docs/inception/plans/story-generation-plan.md 에 저장합니다." },
+            { title: "사용자 입력 요청·수집", titleEn: "Request User Input & Collect Answers", description: "Planning Phase — 사용자에게 [Answer]: 태그 채우기를 요청하고 모든 답변을 수집합니다." },
+            { title: "답변 분석·후속 질문", titleEn: "Analyze Answers & Issue Follow-up Questions", description: "Planning Phase — 모호함·모순을 분석하여 진행 전에 필수 후속(clarification) 질문을 발행합니다. 모순/모호 감지 시 story-planning-clarification-questions.md 가 생성됩니다.", outputs: ["aidlc-docs/inception/plans/story-planning-clarification-questions.md (조건부 — 답변에 모순/모호함 감지 시)"] },
+            { title: "Plan 명시 승인 대기", titleEn: "Wait for Explicit Approval of Plan", description: "Planning Phase — audit.md 에 timestamp 와 함께 승인 prompt 를 기록하고 명시적 승인을 대기합니다." },
+            { title: "Plan 로드·단계 실행 → stories/personas 생성", titleEn: "Load Plan & Execute Steps (generates stories + personas)", description: "Generation Phase — 계획을 로드하고 다음 미완료 step 을 실행하여 stories.md (INVEST 기준) 와 personas.md 를 생성합니다.", outputs: ["aidlc-docs/inception/user-stories/stories.md (INVEST 기준 + acceptance criteria)", "aidlc-docs/inception/user-stories/personas.md"] },
+            { title: "진행 상태 갱신", titleEn: "Update Progress (checkboxes, state)", description: "Generation Phase — checkbox 를 표시하고 aidlc-state.md 의 state 를 갱신합니다." },
+            { title: "완료 메시지·승인 대기", titleEn: "Present Completion & Wait for Approval", description: "Generation Phase — 완료 메시지(announcement, summary, workflow message)를 제시하고 생성된 stories 에 대한 명시적 승인을 대기·기록합니다." }
+          ]
+        },
+        {
+          id: "inception-workflow-planning",
+          title: "워크플로우 계획",
+          titleEn: "Workflow Planning",
+          description: "전체 프로젝트 컨텍스트(요구사항·scope·impact analysis)에 기반하여 어떤 워크플로우 phase 를 실행할지 결정하고 종합 실행 계획을 생성합니다.",
+          executionNote: "항상 실행; 사용자가 override 가능한 추천 결과를 생성",
+          inputs: [
+            "아키텍처·컴포넌트 인벤토리 (brownfield)",
+            "기술 스택·의존성 문서",
+            "Intent analysis 포함 요구사항 분석",
+            "User stories 및 personas (실행된 경우)",
+            "프로젝트 scope 및 기존 시스템 상태"
+          ],
+          deliverables: [
+            "execution-plan.md (상세 분석, 워크플로우 시각화, phase 추천, 성공 기준)",
+            "aidlc-state.md (실행 계획 요약 및 stage 진행 추적)",
+            "audit.md (사용자 응답·승인 상태 기록)",
+            "Mermaid 워크플로우 시각화 (모든 phase 와 실행 상태)",
+            "Risk assessment 및 component impact analysis 문서"
+          ],
+          ruleFile: "inception/workflow-planning.md",
+          activities: [
+            { title: "이전 컨텍스트 산출물 로드", titleEn: "Load Prior Context Artifacts", description: "reverse engineering, requirements analysis, user stories(해당 시) 등 모든 이전 컨텍스트 산출물을 로드합니다." },
+            { title: "Scope·Impact 분석", titleEn: "Perform Scope & Impact Analysis", description: "transformation scope 감지, change impact 평가, component 관계 매핑, risk 평가를 수행합니다." },
+            { title: "Phase 실행 결정", titleEn: "Determine Phase Execution", description: "conditional 기준에 따라 User Stories, Application Design, Units Generation, NFR Implementation 의 실행/skip 을 결정합니다." },
+            { title: "Adaptive Detail Level 설정", titleEn: "Establish Adaptive Detail Levels", description: "실행될 각 stage 에 대한 adaptive detail level 을 설정합니다." },
+            { title: "다중 모듈 조율 분석", titleEn: "Multi-Module Coordination Analysis", description: "의존성을 가진 brownfield 프로젝트에 대한 다중 모듈 조율 분석을 수행합니다." },
+            { title: "Mermaid 워크플로우 시각화", titleEn: "Generate Mermaid Workflow Visualization", description: "적절한 styling 을 갖춘 Mermaid flowchart 로 워크플로우를 시각화합니다." },
+            { title: "execution-plan.md 생성", titleEn: "Create execution-plan.md", description: "aidlc-docs/inception/plans/execution-plan.md 에 실행 계획 문서를 생성합니다." },
+            { title: "State Tracking 초기화", titleEn: "Initialize State Tracking", description: "aidlc-docs/aidlc-state.md 의 state tracking 을 초기화합니다." },
+            { title: "근거와 함께 Plan 제시", titleEn: "Present Plan with Rationale", description: "각 phase 의 실행/skip 결정 근거(rationale)와 함께 계획을 사용자에게 제시합니다." },
+            { title: "사용자 응답 처리", titleEn: "Handle User Response", description: "승인, 변경 요청, 강제 포함(forced inclusion) 등 사용자 응답을 처리합니다." },
+            { title: "audit.md 상호작용 기록", titleEn: "Log Interaction in audit.md", description: "audit.md 에 상호작용을 기록합니다." }
+          ]
+        },
+        {
+          id: "inception-application-design",
+          title: "애플리케이션 설계",
+          titleEn: "Application Design",
+          description: "high-level 컴포넌트 식별 및 service layer 설계. 기능 컴포넌트를 식별하고 인터페이스를 정의하며, 오케스트레이션을 위한 service layer 와 컴포넌트 의존성을 수립합니다.",
+          executionNote: "조건부 — 신규 컴포넌트/서비스/메서드 정의가 필요할 때만",
+          inputs: [
+            "aidlc-docs/inception/requirements/requirements.md",
+            "aidlc-docs/inception/user-stories/stories.md",
+            "완료된 Workspace Detection",
+            "Application Design stage 실행을 지시하는 execution plan"
+          ],
+          deliverables: [
+            "aidlc-docs/inception/plans/application-design-plan.md",
+            "aidlc-docs/inception/plans/design-clarification-questions.md (조건부 — 답변에 모순/모호함 감지 시)",
+            "aidlc-docs/inception/application-design/components.md",
+            "aidlc-docs/inception/application-design/component-methods.md",
+            "aidlc-docs/inception/application-design/services.md",
+            "aidlc-docs/inception/application-design/component-dependency.md",
+            "aidlc-docs/inception/application-design/application-design.md (consolidated)",
+            "Updated audit.md, aidlc-state.md"
+          ],
+          ruleFile: "inception/application-design.md",
+          activities: [
+            { title: "컨텍스트 분석", titleEn: "Analyze Context", description: "요구사항·user stories 등 입력 컨텍스트를 분석합니다." },
+            { title: "Application Design Plan 생성", titleEn: "Create Application Design Plan", description: "구현 단위별 checkbox 가 포함된 application design plan 을 생성합니다." },
+            { title: "필수 설계 산출물 포함", titleEn: "Include Mandatory Design Artifacts in Plan", description: "필수 design 산출물을 plan 에 포함시킵니다." },
+            { title: "컨텍스트 기반 질문 생성", titleEn: "Generate Context-Appropriate Questions", description: "컨텍스트에 맞는 질문을 [Answer]: 태그로 application-design-plan.md 에 embed 합니다.", outputs: ["aidlc-docs/inception/plans/application-design-plan.md"] },
+            { title: "Plan 저장", titleEn: "Store Application Design Plan", description: "aidlc-docs/inception/plans/application-design-plan.md 에 plan 을 저장합니다." },
+            { title: "사용자 입력·수집", titleEn: "Request User Input & Collect Answers", description: "사용자에게 [Answer]: 태그 채우기를 요청하고 답변을 수집합니다." },
+            { title: "답변 분석", titleEn: "Analyze Answers", description: "모호함·vagueness·모순에 대해 답변을 분석합니다." },
+            { title: "필수 후속 질문 발행", titleEn: "Issue Mandatory Follow-up Questions", description: "필요시 필수 follow-up(clarification) 질문을 발행합니다. 모순/모호 감지 시 design-clarification-questions.md 가 생성됩니다.", outputs: ["aidlc-docs/inception/plans/design-clarification-questions.md (조건부 — 답변에 모순/모호함 감지 시)"] },
+            { title: "설계 산출물 생성", titleEn: "Generate Application Design Artifacts", description: "components.md, component-methods.md, services.md, component-dependency.md, application-design.md (consolidated) 를 생성합니다." },
+            { title: "승인 기록·완료 메시지", titleEn: "Log Approval & Present Completion Message", description: "audit.md 에 승인 prompt 를 timestamp 와 함께 기록하고 완료 메시지를 제시합니다.", outputs: ["aidlc-docs/audit.md (timestamp 포함 승인 prompt)"] },
+            { title: "명시 승인·진행 갱신", titleEn: "Wait for Explicit Approval & Update Progress", description: "명시적 승인을 대기하고 응답을 기록한 뒤 aidlc-state.md 의 진행 상태를 갱신합니다." }
+          ]
+        },
+        {
+          id: "inception-units-generation",
+          title: "Unit-of-Work 분해",
+          titleEn: "Units Generation",
+          description: "시스템을 관리 가능한 units of work 로 분해합니다 — 계획·승인 후, 독립적으로 배포 가능한 service 또는 logical module 을 정의하는 unit 산출물을 생성합니다.",
+          executionNote: "조건부 — 다중 서비스/복잡 시스템에서만; 단순 single-unit 구현은 skip",
+          inputs: [
+            "완료된 Workspace Detection",
+            "Requirements Analysis 및 User Stories (권장)",
+            "Application Design stage 산출물 (필수)",
+            "Design stage 완료를 지시하는 execution plan"
+          ],
+          deliverables: [
+            "unit-of-work-plan.md (질문·답변 포함)",
+            "unit-of-work-clarification-questions.md (조건부 — 답변에 모순/모호함 감지 시)",
+            "unit-of-work.md (units 와 책임 정의)",
+            "unit-of-work-dependency.md (dependency matrix)",
+            "unit-of-work-story-map.md (stories ↔ units 매핑)",
+            "Updated aidlc-state.md, audit.md"
+          ],
+          ruleFile: "inception/units-generation.md",
+          activities: [
+            { title: "Unit-of-Work Plan 생성", titleEn: "Create Unit-of-Work Plan", description: "Planning — 분해를 위한 checkbox 가 포함된 unit-of-work plan 을 생성합니다." },
+            { title: "필수 Unit 산출물 포함", titleEn: "Include Mandatory Unit Artifacts in Plan", description: "Planning — 필수 unit 산출물을 plan 에 포함시킵니다." },
+            { title: "컨텍스트 기반 질문 생성", titleEn: "Generate Context-Appropriate Questions", description: "Planning — 관련된 모든 카테고리에 걸쳐 컨텍스트 기반 질문을 unit-of-work-plan.md 에 생성합니다.", outputs: ["aidlc-docs/inception/plans/unit-of-work-plan.md (질문·답변 포함)"] },
+            { title: "unit-of-work-plan.md 저장", titleEn: "Store Plan as unit-of-work-plan.md", description: "Planning — aidlc-docs/inception/plans/unit-of-work-plan.md 에 plan 을 저장합니다." },
+            { title: "사용자 입력·수집", titleEn: "Request User Input & Collect Answers", description: "Planning — [Answer]: 태그 채우기를 요청하고 답변을 검토합니다." },
+            { title: "답변 분석·후속", titleEn: "Analyze Answers & Follow-up", description: "Planning — vague/ambiguous/contradictory 응답을 분석하고 모호함이 있을 시 follow-up(clarification) 질문을 추가합니다. 모순/모호 감지 시 unit-of-work-clarification-questions.md 가 생성됩니다.", outputs: ["aidlc-docs/inception/plans/unit-of-work-clarification-questions.md (조건부 — 답변에 모순/모호함 감지 시)"] },
+            { title: "승인 대기·audit.md 기록", titleEn: "Wait for Approval & Log in audit.md", description: "Planning — 명시적 승인을 대기하고 ISO 8601 timestamp 와 함께 audit.md 에 기록한 뒤 aidlc-state.md 를 갱신합니다." },
+            { title: "Plan 로드·단계 실행 → unit 산출물 생성", titleEn: "Load Plan & Execute Steps (generates unit artifacts)", description: "Generation — unit-of-work plan 을 로드하고 다음 미완료 step 을 실행하여 unit-of-work.md / unit-of-work-dependency.md / unit-of-work-story-map.md 를 생성합니다.", outputs: ["aidlc-docs/inception/application-design/unit-of-work.md (units 와 책임 정의)", "aidlc-docs/inception/application-design/unit-of-work-dependency.md (dependency matrix)", "aidlc-docs/inception/application-design/unit-of-work-story-map.md (stories ↔ units 매핑)"] },
+            { title: "완료 표시·State 갱신", titleEn: "Mark Completed Steps & Update State", description: "Generation — plan 의 step 에 [x] 표시를 하고 aidlc-state.md current status 를 갱신합니다." },
+            { title: "모든 단계까지 반복", titleEn: "Continue Until All Steps Complete", description: "Generation — 모든 step 이 완료될 때까지 반복합니다." },
+            { title: "완료 메시지·승인 대기", titleEn: "Present Completion & Await Approval", description: "Generation — 생성된 units summary 와 함께 완료 메시지를 제시하고 명시적 승인을 대기·기록한 뒤 construction phase 준비를 마칩니다." }
+          ]
+        }
+      ]
+    },
+    {
+      id: "construction",
+      number: "Phase 2",
+      name: "CONSTRUCTION",
+      tagline: "상세 설계 · NFR · 코드 생성",
+      taglineEn: "Detailed design, NFR implementation, and code generation",
+      question: "어떻게 만드는가?",
+      color: "#7ED321",
+      colorKey: "construction",
+      description: "Unit 별로 functional design, NFR requirements/design, infrastructure design, code generation 을 순차 실행하고, 모든 unit 완료 후 build and test 를 수행합니다.",
+      activities: [
+        "Functional Design (per-unit)",
+        "NFR Requirements (per-unit)",
+        "NFR Design (per-unit)",
+        "Infrastructure Design (per-unit)",
+        "Code Generation (per-unit)",
+        "Build and Test (final)"
+      ],
+      deliverables: [
+        "business-logic-model.md, business-rules.md, domain-entities.md",
+        "nfr-requirements.md, tech-stack-decisions.md",
+        "nfr-design-patterns.md, logical-components.md",
+        "infrastructure-design.md, deployment-architecture.md",
+        "전체 application code + unit/integration tests",
+        "build-instructions.md, unit/integration/performance/security-test-instructions.md, build-and-test-summary.md"
+      ],
+      ruleFiles: [
+        "construction/functional-design.md",
+        "construction/nfr-requirements.md",
+        "construction/nfr-design.md",
+        "construction/infrastructure-design.md",
+        "construction/code-generation.md",
+        "construction/build-and-test.md"
+      ],
+      subStages: [
+        {
+          id: "construction-functional-design",
+          title: "기능 설계",
+          titleEn: "Functional Design",
+          description: "Unit 별 상세 비즈니스 로직 설계. high-level 컴포넌트 설계 위에서 도메인 모델, 비즈니스 룰, 알고리즘을 기술 중립적으로 설계합니다.",
+          executionNote: "조건부 (per-unit) — 단순 로직 변경 시 skip",
+          inputs: [
+            "unit-of-work.md 의 unit 정의",
+            "unit-of-work-story-map.md 의 할당된 stories",
+            "완료된 Units Generation 산출물",
+            "Application Design 산출물 (권장)"
+          ],
+          deliverables: [
+            "aidlc-docs/construction/plans/{unit-name}-functional-design-plan.md ([Answer]: 태그 포함)",
+            "aidlc-docs/construction/plans/{unit-name}-functional-design-clarification-questions.md (조건부 — 답변에 모순/모호함 감지 시)",
+            "business-logic-model.md",
+            "business-rules.md",
+            "domain-entities.md",
+            "frontend-components.md (해당 시)",
+            "audit.md 의 승인 기록",
+            "Updated aidlc-state.md"
+          ],
+          ruleFile: "construction/functional-design.md",
+          activities: [
+            { title: "Unit 컨텍스트 분석", titleEn: "Analyze Unit Context", description: "unit 정의·할당 stories 를 읽고 책임을 이해합니다." },
+            { title: "기능 설계 Plan 생성", titleEn: "Create Functional Design Plan", description: "비즈니스 로직과 도메인 모델용 checkbox 가 포함된 plan 을 생성합니다." },
+            { title: "컨텍스트 기반 질문 생성", titleEn: "Generate Context-Appropriate Questions", description: "모호함·누락 detail 을 식별하여 [Answer]: 태그로 functional-design-plan.md 에 embed 합니다.", outputs: ["aidlc-docs/construction/plans/{unit-name}-functional-design-plan.md ([Answer]: 태그 포함)"] },
+            { title: "Plan 저장", titleEn: "Store Plan", description: "aidlc-docs/construction/plans/{unit-name}-functional-design-plan.md 에 저장합니다." },
+            { title: "답변 수집·분석", titleEn: "Collect and Analyze Answers", description: "응답을 검토하고 vague 한 답변에 대해 명확화 질문을 생성합니다. 모순/모호 감지 시 {unit-name}-functional-design-clarification-questions.md 가 생성됩니다.", outputs: ["aidlc-docs/construction/plans/{unit-name}-functional-design-clarification-questions.md (조건부 — 답변에 모순/모호함 감지 시)"] },
+            { title: "기능 설계 산출물 생성", titleEn: "Generate Functional Design Artifacts", description: "business-logic-model.md, business-rules.md, domain-entities.md (필요 시 frontend-components.md) 를 생성합니다." },
+            { title: "완료 메시지 제시", titleEn: "Present Completion Message", description: "AI 요약과 formatted workflow message 로 완료를 알립니다." },
+            { title: "명시 승인 대기", titleEn: "Wait for Explicit Approval", description: "사용자의 명시적 승인 전까지 진행하지 않습니다." },
+            { title: "승인 기록·진행 갱신", titleEn: "Record Approval and Update Progress", description: "audit.md 에 승인을 기록하고 stage 완료를 표시합니다." }
+          ]
+        },
+        {
+          id: "construction-nfr-requirements",
+          title: "비기능 요구사항",
+          titleEn: "NFR Requirements",
+          description: "Unit 의 비기능 요구사항(성능·보안·확장성)을 결정하고 기술 스택 선택을 수립하여, 구현 전에 시스템 품질 속성을 명확히 정의합니다.",
+          executionNote: "조건부 (per-unit) — 성능/보안/확장성 요구사항이 있을 때만",
+          inputs: [
+            "aidlc-docs/construction/{unit-name}/functional-design/ 의 functional design 산출물",
+            "NFR Requirements stage 실행을 지시하는 execution plan",
+            "embedded 질문에 대한 사용자 응답"
+          ],
+          deliverables: [
+            "aidlc-docs/construction/plans/{unit-name}-nfr-requirements-plan.md",
+            "aidlc-docs/construction/plans/{unit-name}-nfr-requirements-clarification-questions.md (조건부 — 답변에 모순/모호함 감지 시)",
+            "aidlc-docs/construction/{unit-name}/nfr-requirements/nfr-requirements.md",
+            "aidlc-docs/construction/{unit-name}/nfr-requirements/tech-stack-decisions.md",
+            "Updated audit.md, aidlc-state.md"
+          ],
+          ruleFile: "construction/nfr-requirements.md",
+          activities: [
+            { title: "기능 설계 분석", titleEn: "Analyze Functional Design", description: "지정된 디렉토리의 functional design 산출물을 읽습니다." },
+            { title: "NFR Requirements Plan 생성", titleEn: "Create NFR Requirements Plan", description: "평가용 checkbox 가 포함된 plan 을 생성합니다." },
+            { title: "컨텍스트 기반 질문 생성", titleEn: "Generate Context-Appropriate Questions", description: "scalability, performance, availability, security, tech stack, reliability, maintainability, usability 에 초점을 둔 [Answer]: 태그 질문을 embed 합니다." },
+            { title: "Plan 저장", titleEn: "Store Plan", description: "지정된 markdown 위치에 nfr-requirements-plan.md 를 저장합니다.", outputs: ["aidlc-docs/construction/plans/{unit-name}-nfr-requirements-plan.md (plan with questions)"] },
+            { title: "답변 수집·분석", titleEn: "Collect and Analyze Answers", description: "사용자 응답을 검토하고 모호함에 대해 follow-up 명확화 질문을 추가합니다. 모순/모호 감지 시 {unit-name}-nfr-requirements-clarification-questions.md 가 생성됩니다.", outputs: ["aidlc-docs/construction/plans/{unit-name}-nfr-requirements-clarification-questions.md (조건부 — 답변에 모순/모호함 감지 시)"] },
+            { title: "NFR Requirements 산출물 생성", titleEn: "Generate NFR Requirements Artifacts", description: "nfr-requirements.md, tech-stack-decisions.md 파일을 생성합니다." },
+            { title: "완료 메시지 제시", titleEn: "Present Completion Message", description: "AI 요약과 formatted workflow message 로 완료를 알립니다." },
+            { title: "명시 승인 대기", titleEn: "Wait for Explicit Approval", description: "NFR 요구사항이 명확히 승인되는지 확인합니다." },
+            { title: "승인 기록·진행 갱신", titleEn: "Record Approval and Update Progress", description: "audit.md 에 기록하고 aidlc-state.md 의 stage 완료를 표시합니다." }
+          ]
+        },
+        {
+          id: "construction-nfr-design",
+          title: "비기능 설계",
+          titleEn: "NFR Design",
+          description: "NFR 요구사항을 design pattern 과 logical component 로 unit design 에 통합합니다. resilience, scalability, performance, security, logical components 5 카테고리에 걸쳐 사용자 입력을 수집합니다.",
+          executionNote: "조건부 (per-unit) — NFR Requirements 가 실행된 경우에만",
+          inputs: [
+            "aidlc-docs/construction/{unit-name}/nfr-requirements/ 의 NFR requirements 문서",
+            "NFR Design stage 실행을 지시하는 execution plan",
+            "명확화 질문에 대한 사용자 응답"
+          ],
+          deliverables: [
+            "aidlc-docs/construction/plans/{unit-name}-nfr-design-plan.md",
+            "aidlc-docs/construction/plans/{unit-name}-nfr-design-clarification-questions.md (조건부 — 답변에 모순/모호함 감지 시)",
+            "aidlc-docs/construction/{unit-name}/nfr-design/nfr-design-patterns.md",
+            "aidlc-docs/construction/{unit-name}/nfr-design/logical-components.md",
+            "Updated audit.md, aidlc-state.md"
+          ],
+          ruleFile: "construction/nfr-design.md",
+          activities: [
+            { title: "NFR Requirements 분석", titleEn: "Analyze NFR Requirements", description: "scalability, performance, availability, security 요구사항을 이해합니다." },
+            { title: "NFR Design Plan 생성", titleEn: "Create NFR Design Plan", description: "design pattern 과 logical component 에 집중한 checkbox plan 을 생성합니다." },
+            { title: "5 카테고리 질문 생성", titleEn: "Generate Context-Appropriate Questions", description: "Resilience, Scalability, Performance, Security, Logical Components 5 카테고리에 걸쳐 [Answer]: 태그 질문을 생성합니다." },
+            { title: "Plan 저장", titleEn: "Store Plan", description: "plans 디렉토리에 모든 [Answer]: 태그가 포함된 nfr-design-plan.md 로 저장합니다.", outputs: ["aidlc-docs/construction/plans/{unit-name}-nfr-design-plan.md"] },
+            { title: "답변 수집·분석", titleEn: "Collect and Analyze Answers", description: "사용자 완료를 기다리고 vague 한 응답을 검토합니다. 모순/모호 감지 시 {unit-name}-nfr-design-clarification-questions.md 가 생성됩니다.", outputs: ["aidlc-docs/construction/plans/{unit-name}-nfr-design-clarification-questions.md (조건부 — 답변에 모순/모호함 감지 시)"] },
+            { title: "NFR Design 산출물 생성", titleEn: "Generate NFR Design Artifacts", description: "nfr-design-patterns.md, logical-components.md 두 markdown 문서를 생성합니다." },
+            { title: "완료 메시지 제시", titleEn: "Present Completion Message", description: "요약과 formatted workflow option 으로 완료를 알립니다." },
+            { title: "명시 승인 대기", titleEn: "Wait for Explicit Approval", description: "설계가 명확히 승인되기 전까지 진행하지 않습니다." },
+            { title: "승인 기록·진행 갱신", titleEn: "Record Approval and Update Progress", description: "audit.md 에 기록하고 aidlc-state.md 에 stage 완료를 표시합니다." }
+          ]
+        },
+        {
+          id: "construction-infrastructure-design",
+          title: "인프라 설계",
+          titleEn: "Infrastructure Design",
+          description: "Functional / NFR design 의 logical software component 를 배포 환경의 실제 인프라 서비스로 매핑하여, 인프라 선택이 시스템 요구사항과 일치하도록 보장합니다.",
+          executionNote: "조건부 (per-unit) — 인프라 변경 또는 클라우드 매핑이 필요할 때만",
+          inputs: [
+            "aidlc-docs/construction/{unit-name}/functional-design/ 의 functional design 문서",
+            "aidlc-docs/construction/{unit-name}/nfr-design/ 의 NFR design 문서 (있을 경우)",
+            "Infrastructure Design stage 를 확인하는 execution plan"
+          ],
+          deliverables: [
+            "aidlc-docs/construction/plans/{unit-name}-infrastructure-design-plan.md",
+            "aidlc-docs/construction/plans/{unit-name}-infrastructure-design-clarification-questions.md (조건부 — 답변에 모순/모호함 감지 시)",
+            "aidlc-docs/construction/{unit-name}/infrastructure-design/infrastructure-design.md",
+            "aidlc-docs/construction/{unit-name}/infrastructure-design/deployment-architecture.md",
+            "aidlc-docs/construction/shared-infrastructure.md (해당 시)",
+            "audit log entry, Updated aidlc-state.md"
+          ],
+          ruleFile: "construction/infrastructure-design.md",
+          activities: [
+            { title: "설계 산출물 분석", titleEn: "Analyze Design Artifacts", description: "functional/NFR design 산출물을 분석합니다." },
+            { title: "Infrastructure Design Plan 생성", titleEn: "Create Infrastructure Design Plan", description: "checkbox 가 포함된 인프라 설계 plan 을 생성합니다." },
+            { title: "7 카테고리 질문 생성", titleEn: "Generate Context-Appropriate Questions", description: "7개 카테고리에 걸친 컨텍스트 기반 질문을 infrastructure-design-plan.md 에 생성합니다.", outputs: ["aidlc-docs/construction/plans/{unit-name}-infrastructure-design-plan.md"] },
+            { title: "[Answer]: 태그로 Plan 저장", titleEn: "Store Plan with [Answer]: tags", description: "모든 [Answer]: 태그를 포함하여 infrastructure-design-plan.md 를 저장합니다.", outputs: ["aidlc-docs/construction/plans/{unit-name}-infrastructure-design-plan.md"] },
+            { title: "답변 수집·분석", titleEn: "Collect and Analyze Answers", description: "사용자 응답을 수집하고 분석합니다. 모순/모호 감지 시 {unit-name}-infrastructure-design-clarification-questions.md 가 생성됩니다.", outputs: ["aidlc-docs/construction/plans/{unit-name}-infrastructure-design-clarification-questions.md (조건부 — 답변에 모순/모호함 감지 시)"] },
+            { title: "인프라 설계 산출물 생성", titleEn: "Generate Infrastructure Design Artifacts", description: "infrastructure-design.md, deployment-architecture.md 와 (해당 시) shared-infrastructure.md 를 생성합니다." },
+            { title: "완료 메시지 제시", titleEn: "Present Completion Message", description: "announcement, summary, workflow guidance 로 완료를 알립니다." },
+            { title: "명시 승인 대기", titleEn: "Wait for Explicit Approval", description: "사용자의 명시적 승인을 기다립니다." },
+            { title: "승인 기록·진행 갱신", titleEn: "Record Approval and Update Progress", description: "audit.md timestamp 와 aidlc-state.md 진행을 갱신합니다." }
+          ]
+        },
+        {
+          id: "construction-code-generation",
+          title: "코드 생성",
+          titleEn: "Code Generation",
+          description: "Unit 에 대한 production code, tests, artifact 를 생성합니다. (1) 상세 승인 plan 작성 → (2) plan 을 step-by-step 으로 실행하는 2-phase 접근.",
+          executionNote: "항상 실행 (per-unit) — 2-phase (plan → generate)",
+          inputs: [
+            "Unit Design Generation 의 완료된 unit design 산출물",
+            "할당된 stories 를 보여주는 unit story map",
+            "Unit dependencies 및 인터페이스 명세",
+            "aidlc-docs/aidlc-state.md 의 workspace root 와 project type",
+            "Brownfield 시 code-structure.md (기존 파일 식별)",
+            "NFR Implementation 완료 상태 (해당 시)"
+          ],
+          deliverables: [
+            "aidlc-docs/construction/plans/{unit-name}-code-generation-plan.md",
+            "Workspace root 에 생성된 모든 application code (aidlc-docs/ 가 아닌)",
+            "Business logic, API layer, repository layer, frontend component 의 unit tests",
+            "aidlc-docs/construction/{unit-name}/code/ 의 문서",
+            "Database migration script (해당 시)",
+            "Deployment artifacts",
+            "Updated aidlc-state.md, audit.md"
+          ],
+          ruleFile: "construction/code-generation.md",
+          activities: [
+            { title: "Unit 컨텍스트 분석", titleEn: "Analyze Unit Context", description: "Planning — design artifact, story map, dependency 를 읽어 컨텍스트를 파악합니다." },
+            { title: "상세 Code Generation Plan 생성", titleEn: "Create Detailed Unit Code Generation Plan", description: "Planning — code 위치와 생성 순서를 결정하는 상세 plan 을 만듭니다." },
+            { title: "Unit 생성 컨텍스트 포함", titleEn: "Include Unit Generation Context", description: "Planning — stories, dependencies, interface, entities, 책임을 plan 에 포함합니다." },
+            { title: "Plan 문서 저장", titleEn: "Save Plan Document", description: "Planning — aidlc-docs/construction/plans/{unit-name}-code-generation-plan.md 에 저장합니다." },
+            { title: "Plan 요약", titleEn: "Summarize the Unit Plan", description: "Planning — 접근 방법과 story 커버리지를 강조한 요약을 제공합니다." },
+            { title: "승인 prompt 기록", titleEn: "Log Approval Prompt", description: "Planning — 승인 요청 전에 audit.md 에 timestamp 와 함께 prompt 를 기록합니다.", outputs: ["aidlc-docs/audit.md (timestamp 포함 승인 prompt)"] },
+            { title: "Plan 명시 승인 대기·기록", titleEn: "Wait for & Record Approval", description: "Planning — 전체 plan 에 대한 명시적 승인을 대기하고 응답을 audit.md 에 기록합니다.", outputs: ["aidlc-docs/audit.md (timestamp 포함 승인 응답)"] },
+            { title: "Plan 로드·단계 실행 → application code 생성", titleEn: "Load Plan & Execute Steps (generates application code)", description: "Generation — plan 을 로드하고 다음 미완료 step 을 실행하여 workspace root 에 application code 를 생성합니다 (brownfield: 기존 파일 수정, greenfield: 신규 생성). 추가로 unit tests 와 documentation 도 생성됩니다.", outputs: ["Workspace root 의 application code (aidlc-docs/ 가 아님)", "Business logic, API layer, repository layer, frontend component 의 unit tests", "aidlc-docs/construction/{unit-name}/code/ 의 문서", "Database migration script (해당 시)"] },
+            { title: "진행 갱신", titleEn: "Update Progress", description: "Generation — step 을 완료 표시하고 관련 stories 를 완료 처리한 뒤 aidlc-state.md 를 갱신합니다." },
+            { title: "단계 계속·완료 처리", titleEn: "Continue to Next Step or Complete", description: "Generation — 다음 step 으로 진행하거나 완료 단계로 넘어갑니다." },
+            { title: "완료 메시지·승인·기록", titleEn: "Present Completion, Wait for Approval, Record", description: "Generation — announcement, summary, formatted workflow message 로 완료를 알리고 명시적 승인을 대기·기록하여 Code Generation 완료를 aidlc-state.md 에 표시합니다." }
+          ]
+        },
+        {
+          id: "construction-build-and-test",
+          title: "빌드·테스트",
+          titleEn: "Build and Test",
+          description: "모든 unit 을 빌드하고 종합적인 테스트 전략을 실행하여, code generation 의 완전성과 unit/integration/performance 차원의 정상 동작을 검증합니다.",
+          executionNote: "모든 unit 완료 후 항상 실행",
+          inputs: [
+            "모든 unit 의 완료된 code generation 산출물",
+            "프로젝트 명세 및 테스트 요구사항",
+            "시스템 및 performance 요구사항"
+          ],
+          deliverables: [
+            "build-instructions.md",
+            "unit-test-instructions.md",
+            "integration-test-instructions.md",
+            "performance-test-instructions.md",
+            "contract-test-instructions.md (조건부)",
+            "security-test-instructions.md (조건부)",
+            "e2e-test-instructions.md (조건부)",
+            "build-and-test-summary.md",
+            "Updated aidlc-state.md, audit.md"
+          ],
+          ruleFile: "construction/build-and-test.md",
+          activities: [
+            { title: "테스트 요구사항 분석", titleEn: "Analyze Testing Requirements", description: "unit, integration, performance, E2E, contract, security 중 적절한 테스트 전략을 결정합니다." },
+            { title: "Build Instructions 생성", titleEn: "Generate Build Instructions", description: "prerequisites, 빌드 단계, 검증, 트러블슈팅을 포함한 build-instructions.md 를 생성합니다." },
+            { title: "Unit Test Instructions 생성", titleEn: "Generate Unit Test Execution Instructions", description: "테스트 실행 명령과 커버리지 기대치를 담은 unit-test-instructions.md 를 생성합니다." },
+            { title: "Integration Test Instructions 생성", titleEn: "Generate Integration Test Instructions", description: "테스트 시나리오, 환경 셋업, 정리 절차를 담은 integration-test-instructions.md 를 생성합니다." },
+            { title: "Performance Test Instructions 생성", titleEn: "Generate Performance Test Instructions", description: "load/stress 테스트와 최적화 가이드를 담은 performance-test-instructions.md 를 생성합니다 (해당 시)." },
+            { title: "추가 Test Instructions 생성", titleEn: "Generate Additional Test Instructions", description: "필요 시 contract-test-instructions.md, security-test-instructions.md, e2e-test-instructions.md 를 생성합니다." },
+            { title: "Test Summary 생성", titleEn: "Generate Test Summary", description: "모든 결과와 준비 상태를 문서화한 build-and-test-summary.md 를 생성합니다." },
+            { title: "State Tracking 갱신", titleEn: "Update State Tracking", description: "aidlc-state.md 에 stage 완료를 표시합니다." },
+            { title: "결과 사용자 제시", titleEn: "Present Results to User", description: "요약과 workflow 옵션과 함께 완료 announcement 를 제공합니다." },
+            { title: "상호작용 기록", titleEn: "Log Interaction", description: "audit.md 에 stage 완료를 timestamp 와 생성된 파일과 함께 기록합니다.", outputs: ["aidlc-docs/audit.md (stage 완료 + 생성 파일 목록)"] }
+          ]
+        }
+      ]
+    },
+    {
+      id: "operations",
+      number: "Phase 3",
+      name: "OPERATIONS",
+      tagline: "배포 · 모니터링 (현재 placeholder)",
+      taglineEn: "Deployment and monitoring (currently a placeholder)",
+      question: "어떻게 배포·운영하는가?",
+      color: "#F5A623",
+      colorKey: "operations",
+      description: "AIDLC 현재 버전에서 Operations phase 는 placeholder 입니다. 배포·모니터링·인시던트 대응·유지보수·production readiness 등 향후 확장 예정인 단계로, 현재는 비활성 상태이며 Build and Test 완료 후 워크플로우가 종료됩니다.",
+      activities: [
+        "Operations (Placeholder)"
+      ],
+      deliverables: [],
+      ruleFiles: [
+        "operations/operations.md"
+      ],
+      subStages: [
+        {
+          id: "operations-placeholder",
+          title: "운영 (Placeholder)",
+          titleEn: "Operations (Placeholder)",
+          description: "향후 deployment, monitoring, maintenance 워크플로우를 위한 placeholder. 현재 버전에서는 확장되지 않았으며, AIDLC 워크플로우는 CONSTRUCTION 의 Build and Test 활동 완료 후 종료됩니다.",
+          executionNote: "현재 비활성 — 향후 확장 예정",
+          inputs: [
+            "Build and Test 산출물"
+          ],
+          deliverables: [
+            "현재 정의된 산출물 없음 (placeholder)"
+          ],
+          ruleFile: "operations/operations.md",
+          activities: [
+            { title: "Deployment Planning (예정)", titleEn: "Deployment Planning (future)", description: "향후 추가될 배포 계획 컴포넌트 — 현재 미구현." },
+            { title: "Monitoring Setup (예정)", titleEn: "Monitoring Setup (future)", description: "향후 추가될 모니터링 설정 컴포넌트 — 현재 미구현." },
+            { title: "Incident Response (예정)", titleEn: "Incident Response (future)", description: "향후 추가될 인시던트 대응 워크플로우 — 현재 미구현." },
+            { title: "Maintenance Workflows (예정)", titleEn: "Maintenance Workflows (future)", description: "향후 추가될 유지보수 워크플로우 — 현재 미구현." },
+            { title: "Production Readiness Docs (예정)", titleEn: "Production Readiness Documentation (future)", description: "향후 추가될 production readiness 문서 — 현재 미구현." }
+          ]
+        }
+      ]
+    }
+  ],
+
+  brackets: [
+    {
+      id: "documentation",
+      label: "DOCUMENTATION",
+      shortDesc: "전 단계에 걸친 문서화 — aidlc-docs/ 디렉토리에 자동 누적",
+      description: "AIDLC 의 모든 산출물은 `aidlc-docs/` 디렉토리에 누적되어 중앙 집중식으로 관리됩니다. Inception 부터 Operations 까지 모든 단계에서 산출되는 문서가 cross-cutting 으로 진행됩니다.",
+      activities: [
+        "Requirements Document 작성·갱신",
+        "Design Document 작성·갱신",
+        "API 문서 자동 생성 (OpenAPI / TypeDoc / Sphinx)",
+        "Operational Runbook 작성",
+        "Architecture Decision Records (ADR)"
+      ],
+      deliverables: [
+        "aidlc-docs/ 하위 모든 문서",
+        "README / CONTRIBUTING",
+        "API Reference",
+        "Architecture Diagrams"
+      ]
+    },
+    {
+      id: "training",
+      label: "TRAINING",
+      shortDesc: "팀 온보딩·운영 인계 — Human-in-the-loop 지원",
+      description: "AIDLC 의 Human-in-the-loop 철학상, AI 에이전트가 생성한 산출물을 사람이 이해·검토할 수 있도록 학습·교육 활동이 cross-cutting 으로 필요합니다.",
+      activities: [
+        "AI Coding Agent 사용법 교육 (Claude Code / Cursor / Q Developer)",
+        "Architecture Walk-through",
+        "Operational Training (모니터링·장애 대응)",
+        "Extension Rule 적용 가이드"
+      ],
+      deliverables: [
+        "Training Materials",
+        "Onboarding Guide",
+        "Walk-through Videos",
+        "Operations Handbook"
+      ]
+    }
+  ],
+
+  changeControl: {
+    scope: {
+      id: "change-scope",
+      title: "Change of Scope Document",
+      description: "원래 SOW 범위를 벗어나는 변경 요청을 공식 기록하는 문서. AIDLC 에서는 사용자가 단계 중간에 요구사항을 변경할 때 작성합니다.",
+      activities: [
+        "Change Request 수집",
+        "Impact Analysis — 일정·비용·리스크 영향 분석",
+        "Approval Workflow"
+      ],
+      deliverables: [
+        "Change of Scope Document",
+        "Impact Analysis Report",
+        "Updated SOW (필요시)"
+      ]
+    },
+    log: {
+      id: "change-log",
+      title: "Change Control Log",
+      description: "모든 변경 요청·승인·반영 이력을 시계열로 누적하는 로그. 감사·추적성을 보장합니다.",
+      activities: [
+        "Change Entry Logging",
+        "Status Tracking",
+        "Audit Trail 유지"
+      ],
+      deliverables: [
+        "Change Control Log (시계열)",
+        "Audit Report"
+      ]
+    }
+  }
+};
+
+/* ============================================================
+   상태 관리
+   ============================================================ */
+const STORAGE_KEY = "aidlc-phases-v2";
+let data = loadData();
+let editMode = false;
+
+function loadData() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (parsed && parsed.meta && parsed.meta.version === DEFAULT_DATA.meta.version) {
+        return parsed;
+      }
+    }
+  } catch (e) {
+    console.warn("LocalStorage load 실패:", e);
+  }
+  return JSON.parse(JSON.stringify(DEFAULT_DATA));
+}
+
+function saveData() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  } catch (e) {
+    console.warn("LocalStorage save 실패:", e);
+  }
+}
+
+/* ============================================================
+   산출물 (Deliverables) 매핑 — 활동의 title/titleEn/description 과
+   step deliverables 를 매칭하여 자동 추출
+   ============================================================ */
+function isProducingActivity(activity) {
+  if (!activity || typeof activity !== "object") return false;
+  // explicit outputs 가 있으면 무조건 producing 으로 처리 (verb 검사 우회)
+  if (Array.isArray(activity.outputs) && activity.outputs.length > 0) return true;
+  const t = String(activity.title || "") + " " + String(activity.titleEn || "");
+  // "Check"/"Scan"/"확인"/"스캔" 류는 읽기만 하는 활동이라 producing 아님
+  if (/^\s*(check|scan|verify|determine|identify|assess|analyze|inspect|review|load)\b/i.test(activity.titleEn || "") ||
+      /(확인|스캔|식별|판별|평가|분석|로드|검토)$/.test(activity.title || "")) {
+    return false;
+  }
+  // "build" 는 명사로 자주 쓰이므로 producing verb 에서 제외 (한글 "생성" 으로 충분)
+  if (/\b(generate|create|store|save|produce|write|initialize|update)\b/i.test(t)) return true;
+  if (/(생성|작성|저장|갱신|기록|만들|구성|발행|초기화)/.test(t)) return true;
+  return false;
+}
+
+function extractFilename(deliverable) {
+  const lastSeg = String(deliverable).split("/").pop();
+  return lastSeg.split(/\s+[\(（]/)[0].trim();
+}
+
+// 활동·파일명 토큰화 시 제외할 일반 단어.
+// 주의: 파일명에 등장 가능한 도메인 단어(build/update/state/plan/test/code 등)는 절대 넣지 말 것.
+const _TOKEN_STOPWORDS = new Set([
+  "the","and","for","with","from","into","across","all","any","this","that",
+  "create","generate","store","save","scan","check","issue","include","wait",
+  "record","present","request","collect","analyze","determine","assess",
+  "identify","establish","perform","handle","execute","continue",
+  "make","use","set","get","have","mandatory","artifact","artifacts",
+  "appropriate","explicit","initial","prior","context","detailed","relevant",
+  "생성","작성","저장","갱신","기록","확인","분석","스캔","수집","요청",
+  "검증","대기","처리","발행","필수","위한","포함","모든","다음","통해","로드","실행"
+]);
+
+function _tokenize(s) {
+  return String(s || "")
+    .toLowerCase()
+    .replace(/\.[a-z]+$/, "")
+    .replace(/[\/\-_\.,()\[\]{}「」『』]/g, " ")
+    .split(/\s+/)
+    .map(t => t.trim())
+    .filter(t => t.length >= 3 && !_TOKEN_STOPWORDS.has(t));
+}
+
+function getActivityDeliverables(ss, activity) {
+  const stepDeliverables = ss && Array.isArray(ss.deliverables) ? ss.deliverables : [];
+  if (!activity || typeof activity !== "object") {
+    return { matched: [], all: stepDeliverables };
+  }
+
+  // 0. Explicit per-activity outputs override (highest priority)
+  if (Array.isArray(activity.outputs) && activity.outputs.length > 0) {
+    return { matched: activity.outputs.slice(), all: stepDeliverables };
+  }
+
+  if (stepDeliverables.length === 0) {
+    return { matched: [], all: stepDeliverables };
+  }
+
+  const haystack = String(activity.title || "") + " | " +
+                   String(activity.titleEn || "") + " | " +
+                   String(activity.description || "");
+  const activityTokens = new Set(_tokenize(
+    String(activity.title || "") + " " +
+    String(activity.titleEn || "") + " " +
+    String(activity.description || "")
+  ));
+
+  // 각 토큰이 이 step 의 deliverables 중 몇 개 파일에 등장하는지 빈도 계산.
+  // 자주 나오는 토큰(예: test/instructions)은 변별력이 낮아 매칭 시 가중치를 낮춤.
+  const tokenFreq = new Map();
+  const fileTokensCache = [];
+  for (const d of stepDeliverables) {
+    const fn = extractFilename(d);
+    const tokens = _tokenize(fn || d);
+    fileTokensCache.push(tokens);
+    for (const t of new Set(tokens)) tokenFreq.set(t, (tokenFreq.get(t) || 0) + 1);
+  }
+  const isRareToken = (t) => (tokenFreq.get(t) || 0) / stepDeliverables.length <= 0.5;
+
+  const matched = [];
+  for (let i = 0; i < stepDeliverables.length; i++) {
+    const d = stepDeliverables[i];
+    const filename = extractFilename(d);
+    const pathOnly = String(d).split(/\s+[\(（]/)[0].trim();
+
+    // 1. Direct filename match in description/title
+    if (filename && haystack.includes(filename)) { matched.push(d); continue; }
+    // 2. Full path match in description/title
+    if (pathOnly.includes("/") && haystack.includes(pathOnly)) { matched.push(d); continue; }
+    // 3. Token overlap (semantic match) + 변별력 검사
+    const fileTokens = fileTokensCache[i];
+    if (fileTokens.length === 0) continue;
+    const matchedTokens = fileTokens.filter(t => activityTokens.has(t));
+    const overlap = matchedTokens.length;
+    if (overlap === 0) continue;
+    const ratio = overlap / fileTokens.length;
+    const hasRareMatch = matchedTokens.some(isRareToken);
+
+    if (fileTokens.length === 1) {
+      // 단일 토큰 파일은 1개 매칭이면 충분
+      matched.push(d);
+    } else if (fileTokens.length === 2 && overlap === 2) {
+      matched.push(d);
+    } else if (fileTokens.length >= 3 && overlap >= 2 && ratio >= 0.5 && hasRareMatch) {
+      // 3+ 토큰 파일은 ≥2 매칭 + 비율 ≥ 50% + step 내 희소 토큰 1개 이상 포함
+      matched.push(d);
+    }
+  }
+  return { matched, all: stepDeliverables };
+}
+
+function hasActivityDeliverable(ss, activity) {
+  if (!isProducingActivity(activity)) return false;
+  return true;
+}
+
+/* ============================================================
+   HITL 사용자 확인 대상 파일 추출 — step deliverables 중 사용자가
+   직접 검토·편집·응답해야 하는 파일(plan / questions / verification /
+   [Answer]: 태그 포함 파일)을 식별
+   ============================================================ */
+function getHITLReviewFiles(ss, activity) {
+  if (!isHITLActivity(activity)) return [];
+  const stepDeliverables = (ss && Array.isArray(ss.deliverables)) ? ss.deliverables : [];
+  if (stepDeliverables.length === 0) return [];
+
+  const reviewPattern = /-plan\.md|questions?\.md|verification|\[answer\]|questionnaire/i;
+  const reviewFiles = stepDeliverables.filter(d => reviewPattern.test(String(d)));
+  if (reviewFiles.length === 0) return [];
+
+  const haystack = String(activity.title || "") + " " +
+                   String(activity.titleEn || "") + " " +
+                   String(activity.description || "");
+  const specific = reviewFiles.filter(d => {
+    const fn = extractFilename(d);
+    const path = String(d).split(/\s+[\(（]/)[0].trim();
+    return (fn && haystack.includes(fn)) || haystack.includes(path);
+  });
+  return specific.length > 0 ? specific : reviewFiles;
+}
+
+/* ============================================================
+   HITL 활동의 사용자 행위 모드 분류
+   - fill_answers   : [Answer]: 태그에 직접 답변 입력
+   - answer_followup: 직전 생성된 후속 질문에 답변
+   - approve        : 산출물 검토 후 명시적 승인
+   - respond        : 검토 후 승인/변경요청/의견 응답 (자유 형식)
+   ============================================================ */
+function getHITLMode(activity) {
+  const text = String(activity.title || "") + " | " +
+               String(activity.titleEn || "") + " | " +
+               String(activity.description || "");
+  const lower = text.toLowerCase();
+
+  // 1. [Answer]: 태그를 직접 채우는 활동
+  if (/\[gate\]|\[answer\]/i.test(text) ||
+      /답변\s*(수집|채우기|대기)|입력\s*(요청|수집|·\s*수집)/.test(text) ||
+      /collect\s+answers?|request\s+user\s+input/i.test(lower)) {
+    return "fill_answers";
+  }
+  // 2. 후속 질문에 답변 (이미 plan 에 추가된 새 질문)
+  if (/후속\s*질문/.test(text) || /follow-?up\s+questions?/i.test(lower)) {
+    return "answer_followup";
+  }
+  // 3. 검토 후 명시 승인
+  if (/승인\s*대기/.test(text) ||
+      /wait\s+for\s+(explicit\s+)?approval|await\s+(.*\s+)?approval/i.test(lower)) {
+    return "approve";
+  }
+  // 4. 자유 응답 / 피드백 (사용자 응답 처리 등)
+  if (/사용자\s*응답\s*처리/.test(text) || /handle\s+user\s+response/i.test(lower)) {
+    return "respond";
+  }
+  return "approve";
+}
+
+const HITL_MODE_INFO = {
+  fill_answers:    { icon: "✏️", label: "[Answer]: 태그 응답 필요",  guide: "아래 파일을 열어 <code>[Answer]:</code> 태그를 찾아 답변을 직접 입력하세요." },
+  answer_followup: { icon: "✏️", label: "후속 질문 응답 필요",       guide: "아래 파일에 새로 추가된 follow-up 질문에 답변하세요." },
+  approve:         { icon: "✅", label: "검토 후 명시적 승인 필요",   guide: "아래 파일을 검토하고 명시적으로 승인하세요." },
+  respond:         { icon: "💬", label: "검토 후 응답 필요",           guide: "아래 파일을 검토하고 승인 / 변경 요청 / 강제 포함(forced inclusion) 등 응답을 주세요." }
+};
+
+/* ============================================================
+   HITL (Human-in-the-loop) 감지 — 활동의 title/titleEn/description 에서
+   사용자 입력·승인을 필요로 하는 키워드를 자동 추출
+   ============================================================ */
+function isHITLActivity(activity) {
+  if (!activity || typeof activity !== "object") return false;
+  const text = String(activity.title || "") + " | " +
+               String(activity.titleEn || "") + " | " +
+               String(activity.description || "");
+  const lower = text.toLowerCase();
+
+  // English patterns
+  if (/\[gate\]/i.test(text)) return true;
+  if (/\bwait\s+for\b/i.test(lower)) return true;
+  if (/\bawait\b/i.test(lower)) return true;
+  if (/\brequest\s+(user\s+)?(input|approval)/i.test(lower)) return true;
+  if (/\bcollect\s+(user\s+)?answers?\b/i.test(lower)) return true;
+  if (/\bissue\s+.*follow-?up\s+questions?\b/i.test(lower)) return true;
+  if (/\bhandle\s+user\s+response\b/i.test(lower)) return true;
+
+  // Korean patterns
+  if (/승인\s*(대기|요청)/.test(text)) return true;
+  if (/입력\s*(요청|·\s*수집|수집)/.test(text)) return true;
+  if (/답변\s*(수집|대기|채우기)/.test(text)) return true;
+  if (/후속\s*질문/.test(text)) return true;
+  if (/사용자\s*응답\s*처리/.test(text)) return true;
+
+  return false;
+}
+
+/* ============================================================
+   Step 배지 파생 — executionNote 텍스트에서 자동 추출
+   ============================================================ */
+function getStepBadges(ss) {
+  const note = String(ss.executionNote || "").toLowerCase();
+
+  // 실행 시점
+  let exec;
+  if (note.includes("비활성") || note.includes("placeholder") || note.includes("inactive")) {
+    exec = { text: "비활성", cls: "inactive", tooltip: "현재 비활성 — 향후 확장 예정" };
+  } else if (note.includes("항상")) {
+    exec = { text: "항상", cls: "always", tooltip: "항상 실행" };
+  } else if (note.includes("조건부")) {
+    exec = { text: "조건부", cls: "conditional", tooltip: "조건 충족 시에만 실행" };
+  } else {
+    exec = { text: "—", cls: "both", tooltip: "실행 모드 미정의" };
+  }
+
+  // 적용 대상 — "brownfield 프로젝트만" / "greenfield 프로젝트만" 만 정확 매칭
+  let app;
+  if (/brownfield\s*프로젝트만/.test(note) || /brownfield-only/.test(note)) {
+    app = { text: "Brownfield", cls: "brownfield", tooltip: "Brownfield 프로젝트 전용" };
+  } else if (/greenfield\s*프로젝트만/.test(note) || /greenfield-only/.test(note)) {
+    app = { text: "Greenfield", cls: "greenfield", tooltip: "Greenfield 프로젝트 전용" };
+  } else {
+    app = { text: "공통", cls: "both", tooltip: "Greenfield + Brownfield 공통" };
+  }
+
+  return { exec, app };
+}
+
+/* ============================================================
+   렌더링
+   ============================================================ */
+function render() {
+  renderAidlcRow();
+  renderBrackets();
+  renderChangeRow();
+}
+
+function renderAidlcRow() {
+  const row = document.getElementById("aidlcRow");
+  row.innerHTML = "";
+
+  data.aidlcPhases.forEach((aidlc, phaseIdx) => {
+    const section = document.createElement("div");
+    section.className = "phase-section";
+
+    // Full-width phase banner header
+    const header = document.createElement("div");
+    header.className = `phase-header phase-header-clickable ${aidlc.colorKey}`;
+    header.innerHTML = `
+      <div class="phase-num">${escapeHtml(aidlc.number)}</div>
+      <div>
+        <div class="phase-name">${escapeHtml(aidlc.name)}</div>
+        <div class="phase-tagline">${escapeHtml(aidlc.tagline)}</div>
+      </div>
+      <div class="phase-question">${escapeHtml(aidlc.question)}</div>
+    `;
+    header.addEventListener("click", () => openAidlcModal(aidlc));
+    section.appendChild(header);
+
+    // Row of step columns (each step = previous sub-stage, now elevated)
+    const stepRow = document.createElement("div");
+    stepRow.className = "step-row";
+
+    const subStages = aidlc.subStages || [];
+    subStages.forEach((ss, idx) => {
+      const col = document.createElement("div");
+      col.className = "step-col";
+
+      // Step header (mini phase-style)
+      const stepHeader = document.createElement("div");
+      stepHeader.className = `step-header ${aidlc.colorKey}`;
+      const badges = getStepBadges(ss);
+      stepHeader.innerHTML = `
+        <div class="step-num">STEP ${idx + 1}</div>
+        <div class="step-title">${escapeHtml(ss.title)}</div>
+        <div class="step-badges">
+          <span class="step-badge ${badges.exec.cls}" title="${escapeHtml(badges.exec.tooltip)}">${escapeHtml(badges.exec.text)}</span>
+          <span class="step-badge ${badges.app.cls}" title="${escapeHtml(badges.app.tooltip)}">${escapeHtml(badges.app.text)}</span>
+        </div>
+      `;
+      stepHeader.addEventListener("click", () => openSubStageModal(aidlc, ss));
+      col.appendChild(stepHeader);
+
+      // Activity boxes cascading below the step header, with ↓ between them
+      const actStack = document.createElement("div");
+      actStack.className = "activity-stack";
+      const acts = ss.activities || [];
+      acts.forEach((act, actIdx) => {
+        const actBox = document.createElement("div");
+        actBox.className = `activity-box ${aidlc.colorKey}`;
+        const label = (act && typeof act === "object") ? (act.title || "") : String(act);
+        const hitlBadge = isHITLActivity(act)
+          ? `<span class="activity-hitl" title="Human-in-the-loop — 사용자 입력·승인 필요">👤</span>`
+          : "";
+        const docBadge = hasActivityDeliverable(ss, act)
+          ? `<span class="activity-doc" title="산출물 생성 활동 — 클릭하여 상세 확인">📄</span>`
+          : "";
+        actBox.innerHTML = docBadge + escapeHtml(label) + hitlBadge;
+        actBox.addEventListener("click", () => openActivityModal(aidlc, ss, act, actIdx));
+        actStack.appendChild(actBox);
+
+        if (actIdx < acts.length - 1) {
+          const arr = document.createElement("div");
+          arr.className = `activity-flow-arrow ${aidlc.colorKey}`;
+          arr.textContent = "↓";
+          actStack.appendChild(arr);
+        }
+      });
+      col.appendChild(actStack);
+
+      stepRow.appendChild(col);
+
+      // → arrow between step columns
+      if (idx < subStages.length - 1) {
+        const stepArrow = document.createElement("div");
+        stepArrow.className = `step-arrow-h ${aidlc.colorKey}`;
+        stepArrow.textContent = "→";
+        stepArrow.title = `${ss.title} → ${subStages[idx + 1].title}`;
+        stepRow.appendChild(stepArrow);
+      }
+    });
+    section.appendChild(stepRow);
+
+    row.appendChild(section);
+
+    // ↓ arrow between phase sections
+    if (phaseIdx < data.aidlcPhases.length - 1) {
+      const phaseArrow = document.createElement("div");
+      phaseArrow.className = "phase-flow-arrow";
+      phaseArrow.textContent = "▼";
+      const nextPhase = data.aidlcPhases[phaseIdx + 1];
+      phaseArrow.title = `${aidlc.name} → ${nextPhase.name}`;
+      row.appendChild(phaseArrow);
+    }
+  });
+}
+
+function renderBrackets() {
+  const row = document.getElementById("bracketsRow");
+  row.innerHTML = "";
+
+  data.brackets.forEach(bracket => {
+    const el = document.createElement("div");
+    el.className = "bracket";
+    el.innerHTML = `
+      <span class="bracket-label">${escapeHtml(bracket.label)}</span>
+      <span class="bracket-desc">${escapeHtml(bracket.shortDesc || "")}</span>
+    `;
+    el.addEventListener("click", () => openBracketModal(bracket));
+    row.appendChild(el);
+  });
+}
+
+function renderChangeRow() {
+  const row = document.getElementById("changeRow");
+  row.innerHTML = "";
+
+  const scope = document.createElement("div");
+  scope.className = "change-box";
+  scope.textContent = data.changeControl.scope.title;
+  scope.addEventListener("click", () => openChangeModal(data.changeControl.scope));
+  row.appendChild(scope);
+
+  const arrow = document.createElement("div");
+  arrow.className = "change-arrow";
+  row.appendChild(arrow);
+
+  const log = document.createElement("div");
+  log.className = "change-box";
+  log.textContent = data.changeControl.log.title;
+  log.addEventListener("click", () => openChangeModal(data.changeControl.log));
+  row.appendChild(log);
+}
+
+/* ============================================================
+   Modal
+   ============================================================ */
+const modalBackdrop = document.getElementById("modalBackdrop");
+const modalTitle = document.getElementById("modalTitle");
+const modalMeta = document.getElementById("modalMeta");
+const modalBody = document.getElementById("modalBody");
+
+let currentModalContext = null;
+
+function openAidlcModal(aidlc) {
+  currentModalContext = { type: "aidlc", aidlcId: aidlc.id };
+  modalTitle.textContent = aidlc.name;
+  modalMeta.innerHTML = `${escapeHtml(aidlc.number)} · <em>${escapeHtml(aidlc.question)}</em>${aidlc.taglineEn ? ` · <span style="color:var(--text-soft)">${escapeHtml(aidlc.taglineEn)}</span>` : ""}`;
+  modalBody.innerHTML = `
+    <div class="modal-section">
+      <h3>🏷️ AIDLC Phase</h3>
+      <span class="aidlc-mapping-chip" style="background:${aidlc.color}">${escapeHtml(aidlc.name)}</span>
+      <span style="margin-left:8px; color:var(--text-soft); font-size:12px;">${escapeHtml(aidlc.tagline)}</span>
+    </div>
+    <div class="modal-section">
+      <h3>📝 설명</h3>
+      <p class="editable-text" data-field="description">${escapeHtml(aidlc.description)}</p>
+    </div>
+    ${renderListSection("⚙️ 주요 활동 (Phase Steps)", aidlc.activities, "activities")}
+    ${renderListSection("📦 산출물 (Deliverables)", aidlc.deliverables, "deliverables")}
+    ${renderListSection("📂 AIDLC Rule Files", aidlc.ruleFiles || [], "ruleFiles")}
+    <div class="modal-section">
+      <h3>🔽 Sub-Stages</h3>
+      <ul>${(aidlc.subStages || []).map((s, i) => `<li><strong>Step ${i + 1}.</strong> ${escapeHtml(s.title)}${s.titleEn ? ` <span style="color:var(--text-soft); font-size:12px;">(${escapeHtml(s.titleEn)})</span>` : ""}</li>`).join('')}</ul>
+    </div>
+  `;
+  bindEditableFields();
+  modalBackdrop.classList.add("open");
+}
+
+function openSubStageModal(aidlc, ss) {
+  currentModalContext = { type: "substage", aidlcId: aidlc.id, ssId: ss.id };
+  modalTitle.textContent = ss.title;
+  modalMeta.innerHTML = `<span style="color:${aidlc.color}; font-weight:700;">${escapeHtml(aidlc.name)}</span> · ${escapeHtml(aidlc.number)} · AIDLC Step${ss.titleEn ? ` · <span style="color:var(--text-soft)">${escapeHtml(ss.titleEn)}</span>` : ""}`;
+  modalBody.innerHTML = `
+    <div class="modal-section">
+      <h3>🏷️ Parent Phase</h3>
+      <span class="aidlc-mapping-chip" style="background:${aidlc.color}">${escapeHtml(aidlc.name)}</span>
+      <span style="margin-left:8px; color:var(--text-soft); font-size:12px;">${escapeHtml(aidlc.tagline)}</span>
+    </div>
+    <div class="modal-section">
+      <h3>📝 설명 (Purpose)</h3>
+      <p class="editable-text" data-field="description">${escapeHtml(ss.description)}</p>
+    </div>
+    ${ss.executionNote ? `<div class="modal-section">
+      <h3>⚡ 실행 조건 (Execution)</h3>
+      <p class="editable-text" data-field="executionNote">${escapeHtml(ss.executionNote)}</p>
+    </div>` : ""}
+    ${ss.ruleFile ? `<div class="modal-section">
+      <h3>📂 AIDLC Rule File</h3>
+      <p><code class="editable-text" data-field="ruleFile">${escapeHtml(ss.ruleFile)}</code></p>
+    </div>` : ""}
+    ${renderListSection("📥 입력 (Inputs)", ss.inputs || [], "inputs")}
+    ${renderListSection("⚙️ 주요 활동 (Activities)", ss.activities, "activities")}
+    ${renderListSection("📦 산출물 (Deliverables)", ss.deliverables, "deliverables")}
+  `;
+  bindEditableFields();
+  modalBackdrop.classList.add("open");
+}
+
+function openActivityModal(aidlc, ss, activity, idx) {
+  currentModalContext = { type: "activity", aidlcId: aidlc.id, ssId: ss.id, activityIdx: idx };
+  const isObj = activity && typeof activity === "object";
+  const title = isObj ? (activity.title || "") : String(activity);
+  const titleEn = isObj ? (activity.titleEn || "") : "";
+  const desc = isObj ? (activity.description || "") : "";
+  modalTitle.textContent = title;
+  modalMeta.innerHTML = `<span style="color:${aidlc.color}; font-weight:700;">${escapeHtml(aidlc.name)}</span> · ${escapeHtml(aidlc.number)} · <strong>${escapeHtml(ss.title)}</strong> · Activity ${idx + 1}${titleEn ? ` · <span style="color:var(--text-soft)">${escapeHtml(titleEn)}</span>` : ""}`;
+  const hitl = isHITLActivity(activity);
+  const producing = isProducingActivity(activity);
+  const dlv = getActivityDeliverables(ss, activity);
+  let deliverableSection = "";
+  if (producing) {
+    const renderFileItem = (d) => looksLikeFile(d)
+      ? `<li><span class="file-link" data-mdfile="${escapeHtml(d)}">${escapeHtml(d)}</span></li>`
+      : `<li><code style="font-size:12px;">${escapeHtml(d)}</code></li>`;
+    if (dlv.matched.length > 0) {
+      deliverableSection = `
+        <div class="modal-section">
+          <h3>📄 이 활동이 생성·수정하는 문서</h3>
+          <ul style="margin:0; padding-left:20px;">
+            ${dlv.matched.map(renderFileItem).join('')}
+          </ul>
+          ${dlv.all.length > dlv.matched.length ? `
+            <details style="margin-top:10px;">
+              <summary style="cursor:pointer; color:var(--text-soft); font-size:12px;">Step 의 전체 산출물 보기 (${dlv.all.length})</summary>
+              <ul style="margin:6px 0 0; padding-left:20px;">
+                ${dlv.all.map(renderFileItem).join('')}
+              </ul>
+            </details>` : ""}
+        </div>
+      `;
+    } else if (dlv.all.length > 0) {
+      deliverableSection = `
+        <div class="modal-section">
+          <h3>📄 산출물 (Step 전체)</h3>
+          <p style="color:var(--text-soft); font-size:12px; margin:0 0 6px;">이 활동의 구체 파일명을 자동 매칭하지 못해, 소속된 step 의 전체 산출물을 표시합니다.</p>
+          <ul style="margin:0; padding-left:20px;">
+            ${dlv.all.map(renderFileItem).join('')}
+          </ul>
+        </div>
+      `;
+    }
+  }
+
+  modalBody.innerHTML = `
+    <div class="modal-section">
+      <h3>🏷️ Parent Step</h3>
+      <span class="aidlc-mapping-chip" style="background:${aidlc.color}">${escapeHtml(ss.title)}</span>
+      <span style="margin-left:8px; color:var(--text-soft); font-size:12px;">${escapeHtml(aidlc.name)} · ${escapeHtml(aidlc.number)}</span>
+    </div>
+    <div class="modal-section">
+      <h3>${hitl ? "👤 Human-in-the-loop" : "🤖 자동 실행"}</h3>
+      <p style="font-size:13px;">${hitl
+        ? "이 활동은 <strong>사용자의 입력 또는 명시적 승인</strong>을 필요로 합니다. AI 에이전트는 사용자 응답을 받을 때까지 다음 단계로 진행하지 않습니다."
+        : "이 활동은 AI 에이전트가 <strong>자동으로 수행</strong>합니다. 사용자 개입 없이 다음 활동으로 진행됩니다."}</p>
+      ${(() => {
+        if (!hitl) return "";
+        const reviewFiles = getHITLReviewFiles(ss, activity);
+        if (reviewFiles.length === 0) return "";
+        const mode = getHITLMode(activity);
+        const info = HITL_MODE_INFO[mode] || HITL_MODE_INFO.approve;
+        return `
+          <div style="margin-top:10px; padding:10px 12px; background:#FFF8E1; border:1px solid #F5D87A; border-radius:6px;">
+            <div style="font-size:12px; font-weight:700; color:#7A5C00; margin-bottom:6px;">${info.icon} 사용자 행위: ${escapeHtml(info.label)}</div>
+            <p style="font-size:12px; color:#5A4300; margin:0 0 6px;">${info.guide}</p>
+            <ul style="margin:0; padding-left:20px;">
+              ${reviewFiles.map(f => looksLikeFile(f)
+                ? `<li><span class="file-link" data-mdfile="${escapeHtml(f)}">${escapeHtml(f)}</span></li>`
+                : `<li><code style="font-size:12px;">${escapeHtml(f)}</code></li>`).join('')}
+            </ul>
+          </div>`;
+      })()}
+    </div>
+    <div class="modal-section">
+      <h3>📝 상세 설명</h3>
+      <p class="editable-text" data-field="description">${escapeHtml(desc || "(상세 설명이 없습니다)")}</p>
+    </div>
+    ${deliverableSection}
+    ${ss.ruleFile ? `<div class="modal-section">
+      <h3>📂 AIDLC Rule File</h3>
+      <p><code>${escapeHtml(ss.ruleFile)}</code></p>
+    </div>` : ""}
+    <div class="modal-section">
+      <h3>🔗 Step 내 위치</h3>
+      <p style="color:var(--text-soft); font-size:13px;">이 활동은 <strong>${escapeHtml(ss.title)}</strong> 단계의 ${idx + 1} 번째 활동입니다.</p>
+    </div>
+  `;
+  bindEditableFields();
+  modalBackdrop.classList.add("open");
+}
+
+function openBracketModal(bracket) {
+  currentModalContext = { type: "bracket", bracketId: bracket.id };
+  modalTitle.textContent = bracket.label;
+  modalMeta.innerHTML = "전 단계에 걸친 활동 (Cross-cutting Concern)";
+  modalBody.innerHTML = `
+    <div class="modal-section">
+      <h3>📝 설명</h3>
+      <p class="editable-text" data-field="description">${escapeHtml(bracket.description)}</p>
+    </div>
+    ${renderListSection("⚙️ 주요 활동 (Activities)", bracket.activities, "activities")}
+    ${renderListSection("📦 산출물 (Deliverables)", bracket.deliverables, "deliverables")}
+  `;
+  bindEditableFields();
+  modalBackdrop.classList.add("open");
+}
+
+function openChangeModal(change) {
+  currentModalContext = { type: "change", changeId: change.id };
+  modalTitle.textContent = change.title;
+  modalMeta.textContent = "Change Control";
+  modalBody.innerHTML = `
+    <div class="modal-section">
+      <h3>📝 설명</h3>
+      <p class="editable-text" data-field="description">${escapeHtml(change.description)}</p>
+    </div>
+    ${renderListSection("⚙️ 주요 활동 (Activities)", change.activities, "activities")}
+    ${renderListSection("📦 산출물 (Deliverables)", change.deliverables, "deliverables")}
+  `;
+  bindEditableFields();
+  modalBackdrop.classList.add("open");
+}
+
+function renderListSection(heading, items, fieldName) {
+  const list = (items || []).map((item, i) => {
+    if (item && typeof item === "object") {
+      const t = escapeHtml(item.title || "");
+      const e = item.titleEn ? ` <span style="color:var(--text-soft); font-size:11px; font-weight:400;">(${escapeHtml(item.titleEn)})</span>` : "";
+      const d = item.description ? `<div style="color:var(--text-soft); font-size:12px; margin-top:2px;">${escapeHtml(item.description)}</div>` : "";
+      return `<li><strong class="editable-text" data-field="${fieldName}" data-index="${i}" data-subfield="title">${t}</strong>${e}${d}</li>`;
+    }
+    const s = String(item);
+    if (looksLikeFile(s)) {
+      // 파일 경로면 클릭 가능한 링크로 표시
+      return `<li><span class="file-link" data-mdfile="${escapeHtml(s)}">${escapeHtml(s)}</span></li>`;
+    }
+    return `<li><span class="editable-text" data-field="${fieldName}" data-index="${i}">${escapeHtml(item)}</span></li>`;
+  }).join('');
+  return `
+    <div class="modal-section" data-list-field="${fieldName}">
+      <h3>${heading}</h3>
+      <ul>${list}</ul>
+      <div class="list-edit-controls">
+        <button onclick="addListItem('${fieldName}')">+ 항목 추가</button>
+        <button onclick="removeLastListItem('${fieldName}')">− 마지막 항목 삭제</button>
+      </div>
+    </div>
+  `;
+}
+
+function bindEditableFields() {
+  modalBody.querySelectorAll(".editable-text").forEach(el => {
+    el.setAttribute("contenteditable", editMode ? "true" : "false");
+    el.addEventListener("blur", () => persistEdit(el));
+  });
+}
+
+function persistEdit(el) {
+  if (!editMode) return;
+  const field = el.dataset.field;
+  const idx = el.dataset.index;
+  const subfield = el.dataset.subfield;
+  const value = el.textContent.trim();
+  const target = getCurrentTarget();
+  if (!target) return;
+
+  if (idx !== undefined) {
+    const existing = target[field][parseInt(idx)];
+    if (existing && typeof existing === "object" && subfield) {
+      existing[subfield] = value;
+    } else {
+      target[field][parseInt(idx)] = value;
+    }
+  } else {
+    target[field] = value;
+  }
+  saveData();
+  render();
+}
+
+function getCurrentTarget() {
+  if (!currentModalContext) return null;
+  const ctx = currentModalContext;
+  if (ctx.type === "aidlc") {
+    return data.aidlcPhases.find(a => a.id === ctx.aidlcId);
+  }
+  if (ctx.type === "substage") {
+    const aidlc = data.aidlcPhases.find(a => a.id === ctx.aidlcId);
+    return aidlc ? (aidlc.subStages || []).find(s => s.id === ctx.ssId) : null;
+  }
+  if (ctx.type === "activity") {
+    const aidlc = data.aidlcPhases.find(a => a.id === ctx.aidlcId);
+    if (!aidlc) return null;
+    const ss = (aidlc.subStages || []).find(s => s.id === ctx.ssId);
+    if (!ss) return null;
+    return (ss.activities || [])[ctx.activityIdx] || null;
+  }
+  if (ctx.type === "bracket") {
+    return data.brackets.find(b => b.id === ctx.bracketId);
+  }
+  if (ctx.type === "change") {
+    if (ctx.changeId === data.changeControl.scope.id) return data.changeControl.scope;
+    if (ctx.changeId === data.changeControl.log.id) return data.changeControl.log;
+  }
+  return null;
+}
+
+function addListItem(field) {
+  if (!editMode) return;
+  const target = getCurrentTarget();
+  if (!target) return;
+  if (!Array.isArray(target[field])) target[field] = [];
+  target[field].push("새 항목");
+  saveData();
+  reopenCurrentModal();
+}
+
+function removeLastListItem(field) {
+  if (!editMode) return;
+  const target = getCurrentTarget();
+  if (!target || !Array.isArray(target[field]) || target[field].length === 0) return;
+  target[field].pop();
+  saveData();
+  reopenCurrentModal();
+}
+
+function reopenCurrentModal() {
+  const ctx = currentModalContext;
+  if (!ctx) return;
+  if (ctx.type === "aidlc") {
+    openAidlcModal(data.aidlcPhases.find(a => a.id === ctx.aidlcId));
+  } else if (ctx.type === "substage") {
+    const aidlc = data.aidlcPhases.find(a => a.id === ctx.aidlcId);
+    const ss = aidlc.subStages.find(s => s.id === ctx.ssId);
+    openSubStageModal(aidlc, ss);
+  } else if (ctx.type === "activity") {
+    const aidlc = data.aidlcPhases.find(a => a.id === ctx.aidlcId);
+    const ss = aidlc.subStages.find(s => s.id === ctx.ssId);
+    const act = (ss.activities || [])[ctx.activityIdx];
+    openActivityModal(aidlc, ss, act, ctx.activityIdx);
+  } else if (ctx.type === "bracket") {
+    openBracketModal(data.brackets.find(b => b.id === ctx.bracketId));
+  } else if (ctx.type === "change") {
+    const c = ctx.changeId === data.changeControl.scope.id
+      ? data.changeControl.scope
+      : data.changeControl.log;
+    openChangeModal(c);
+  }
+}
+
+document.getElementById("modalClose").addEventListener("click", closeModal);
+modalBackdrop.addEventListener("click", e => {
+  if (e.target === modalBackdrop) closeModal();
+});
+// .file-link 클릭 시 md viewer 오픈 (모달 body 위임)
+modalBody.addEventListener("click", e => {
+  const link = e.target.closest(".file-link");
+  if (link && link.dataset.mdfile) {
+    e.stopPropagation();
+    openMdViewer(link.dataset.mdfile);
+  }
+});
+document.addEventListener("keydown", e => {
+  if (e.key === "Escape") closeModal();
+});
+
+function closeModal() {
+  modalBackdrop.classList.remove("open");
+  currentModalContext = null;
+  render();
+}
+
+/* ============================================================
+   Toolbar 동작
+   ============================================================ */
+document.getElementById("btnEdit").addEventListener("click", () => {
+  editMode = !editMode;
+  document.body.classList.toggle("edit-mode", editMode);
+  document.getElementById("btnEdit").classList.toggle("active", editMode);
+  if (modalBackdrop.classList.contains("open")) bindEditableFields();
+});
+
+document.getElementById("btnExport").addEventListener("click", () => {
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "aidlc-config.json";
+  a.click();
+  URL.revokeObjectURL(url);
+});
+
+document.getElementById("btnImport").addEventListener("click", () => {
+  document.getElementById("fileInput").click();
+});
+
+document.getElementById("fileInput").addEventListener("change", (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (evt) => {
+    try {
+      const imported = JSON.parse(evt.target.result);
+      if (!imported.aidlcPhases) {
+        alert("유효하지 않은 형식입니다. aidlcPhases 가 필요합니다.");
+        return;
+      }
+      if (confirm("현재 데이터를 가져온 파일로 교체합니다. 계속하시겠습니까?")) {
+        data = imported;
+        saveData();
+        render();
+      }
+    } catch (err) {
+      alert("JSON 파싱 실패: " + err.message);
+    }
+  };
+  reader.readAsText(file);
+  e.target.value = "";
+});
+
+document.getElementById("btnReset").addEventListener("click", () => {
+  if (confirm("모든 변경사항을 잃고 기본 데이터로 초기화합니다. 계속하시겠습니까?")) {
+    data = JSON.parse(JSON.stringify(DEFAULT_DATA));
+    saveData();
+    render();
+  }
+});
+
+/* ============================================================
+   MD Viewer — 산출물 파일을 samples/ 디렉토리에서 fetch 하여 렌더링
+   ============================================================ */
+const mdvBackdrop = document.getElementById("mdvBackdrop");
+const mdvTitle = document.getElementById("mdvTitle");
+const mdvPath = document.getElementById("mdvPath");
+const mdvBody = document.getElementById("mdvBody");
+
+document.getElementById("mdvClose").addEventListener("click", closeMdViewer);
+mdvBackdrop.addEventListener("click", e => { if (e.target === mdvBackdrop) closeMdViewer(); });
+document.addEventListener("keydown", e => {
+  if (e.key === "Escape" && mdvBackdrop.classList.contains("open")) closeMdViewer();
+});
+
+function closeMdViewer() {
+  mdvBackdrop.classList.remove("open");
+}
+
+// 경로 없는 bare filename → 표준 AIDLC 디렉토리 경로 매핑
+const SAMPLE_FILE_PATH_MAP = {
+  "aidlc-state.md": "aidlc-state.md",
+  "audit.md": "audit.md",
+  // inception requirements
+  "requirements.md": "inception/requirements/requirements.md",
+  "requirement-verification-questions.md": "inception/requirements/requirement-verification-questions.md",
+  "requirements-clarification-questions.md": "inception/requirements/requirements-clarification-questions.md",
+  // inception plans
+  "execution-plan.md": "inception/plans/execution-plan.md",
+  "story-generation-plan.md": "inception/plans/story-generation-plan.md",
+  "story-planning-clarification-questions.md": "inception/plans/story-planning-clarification-questions.md",
+  "user-stories-assessment.md": "inception/plans/user-stories-assessment.md",
+  "application-design-plan.md": "inception/plans/application-design-plan.md",
+  "design-clarification-questions.md": "inception/plans/design-clarification-questions.md",
+  "unit-of-work-plan.md": "inception/plans/unit-of-work-plan.md",
+  "unit-of-work-clarification-questions.md": "inception/plans/unit-of-work-clarification-questions.md",
+  // inception user-stories
+  "stories.md": "inception/user-stories/stories.md",
+  "user-stories.md": "inception/user-stories/stories.md", // alias
+  "personas.md": "inception/user-stories/personas.md",
+  // inception application-design
+  "application-design.md": "inception/application-design/application-design.md",
+  "components.md": "inception/application-design/components.md",
+  "component-methods.md": "inception/application-design/component-methods.md",
+  "services.md": "inception/application-design/services.md",
+  "component-dependency.md": "inception/application-design/component-dependency.md",
+  "unit-of-work.md": "inception/application-design/unit-of-work.md",
+  "unit-of-work-dependency.md": "inception/application-design/unit-of-work-dependency.md",
+  "unit-of-work-story-map.md": "inception/application-design/unit-of-work-story-map.md",
+  // inception reverse-engineering
+  "business-overview.md": "inception/reverse-engineering/business-overview.md",
+  "architecture.md": "inception/reverse-engineering/architecture.md",
+  "code-structure.md": "inception/reverse-engineering/code-structure.md",
+  "api-documentation.md": "inception/reverse-engineering/api-documentation.md",
+  "component-inventory.md": "inception/reverse-engineering/component-inventory.md",
+  "technology-stack.md": "inception/reverse-engineering/technology-stack.md",
+  "dependencies.md": "inception/reverse-engineering/dependencies.md",
+  "code-quality-assessment.md": "inception/reverse-engineering/code-quality-assessment.md",
+  "reverse-engineering-timestamp.md": "inception/reverse-engineering/reverse-engineering-timestamp.md",
+  // construction unit (예시: user-management)
+  "business-logic-model.md": "construction/user-management/functional-design/business-logic-model.md",
+  "business-rules.md": "construction/user-management/functional-design/business-rules.md",
+  "domain-entities.md": "construction/user-management/functional-design/domain-entities.md",
+  "frontend-components.md": "construction/user-management/functional-design/frontend-components.md",
+  "nfr-requirements.md": "construction/user-management/nfr-requirements/nfr-requirements.md",
+  "tech-stack-decisions.md": "construction/user-management/nfr-requirements/tech-stack-decisions.md",
+  "nfr-design-patterns.md": "construction/user-management/nfr-design/nfr-design-patterns.md",
+  "logical-components.md": "construction/user-management/nfr-design/logical-components.md",
+  "infrastructure-design.md": "construction/user-management/infrastructure-design/infrastructure-design.md",
+  "deployment-architecture.md": "construction/user-management/infrastructure-design/deployment-architecture.md",
+  "shared-infrastructure.md": "construction/shared-infrastructure.md",
+  // build & test (AIDLC 실제 경로: construction/build-and-test/)
+  "build-instructions.md": "construction/build-and-test/build-instructions.md",
+  "unit-test-instructions.md": "construction/build-and-test/unit-test-instructions.md",
+  "integration-test-instructions.md": "construction/build-and-test/integration-test-instructions.md",
+  "performance-test-instructions.md": "construction/build-and-test/performance-test-instructions.md",
+  "contract-test-instructions.md": "construction/build-and-test/contract-test-instructions.md",
+  "security-test-instructions.md": "construction/build-and-test/security-test-instructions.md",
+  "e2e-test-instructions.md": "construction/build-and-test/e2e-test-instructions.md",
+  "build-and-test-summary.md": "construction/build-and-test/build-and-test-summary.md",
+  // operations
+  "operations.md": "operations/operations.md"
+};
+
+// 설명 텍스트에서 첫 번째 파일 경로/이름 추출 후 표준 sample 경로로 변환
+function resolveSamplePath(deliverable) {
+  let s = String(deliverable);
+  // {unit-name} placeholder → 샘플 unit 이름으로 치환 (regex 매칭 전)
+  s = s.replace(/\{unit-name\}/g, "user-management");
+  // 첫 번째 .md 파일 경로/이름 추출 (경로 prefix 포함 가능)
+  const m = s.match(/[\w\-\/]+\.md/);
+  if (!m) return s;
+  let p = m[0];
+  p = p.replace(/^aidlc-docs\//, "");
+  // bare filename 이면 표준 경로로 확장
+  if (!p.includes("/") && SAMPLE_FILE_PATH_MAP[p]) {
+    p = SAMPLE_FILE_PATH_MAP[p];
+  }
+  return p;
+}
+
+function looksLikeFile(deliverable) {
+  if (!deliverable) return false;
+  const s = String(deliverable);
+  // .md 확장자 포함 (괄호 앞)
+  return /\.md\b/.test(s);
+}
+
+async function openMdViewer(deliverableStr) {
+  const relPath = resolveSamplePath(deliverableStr);
+  const fetchUrl = `samples/${relPath}`;
+  const filename = relPath.split("/").pop();
+
+  mdvTitle.textContent = filename;
+  mdvPath.textContent = relPath;
+  mdvBody.innerHTML = `<div class="mdv-status">📂 ${escapeHtml(fetchUrl)} 불러오는 중…</div>`;
+  mdvBackdrop.classList.add("open");
+
+  try {
+    const res = await fetch(fetchUrl);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const md = await res.text();
+    const html = (typeof marked !== "undefined" && marked.parse) ? marked.parse(md) : escapeHtml(md);
+    mdvBody.innerHTML =
+      `<div class="mdv-sample-note">📎 이 문서는 AWS Labs <a href="https://github.com/awslabs/aidlc-workflows/tree/main/scripts/aidlc-evaluator/test_cases" target="_blank">aidlc-workflows · aidlc-evaluator/test_cases</a> 의 <strong>golden sample</strong> 입니다 (sci-calc / all-stages). 실제 프로젝트에서는 AI 에이전트가 컨텍스트에 맞춰 다른 내용으로 생성합니다.</div>` +
+      html;
+  } catch (err) {
+    mdvBody.innerHTML = `
+      <div class="mdv-error">
+        <strong>이 파일의 golden sample 이 아직 준비되어 있지 않습니다.</strong><br>
+        경로: <code>${escapeHtml(fetchUrl)}</code><br>
+        에러: ${escapeHtml(String(err.message || err))}<br><br>
+        <span style="font-size:12px; color:#7A5C00;">
+          AWS Labs <code>aidlc-workflows</code> 저장소의
+          <code>scripts/aidlc-evaluator/test_cases/</code> 에는 sci-calc / all-stages
+          두 개의 골든 샘플 세트가 있으며, 이 파일은 그중에 포함되지 않은 파일입니다.<br><br>
+          ※ <code>file://</code> 로 열려 있다면 CORS 문제로 fetch 가 막힐 수 있으니
+          <code>python3 -m http.server</code> 같은 로컬 서버로 열어주세요.
+        </span>
+      </div>`;
+  }
+}
+
+/* ============================================================
+   유틸
+   ============================================================ */
+function escapeHtml(s) {
+  if (s === undefined || s === null) return "";
+  return String(s)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+render();
+</script>
+</body>
+</html>
