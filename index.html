@@ -47,6 +47,34 @@
     font-size: 14px;
     margin-top: 4px;
   }
+  .nav {
+    display: flex;
+    gap: 8px;
+  }
+  .nav a {
+    text-decoration: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    border: 1.5px solid var(--sdlc-blue);
+    color: var(--sdlc-blue);
+    font-size: 13px;
+    font-weight: 700;
+    transition: all .15s ease;
+  }
+  .nav a:hover { background: var(--sdlc-blue); color: white; }
+  .nav a.active {
+    background: var(--sdlc-accent);
+    border-color: var(--sdlc-accent);
+    color: white;
+  }
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  body.simple-mode .nav a { padding: 5px 10px; font-size: 12px; }
+
   .toolbar { display: flex; gap: 8px; }
   .toolbar button {
     background: white;
@@ -817,13 +845,19 @@
     <h1>AIDLC PHASES <span class="edit-badge">EDIT MODE</span></h1>
     <div class="subtitle">AWS Labs <a href="https://github.com/awslabs/aidlc-workflows" target="_blank">aidlc-workflows</a> — AI Development Life Cycle 가이드</div>
   </div>
-  <div class="toolbar">
-    <button id="btnViewMode" title="Simple ↔ Full view 토글">◇ Simple</button>
-    <button id="btnEdit">✎ Edit</button>
-    <button id="btnExport">⬇ Export</button>
-    <button id="btnImport">⬆ Import</button>
-    <button id="btnReset" class="danger">↺ Reset</button>
-    <input type="file" id="fileInput" class="file-input" accept="application/json">
+  <div class="header-right">
+    <nav class="nav">
+      <a href="index.html" class="active">📊 워크플로우 다이어그램</a>
+      <a href="effects.html">✨ AI-DLC 효과</a>
+    </nav>
+    <div class="toolbar">
+      <button id="btnViewMode" title="Simple ↔ Full view 토글">◇ Simple</button>
+      <button id="btnEdit">✎ Edit</button>
+      <button id="btnExport">⬇ Export</button>
+      <button id="btnImport">⬆ Import</button>
+      <button id="btnReset" class="danger">↺ Reset</button>
+      <input type="file" id="fileInput" class="file-input" accept="application/json">
+    </div>
   </div>
 </header>
 

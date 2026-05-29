@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>AI-DLC의 효과 — AIDLC Guide</title>
+<style>
+  :root {
+    --aidlc-inception: #4A90E2;
+    --aidlc-construction: #7ED321;
+    --aidlc-operations: #F5A623;
+    --sdlc-blue: #2C7BC4;
+    --sdlc-blue-dark: #1F5C92;
+    --sdlc-accent: #F5A623;
+    --text: #2A3142;
+    --text-soft: #5B6577;
+    --text-faint: #8A93A6;
+    --border: #D7E3F0;
+    --bg-card: #FFFFFF;
+    --bg-soft: #F5F8FC;
+  }
+
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    font-family: 'Segoe UI', 'Apple SD Gothic Neo', 'Malgun Gothic', '맑은 고딕', sans-serif;
+    color: var(--text);
+    background: linear-gradient(180deg, #FAFBFE 0%, #EEF3FA 100%);
+    min-height: 100vh;
+    line-height: 1.6;
+  }
+
+  /* ============ Header ============ */
+  header {
+    padding: 24px 32px 8px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+  .title-block h1 {
+    margin: 0;
+    font-size: 30px;
+    color: var(--sdlc-blue);
+    letter-spacing: 0.5px;
+    font-weight: 800;
+  }
+  .title-block .subtitle {
+    color: var(--text-soft);
+    font-size: 14px;
+    margin-top: 4px;
+  }
+  .nav {
+    display: flex;
+    gap: 8px;
+  }
+  .nav a {
+    text-decoration: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    border: 1.5px solid var(--sdlc-blue);
+    color: var(--sdlc-blue);
+    font-size: 13px;
+    font-weight: 700;
+    transition: all .15s ease;
+  }
+  .nav a:hover { background: var(--sdlc-blue); color: white; }
+  .nav a.active {
+    background: var(--sdlc-accent);
+    border-color: var(--sdlc-accent);
+    color: white;
+  }
+
+  main {
+    padding: 16px 32px 48px;
+    max-width: 1280px;
+    margin: 0 auto;
+  }
+
+  /* ============ Section 1: What is AI-DLC ============ */
+  .hero {
+    background: linear-gradient(135deg, #2C7BC4 0%, #1F5C92 100%);
+    color: white;
+    border-radius: 16px;
+    padding: 36px 40px;
+    margin-bottom: 28px;
+    box-shadow: 0 8px 24px rgba(44,123,196,0.25);
+  }
+  .hero h2 {
+    margin: 0 0 12px;
+    font-size: 28px;
+    letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .hero h2 .badge {
+    display: inline-block;
+    background: rgba(255,255,255,0.18);
+    border: 1px solid rgba(255,255,255,0.35);
+    padding: 4px 12px;
+    border-radius: 16px;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 1px;
+  }
+  .hero .lead {
+    font-size: 16px;
+    line-height: 1.65;
+    margin: 0 0 18px;
+    opacity: 0.95;
+  }
+  .hero .lead strong { color: #FFE8B3; font-weight: 700; }
+  .hero .principles {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-top: 16px;
+  }
+  .hero .principle {
+    background: rgba(255,255,255,0.10);
+    border: 1px solid rgba(255,255,255,0.20);
+    border-radius: 10px;
+    padding: 14px 16px;
+  }
+  .hero .principle .pn {
+    font-size: 11px;
+    opacity: 0.75;
+    letter-spacing: 1.2px;
+    font-weight: 700;
+  }
+  .hero .principle .pt {
+    font-size: 15px;
+    font-weight: 700;
+    margin: 4px 0 6px;
+  }
+  .hero .principle .pd {
+    font-size: 12px;
+    opacity: 0.85;
+    line-height: 1.55;
+  }
+
+  /* Phase row inside hero (visual summary) */
+  .phase-strip {
+    display: grid;
+    grid-template-columns: 1fr 24px 1fr 24px 1fr;
+    align-items: center;
+    gap: 0;
+    margin: 22px 0 4px;
+  }
+  .phase-strip .ph {
+    background: rgba(255,255,255,0.18);
+    border: 1px solid rgba(255,255,255,0.32);
+    border-radius: 8px;
+    padding: 10px 12px;
+    text-align: center;
+  }
+  .phase-strip .ph .pn { font-size: 10px; opacity: 0.78; letter-spacing: 1px; font-weight: 700; }
+  .phase-strip .ph .nm { font-size: 14px; font-weight: 800; margin-top: 2px; letter-spacing: 0.8px; }
+  .phase-strip .ph .dt { font-size: 11px; opacity: 0.82; margin-top: 2px; }
+  .phase-strip .ar {
+    text-align: center;
+    font-size: 18px;
+    font-weight: 700;
+    opacity: 0.7;
+  }
+
+  /* ============ Section title ============ */
+  .section-title {
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+    margin: 36px 0 16px;
+  }
+  .section-title h2 {
+    margin: 0;
+    font-size: 22px;
+    color: var(--sdlc-blue);
+    font-weight: 800;
+    letter-spacing: 0.3px;
+  }
+  .section-title .label {
+    font-size: 11px;
+    background: var(--sdlc-accent);
+    color: white;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+  }
+  .section-title .sub {
+    color: var(--text-soft);
+    font-size: 13px;
+    font-weight: 500;
+  }
+
+  /* ============ Effect cards ============ */
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 16px;
+  }
+  .card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 18px 20px;
+    transition: transform .15s ease, box-shadow .15s ease;
+    border-top: 4px solid var(--sdlc-blue);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(44,123,196,0.15);
+  }
+  .card.ai { border-top-color: var(--aidlc-inception); }
+  .card.framework { border-top-color: var(--sdlc-accent); }
+
+  .card .icon-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 4px;
+  }
+  .card .icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+  .card.ai .icon { background: #E8F1FB; color: var(--aidlc-inception); }
+  .card.framework .icon { background: #FFF1D9; color: #B5751A; }
+
+  .card h3 {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 800;
+    color: var(--text);
+    letter-spacing: 0.2px;
+  }
+  .card .area {
+    font-size: 10px;
+    color: var(--text-faint);
+    letter-spacing: 1px;
+    font-weight: 700;
+    text-transform: uppercase;
+    margin-bottom: 2px;
+  }
+  .card .effect {
+    font-size: 13px;
+    color: var(--text);
+    line-height: 1.6;
+  }
+  .card .effect strong { color: var(--sdlc-blue); }
+  .card ul {
+    margin: 6px 0 0;
+    padding-left: 18px;
+    color: var(--text-soft);
+    font-size: 12.5px;
+    line-height: 1.6;
+  }
+  .card ul li {
+    margin-bottom: 3px;
+  }
+  .card ul li::marker { color: var(--text-faint); }
+
+  /* ============ Comparison table (Without vs With) ============ */
+  .comparison {
+    margin: 36px 0 0;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  }
+  .comparison-header {
+    background: var(--bg-soft);
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .comparison-header h2 {
+    margin: 0;
+    font-size: 17px;
+    color: var(--sdlc-blue);
+  }
+  .comparison-header .sub {
+    color: var(--text-soft);
+    font-size: 12px;
+  }
+  .comparison table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  .comparison th {
+    background: var(--bg-soft);
+    text-align: left;
+    padding: 12px 18px;
+    font-weight: 700;
+    color: var(--text);
+    border-bottom: 1px solid var(--border);
+  }
+  .comparison th.left { color: #C44; }
+  .comparison th.right { color: #2A8; }
+  .comparison td {
+    padding: 12px 18px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+  .comparison td.dim { color: var(--text-soft); }
+  .comparison td.bright { color: var(--text); font-weight: 500; }
+  .comparison tr:last-child td { border-bottom: none; }
+  .comparison .dim::before { content: "✗ "; color: #C44; margin-right: 4px; }
+  .comparison .bright::before { content: "✓ "; color: #2A8; margin-right: 4px; }
+
+  /* ============ Footer ============ */
+  footer {
+    padding: 18px 32px 32px;
+    text-align: center;
+    color: var(--text-soft);
+    font-size: 12px;
+    max-width: 1280px;
+    margin: 0 auto;
+  }
+  footer a { color: var(--sdlc-blue); text-decoration: none; }
+  footer a:hover { text-decoration: underline; }
+
+  @media (max-width: 720px) {
+    .hero { padding: 24px 22px; }
+    .hero h2 { font-size: 22px; }
+    .hero .principles { grid-template-columns: 1fr; }
+    .phase-strip { grid-template-columns: 1fr; gap: 8px; }
+    .phase-strip .ar { display: none; }
+    main { padding: 12px 16px 32px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="title-block">
+    <h1>AI-DLC 의 효과</h1>
+    <div class="subtitle">AWS Labs <a href="https://github.com/awslabs/aidlc-workflows" target="_blank" style="color:var(--sdlc-blue);">aidlc-workflows</a> 가 제공하는 가치 정리</div>
+  </div>
+  <nav class="nav">
+    <a href="index.html">📊 워크플로우 다이어그램</a>
+    <a href="effects.html" class="active">✨ AI-DLC 효과</a>
+  </nav>
+</header>
+
+<main>
+
+  <!-- ============ AI-DLC 란? ============ -->
+  <section class="hero">
+    <h2>AI-DLC 란? <span class="badge">AI Development Life Cycle</span></h2>
+    <p class="lead">
+      AI-DLC 는 AWS Labs 가 만든 <strong>AI 코딩 에이전트(Claude Code / Cursor / Q Developer 등)를 위한 표준 개발 워크플로우</strong>입니다.
+      "vibe coding" 처럼 즉흥적으로 코드를 생성하는 대신,
+      <strong>요구사항 수집 → 설계 → 코드 생성 → 빌드/테스트</strong> 의 전 과정을 구조화된 단계로 진행하며,
+      모든 단계마다 사용자가 명시적으로 검토·승인할 수 있는 <strong>Human-in-the-loop</strong> gate 를 둡니다.
+    </p>
+
+    <div class="principles">
+      <div class="principle">
+        <div class="pn">PRINCIPLE 1</div>
+        <div class="pt">📋 File-based questions</div>
+        <div class="pd">AI 는 채팅으로 질문하지 않고, multiple-choice 질문 파일에 <code>[Answer]:</code> 태그를 남겨 사용자가 파일에 답변하도록 합니다. 모호함이 체계적으로 제거됩니다.</div>
+      </div>
+      <div class="principle">
+        <div class="pn">PRINCIPLE 2</div>
+        <div class="pt">📝 Audit trail by default</div>
+        <div class="pd">모든 결정·승인·응답이 <code>audit.md</code> 에 ISO 8601 timestamp 와 함께 append-only 로 기록되어, 누가 언제 무엇을 승인했는지 항상 추적됩니다.</div>
+      </div>
+      <div class="principle">
+        <div class="pn">PRINCIPLE 3</div>
+        <div class="pt">🔀 Adaptive workflow</div>
+        <div class="pd">프로젝트의 복잡도·greenfield/brownfield 여부에 따라 14개 step 중 일부가 자동 skip 되거나 depth (minimal/standard/comprehensive) 가 조정됩니다.</div>
+      </div>
+    </div>
+
+    <div class="phase-strip">
+      <div class="ph">
+        <div class="pn">PHASE 1</div>
+        <div class="nm">INCEPTION</div>
+        <div class="dt">계획 · 요구사항 · 아키텍처 결정 (7 step)</div>
+      </div>
+      <div class="ar">→</div>
+      <div class="ph">
+        <div class="pn">PHASE 2</div>
+        <div class="nm">CONSTRUCTION</div>
+        <div class="dt">상세 설계 · NFR · 코드 생성 (6 step)</div>
+      </div>
+      <div class="ar">→</div>
+      <div class="ph">
+        <div class="pn">PHASE 3</div>
+        <div class="nm">OPERATIONS</div>
+        <div class="dt">배포 · 모니터링 (placeholder)</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ Section: AI 의 도움으로 얻는 효과 ============ -->
+  <div class="section-title">
+    <h2>AI 의 도움으로 얻는 효과</h2>
+    <span class="label">AI Capability</span>
+    <span class="sub">AI 코딩 에이전트가 실제로 처리하는 작업 영역과 그 결과로 얻는 가치</span>
+  </div>
+  <div class="cards">
+
+    <div class="card ai">
+      <div class="icon-row">
+        <div class="icon">📋</div>
+        <div>
+          <div class="area">REQUIREMENTS</div>
+          <h3>요구사항 분석</h3>
+        </div>
+      </div>
+      <div class="effect">사용자 요청을 product owner 관점으로 받아 <strong>6 영역 완성도 분석</strong>(Functional / NFR / User Scenarios / Business Context / Technical Context / Quality Attributes) 을 자동 수행합니다.</div>
+      <ul>
+        <li>요청 명확성·복잡도 자동 판별 (clear / vague / incomplete)</li>
+        <li>모호한 응답·답변 충돌 자동 탐지 → clarification 라운드</li>
+        <li>구조화된 multiple-choice 질문 자동 생성</li>
+      </ul>
+    </div>
+
+    <div class="card ai">
+      <div class="icon-row">
+        <div class="icon">🏗️</div>
+        <div>
+          <div class="area">DESIGN</div>
+          <h3>아키텍처·컴포넌트 설계</h3>
+        </div>
+      </div>
+      <div class="effect">high-level 컴포넌트와 service layer 를 자동 식별하고, 의존성 그래프와 unit-of-work 까지 분해합니다.</div>
+      <ul>
+        <li>components / methods / services / dependency 4개 산출물 자동 생성</li>
+        <li>병렬 개발 가능한 unit-of-work 로 자동 분해</li>
+        <li>DDD aggregate / circular dependency 자동 검출</li>
+      </ul>
+    </div>
+
+    <div class="card ai">
+      <div class="icon-row">
+        <div class="icon">💻</div>
+        <div>
+          <div class="area">CODE GENERATION</div>
+          <h3>코드 작성</h3>
+        </div>
+      </div>
+      <div class="effect">설계 산출물을 입력으로 <strong>Unit 단위 병렬 코드 생성</strong>. brownfield 는 기존 파일 수정, greenfield 는 신규 생성.</div>
+      <ul>
+        <li>2-phase (plan → execute) 로 코드 생성 전 사용자 검토</li>
+        <li>일관된 패턴 적용 (repository / state machine / strategy 등)</li>
+        <li>inline documentation 자동 작성</li>
+      </ul>
+    </div>
+
+    <div class="card ai">
+      <div class="icon-row">
+        <div class="icon">🧪</div>
+        <div>
+          <div class="area">TESTING</div>
+          <h3>테스트 자동 생성</h3>
+        </div>
+      </div>
+      <div class="effect">unit / integration / performance / contract / security / e2e 테스트 instruction 을 자동 생성하여 빌드·검증 단계를 표준화합니다.</div>
+      <ul>
+        <li>NFR 에 따라 조건부 테스트 활성화 (perf / security 등)</li>
+        <li>build-and-test-summary.md 로 전체 결과 통합 리포트</li>
+        <li>실패 시 자동 디버깅·수정 시도 (real golden sample 192/192 PASS)</li>
+      </ul>
+    </div>
+
+    <div class="card ai">
+      <div class="icon-row">
+        <div class="icon">📚</div>
+        <div>
+          <div class="area">DOCUMENTATION</div>
+          <h3>문서화</h3>
+        </div>
+      </div>
+      <div class="effect">모든 단계의 산출물이 markdown 으로 자동 누적됩니다. 별도 문서화 작업이 필요 없습니다.</div>
+      <ul>
+        <li><code>aidlc-docs/</code> 디렉토리에 단계별 산출물 자동 정리</li>
+        <li>설계 도면(컴포넌트/의존성)을 Mermaid 다이어그램으로 자동 작성</li>
+        <li>API 문서·domain model·business rules 모두 markdown</li>
+      </ul>
+    </div>
+
+    <div class="card ai">
+      <div class="icon-row">
+        <div class="icon">🔍</div>
+        <div>
+          <div class="area">BROWNFIELD ANALYSIS</div>
+          <h3>기존 코드베이스 분석</h3>
+        </div>
+      </div>
+      <div class="effect">brownfield 프로젝트에 대해 <strong>reverse engineering</strong> 으로 9개 분석 문서를 자동 생성합니다.</div>
+      <ul>
+        <li>business-overview / architecture / API / code-structure 문서화</li>
+        <li>component-inventory / technology-stack / dependencies 식별</li>
+        <li>code-quality-assessment 로 tech debt·테스트 커버리지 평가</li>
+      </ul>
+    </div>
+
+  </div>
+
+  <!-- ============ Section: AI-DLC 프레임워크 자체가 주는 효과 ============ -->
+  <div class="section-title">
+    <h2>AI-DLC 프레임워크 자체가 주는 효과</h2>
+    <span class="label">Framework Value</span>
+    <span class="sub">AI 모델 자체와 별개로, AI-DLC 의 워크플로우 구조가 보장하는 효과</span>
+  </div>
+  <div class="cards">
+
+    <div class="card framework">
+      <div class="icon-row">
+        <div class="icon">🔍</div>
+        <div>
+          <div class="area">TRACEABILITY</div>
+          <h3>추적성</h3>
+        </div>
+      </div>
+      <div class="effect">모든 사용자 결정·승인·AI 응답이 <code>audit.md</code> 에 <strong>ISO 8601 timestamp 와 함께 append-only</strong> 로 기록됩니다.</div>
+      <ul>
+        <li>누가 언제 무엇을 승인했는지 항상 확인 가능</li>
+        <li>감사·컴플라이언스 대응에 그대로 사용 가능</li>
+        <li>잘못된 결정의 원인 분석 (post-mortem) 가능</li>
+      </ul>
+    </div>
+
+    <div class="card framework">
+      <div class="icon-row">
+        <div class="icon">🎯</div>
+        <div>
+          <div class="area">HUMAN-IN-THE-LOOP</div>
+          <h3>사용자 결정 권한 보장</h3>
+        </div>
+      </div>
+      <div class="effect">AI 가 임의로 진행하지 않도록, <strong>명시적 승인 gate</strong> 가 단계 사이마다 배치됩니다.</div>
+      <ul>
+        <li>중요 단계마다 사용자가 검토 후 명시적으로 "Approve" 입력</li>
+        <li>[Answer]: 태그로 사용자가 직접 선택지 입력</li>
+        <li>follow-up clarification 라운드로 모순 해소</li>
+      </ul>
+    </div>
+
+    <div class="card framework">
+      <div class="icon-row">
+        <div class="icon">🔀</div>
+        <div>
+          <div class="area">ADAPTIVE</div>
+          <h3>복잡도 적응성</h3>
+        </div>
+      </div>
+      <div class="effect">프로젝트 특성에 따라 단계가 자동 skip 되거나 depth 가 조정되어 <strong>오버엔지니어링을 방지</strong>합니다.</div>
+      <ul>
+        <li>단순 API → User Stories / Unit Generation skip</li>
+        <li>NFR 명세 명확 → NFR Requirements / Design skip</li>
+        <li>요청 명확성에 따라 minimal / standard / comprehensive 자동 선택</li>
+      </ul>
+    </div>
+
+    <div class="card framework">
+      <div class="icon-row">
+        <div class="icon">⚠️</div>
+        <div>
+          <div class="area">CONTRADICTION DETECTION</div>
+          <h3>모순 자동 탐지</h3>
+        </div>
+      </div>
+      <div class="effect">사용자 답변 간의 충돌·모호함을 자동 분석하고, <code>*-clarification-questions.md</code> 파일로 후속 질문을 발행합니다.</div>
+      <ul>
+        <li>scope/risk/timeline mismatch 자동 감지</li>
+        <li>해결 전까지 다음 단계 진행 차단 (blocking gate)</li>
+        <li>일관성 검증 후에만 산출물 생성</li>
+      </ul>
+    </div>
+
+    <div class="card framework">
+      <div class="icon-row">
+        <div class="icon">🎨</div>
+        <div>
+          <div class="area">CONSISTENCY</div>
+          <h3>일관된 워크플로우 패턴</h3>
+        </div>
+      </div>
+      <div class="effect">모든 step 이 <strong>plan → 질문 → 답변 → 검증 → 산출물 생성</strong> 의 동일 패턴을 따라 예측 가능한 결과를 보장합니다.</div>
+      <ul>
+        <li>매번 같은 step 순서·산출물 구조</li>
+        <li>팀원이 산출물 위치를 외울 필요 없음 (표준 경로)</li>
+        <li>새 unit / phase 추가 시 학습 비용 최소화</li>
+      </ul>
+    </div>
+
+    <div class="card framework">
+      <div class="icon-row">
+        <div class="icon">🛡️</div>
+        <div>
+          <div class="area">COMPLIANCE GATES</div>
+          <h3>컴플라이언스 강제</h3>
+        </div>
+      </div>
+      <div class="effect"><strong>Extensions opt-in</strong> 으로 보안·품질·테스트 룰을 <strong>blocking constraint</strong> 로 적용합니다.</div>
+      <ul>
+        <li>opt-in 한 룰은 단계 진행을 막는 강제 조건이 됨</li>
+        <li>aws-best-practices, security-baseline 등 사전 정의 룰</li>
+        <li>커버리지 임계값·SAST 결과가 자동 검증됨</li>
+      </ul>
+    </div>
+
+    <div class="card framework">
+      <div class="icon-row">
+        <div class="icon">🤝</div>
+        <div>
+          <div class="area">COLLABORATION</div>
+          <h3>사람·AI 공동 작업</h3>
+        </div>
+      </div>
+      <div class="effect">모든 산출물이 <strong>markdown 파일</strong> 이라 사람·AI·다른 도구가 동일하게 읽고 쓸 수 있습니다.</div>
+      <ul>
+        <li>PR 리뷰·코드 리뷰처럼 산출물도 git diff 가능</li>
+        <li>중단·이어쓰기 가능 (session-continuity)</li>
+        <li>여러 AI agent 가 같은 워크스페이스에서 협업</li>
+      </ul>
+    </div>
+
+    <div class="card framework">
+      <div class="icon-row">
+        <div class="icon">🔌</div>
+        <div>
+          <div class="area">PORTABILITY</div>
+          <h3>AI 에이전트 독립성</h3>
+        </div>
+      </div>
+      <div class="effect"><strong>Claude Code / Cursor / Q Developer / Kiro / Amazon Q</strong> 등 어느 AI agent 에서 실행해도 같은 워크플로우 룰이 적용됩니다.</div>
+      <ul>
+        <li>도구 변경 시에도 산출물·진행 상태 그대로 이어짐</li>
+        <li><code>.claude/</code>, <code>.kiro/</code>, <code>.amazonq/</code> 등 각 도구의 룰 경로 자동 인식</li>
+        <li>vendor lock-in 방지</li>
+      </ul>
+    </div>
+
+    <div class="card framework">
+      <div class="icon-row">
+        <div class="icon">🔁</div>
+        <div>
+          <div class="area">REPRODUCIBILITY</div>
+          <h3>재현성</h3>
+        </div>
+      </div>
+      <div class="effect">같은 입력 (vision.md / tech-env.md + 답변) → 같은 산출물 구조를 보장합니다.</div>
+      <ul>
+        <li>aidlc-evaluator 의 golden sample 기반 검증</li>
+        <li>workflow 가 결정론적 (state machine 기반)</li>
+        <li>실험·비교·회귀 테스트 가능</li>
+      </ul>
+    </div>
+
+  </div>
+
+  <!-- ============ Without vs With ============ -->
+  <div class="comparison">
+    <div class="comparison-header">
+      <h2>📊 ad-hoc AI coding 과 AI-DLC 비교</h2>
+      <span class="sub">같은 AI 모델을 써도 워크플로우가 다르면 결과가 달라집니다</span>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>관점</th>
+          <th class="left">ad-hoc AI coding (vibe coding)</th>
+          <th class="right">AI-DLC 워크플로우</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>요구사항</strong></td>
+          <td class="dim">chat 으로 즉흥 질문 → 모호함이 코드까지 전파됨</td>
+          <td class="bright">질문 파일 + [Answer]: 태그 + 6 영역 완성도 분석</td>
+        </tr>
+        <tr>
+          <td><strong>승인 추적</strong></td>
+          <td class="dim">chat 로그에 의존, 누가 언제 무엇을 승인했는지 불명확</td>
+          <td class="bright">audit.md 에 timestamp 와 함께 append-only 기록</td>
+        </tr>
+        <tr>
+          <td><strong>모순 처리</strong></td>
+          <td class="dim">AI 가 자체 판단으로 한쪽 선택 → 의도와 다른 결과 가능</td>
+          <td class="bright">clarification-questions.md 로 사용자 결정 강제</td>
+        </tr>
+        <tr>
+          <td><strong>단계 간 연결</strong></td>
+          <td class="dim">대화 컨텍스트 유실 시 처음부터 다시 (context loss)</td>
+          <td class="bright">파일 기반 산출물로 항상 이어쓰기 가능 (session-continuity)</td>
+        </tr>
+        <tr>
+          <td><strong>도구 의존성</strong></td>
+          <td class="dim">특정 AI 도구·UI 에 종속</td>
+          <td class="bright">markdown 산출물 + 룰 파일로 도구 독립적</td>
+        </tr>
+        <tr>
+          <td><strong>품질 보장</strong></td>
+          <td class="dim">사람이 매번 수동 검토 필요</td>
+          <td class="bright">Extensions 룰이 blocking constraint 로 자동 검증</td>
+        </tr>
+        <tr>
+          <td><strong>복잡도 대응</strong></td>
+          <td class="dim">단순 작업에도 풀세트 진행 또는 큰 작업에 깊이 부족</td>
+          <td class="bright">14 step 중 필요한 것만 자동 선택 (adaptive)</td>
+        </tr>
+        <tr>
+          <td><strong>오버엔지니어링</strong></td>
+          <td class="dim">AI 가 알아서 추가 추상화·feature flag 생성</td>
+          <td class="bright">요구사항·NFR 명세에 기반해 필요한 만큼만 생성</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+</main>
+
+<footer>
+  <p>
+    데이터·컨벤션 출처: AWS Labs
+    <a href="https://github.com/awslabs/aidlc-workflows" target="_blank">aidlc-workflows</a>
+    (Apache-2.0 License) ·
+    <a href="index.html">📊 워크플로우 다이어그램으로 돌아가기</a>
+  </p>
+</footer>
+
+</body>
+</html>
