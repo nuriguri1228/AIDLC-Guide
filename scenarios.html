@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>AI-DLC 사용자 시나리오 — AIDLC Guide</title>
+<style>
+  :root {
+    --aidlc-inception: #4A90E2;
+    --aidlc-construction: #7ED321;
+    --aidlc-operations: #F5A623;
+    --sdlc-blue: #2C7BC4;
+    --sdlc-blue-dark: #1F5C92;
+    --sdlc-accent: #F5A623;
+    --text: #2A3142;
+    --text-soft: #5B6577;
+    --text-faint: #8A93A6;
+    --border: #D7E3F0;
+    --bg-card: #FFFFFF;
+    --bg-soft: #F5F8FC;
+    --ok: #2A8;
+    --warn: #C90;
+    --bad: #C44;
+  }
+
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    font-family: 'Segoe UI', 'Apple SD Gothic Neo', 'Malgun Gothic', '맑은 고딕', sans-serif;
+    color: var(--text);
+    background: linear-gradient(180deg, #FAFBFE 0%, #EEF3FA 100%);
+    min-height: 100vh;
+    line-height: 1.6;
+  }
+
+  header {
+    padding: 24px 32px 8px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+  .title-block h1 {
+    margin: 0; font-size: 30px; color: var(--sdlc-blue);
+    letter-spacing: 0.5px; font-weight: 800;
+  }
+  .title-block .subtitle { color: var(--text-soft); font-size: 14px; margin-top: 4px; }
+  .nav { display: flex; gap: 8px; flex-wrap: wrap; }
+  .nav a {
+    text-decoration: none; padding: 8px 16px; border-radius: 6px;
+    border: 1.5px solid var(--sdlc-blue); color: var(--sdlc-blue);
+    font-size: 13px; font-weight: 700; transition: all .15s ease;
+  }
+  .nav a:hover { background: var(--sdlc-blue); color: white; }
+  .nav a.active {
+    background: var(--sdlc-accent); border-color: var(--sdlc-accent); color: white;
+  }
+
+  main { padding: 16px 32px 48px; max-width: 1280px; margin: 0 auto; }
+
+  /* ============ Hero ============ */
+  .hero {
+    background: linear-gradient(135deg, #2C7BC4 0%, #1F5C92 100%);
+    color: white;
+    border-radius: 16px;
+    padding: 32px 36px;
+    margin-bottom: 28px;
+    box-shadow: 0 8px 24px rgba(44,123,196,0.25);
+  }
+  .hero h2 { margin: 0 0 10px; font-size: 26px; letter-spacing: 0.5px; }
+  .hero p { margin: 0 0 8px; font-size: 15px; line-height: 1.7; opacity: 0.95; }
+  .hero p strong { color: #FFE8B3; }
+
+  /* ============ Decision matrix ============ */
+  .matrix {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 28px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  }
+  .matrix-header {
+    background: var(--bg-soft);
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--border);
+  }
+  .matrix-header h2 { margin: 0; font-size: 17px; color: var(--sdlc-blue); }
+  .matrix-header .sub { color: var(--text-soft); font-size: 12px; }
+  .matrix table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .matrix th, .matrix td {
+    padding: 11px 16px;
+    border-bottom: 1px solid var(--border);
+    text-align: left;
+    vertical-align: top;
+  }
+  .matrix th { background: var(--bg-soft); font-weight: 700; }
+  .matrix tr:last-child td { border-bottom: none; }
+  .matrix .fit { font-weight: 700; white-space: nowrap; }
+  .matrix .fit.ok   { color: var(--ok); }
+  .matrix .fit.warn { color: var(--warn); }
+  .matrix .fit.bad  { color: var(--bad); }
+  .matrix td.row { font-weight: 700; }
+
+  /* ============ Scenario cards ============ */
+  .section-title {
+    display: flex; align-items: baseline; gap: 14px; margin: 36px 0 16px;
+  }
+  .section-title h2 {
+    margin: 0; font-size: 22px; color: var(--sdlc-blue);
+    font-weight: 800; letter-spacing: 0.3px;
+  }
+  .section-title .sub { color: var(--text-soft); font-size: 13px; font-weight: 500; }
+
+  .scenarios {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+    gap: 18px;
+  }
+  .scn {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 22px 24px;
+    display: flex; flex-direction: column; gap: 12px;
+    border-top: 5px solid var(--sdlc-blue);
+    transition: transform .15s ease, box-shadow .15s ease;
+  }
+  .scn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 24px rgba(44,123,196,0.12);
+  }
+  .scn.ok   { border-top-color: var(--ok); }
+  .scn.warn { border-top-color: var(--warn); }
+  .scn.bad  { border-top-color: var(--bad); }
+
+  .scn .head {
+    display: flex; align-items: flex-start; gap: 12px;
+  }
+  .scn .head .icon {
+    width: 42px; height: 42px; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px; flex-shrink: 0;
+    background: #E8F1FB; color: var(--sdlc-blue);
+  }
+  .scn.ok   .head .icon { background: #E5F6EE; color: var(--ok); }
+  .scn.warn .head .icon { background: #FFF4D9; color: #8A6A0A; }
+  .scn.bad  .head .icon { background: #FBE5E5; color: var(--bad); }
+  .scn .head .meta { flex: 1; }
+  .scn .head .num {
+    font-size: 10px; letter-spacing: 1.2px;
+    color: var(--text-faint); font-weight: 700;
+  }
+  .scn .head h3 { margin: 2px 0 0; font-size: 17px; font-weight: 800; color: var(--text); }
+  .scn .head .fit {
+    font-size: 11px; padding: 3px 10px; border-radius: 12px;
+    font-weight: 700; letter-spacing: 0.6px;
+    background: #E8F1FB; color: var(--sdlc-blue);
+    white-space: nowrap;
+  }
+  .scn.ok   .head .fit { background: #E5F6EE; color: var(--ok); }
+  .scn.warn .head .fit { background: #FFF4D9; color: #8A6A0A; }
+  .scn.bad  .head .fit { background: #FBE5E5; color: var(--bad); }
+
+  .scn .situ {
+    background: var(--bg-soft);
+    border-left: 3px solid var(--sdlc-blue);
+    padding: 10px 12px; border-radius: 0 6px 6px 0;
+    font-size: 12.5px; color: var(--text-soft); line-height: 1.6;
+  }
+  .scn.ok   .situ { border-left-color: var(--ok); }
+  .scn.warn .situ { border-left-color: var(--warn); }
+  .scn.bad  .situ { border-left-color: var(--bad); }
+  .scn .situ strong { color: var(--text); }
+
+  .scn .blk { display: flex; flex-direction: column; gap: 4px; }
+  .scn .blk .label {
+    font-size: 10px; letter-spacing: 1px; color: var(--text-faint);
+    font-weight: 700; text-transform: uppercase;
+  }
+  .scn .blk ul {
+    margin: 0; padding-left: 18px;
+    font-size: 12.5px; color: var(--text-soft); line-height: 1.55;
+  }
+  .scn .blk ul li { margin-bottom: 3px; }
+  .scn .blk ul li::marker { color: var(--text-faint); }
+  .scn .blk ul li strong { color: var(--text); }
+  .scn .blk code {
+    background: var(--bg-soft); color: var(--text);
+    padding: 1px 6px; border-radius: 4px; font-size: 11.5px;
+  }
+
+  .scn .caveat {
+    background: #FFF7E8;
+    border: 1px solid #E8C97A;
+    border-radius: 6px;
+    padding: 8px 12px;
+    font-size: 12px; color: #6A4F1A; line-height: 1.55;
+  }
+  .scn .caveat strong { color: #8A5A0A; }
+  .scn.bad .caveat {
+    background: #FDEDED;
+    border-color: #F2B0B0;
+    color: #8C2A2A;
+  }
+  .scn.bad .caveat strong { color: var(--bad); }
+
+  /* ============ Deep dive: 10M LOC ============ */
+  .deepdive {
+    margin-top: 40px;
+    background: linear-gradient(135deg, #FDEDED 0%, #FBE0E0 100%);
+    border: 1.5px solid #F2B0B0;
+    border-radius: 14px;
+    padding: 28px 32px;
+  }
+  .deepdive .dh {
+    display: flex; align-items: center; gap: 12px;
+    margin-bottom: 8px; flex-wrap: wrap;
+  }
+  .deepdive .dh h2 { margin: 0; font-size: 22px; color: #8C2A2A; font-weight: 800; }
+  .deepdive .dh .badge {
+    background: #8C2A2A; color: white;
+    padding: 3px 10px; border-radius: 12px;
+    font-size: 11px; letter-spacing: 0.8px; font-weight: 700;
+  }
+  .deepdive .dh .sub { color: #6E2828; font-size: 13px; font-weight: 500; }
+  .deepdive .lead {
+    font-size: 14px; color: #5C2424; margin: 8px 0 22px; line-height: 1.7;
+  }
+  .deepdive .lead strong { color: #8C2A2A; }
+  .deepdive .lead code {
+    background: rgba(140,42,42,0.08);
+    padding: 1px 6px; border-radius: 4px; font-size: 12.5px;
+  }
+
+  .blockers, .workarounds {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 12px;
+    margin-bottom: 18px;
+  }
+  .blocker, .workaround {
+    background: white;
+    border-radius: 10px;
+    padding: 14px 16px;
+    border-left: 4px solid #C44;
+  }
+  .workaround { border-left-color: var(--sdlc-blue); }
+  .blocker .src, .workaround .src {
+    font-size: 10px; color: var(--text-faint);
+    letter-spacing: 1px; font-weight: 700;
+  }
+  .blocker h4, .workaround h4 {
+    margin: 3px 0 6px; font-size: 14px; color: var(--text); font-weight: 800;
+  }
+  .blocker p, .workaround p {
+    margin: 0; font-size: 12.5px; color: var(--text-soft); line-height: 1.6;
+  }
+  .blocker p strong, .workaround p strong { color: var(--text); }
+  .blocker code, .workaround code {
+    background: var(--bg-soft); padding: 1px 5px; border-radius: 4px; font-size: 11.5px;
+  }
+
+  .deepdive .sect-title {
+    margin: 12px 0 10px;
+    font-size: 15px; font-weight: 800; color: #8C2A2A;
+    letter-spacing: 0.3px;
+  }
+
+  /* ============ Footer ============ */
+  footer {
+    padding: 18px 32px 32px;
+    text-align: center; color: var(--text-soft); font-size: 12px;
+    max-width: 1280px; margin: 0 auto;
+  }
+  footer a { color: var(--sdlc-blue); text-decoration: none; }
+  footer a:hover { text-decoration: underline; }
+
+  @media (max-width: 720px) {
+    .hero { padding: 22px 18px; }
+    .scenarios { grid-template-columns: 1fr; }
+    .deepdive { padding: 22px 18px; }
+    main { padding: 12px 16px 32px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="title-block">
+    <h1>AI-DLC 사용자 시나리오</h1>
+    <div class="subtitle">언제 어떻게 AI-DLC 를 적용해야 가장 효과적인가</div>
+  </div>
+  <nav class="nav">
+    <a href="index.html">📊 워크플로우 다이어그램</a>
+    <a href="effects.html">✨ AI-DLC 효과</a>
+    <a href="scenarios.html" class="active">🎬 사용자 시나리오</a>
+    <a href="reverse-engineering.html">🔍 Reverse Engineering</a>
+  </nav>
+</header>
+
+<main>
+
+  <!-- ============ Hero ============ -->
+  <section class="hero">
+    <h2>🎬 AI-DLC 가 잘 맞는 상황 vs 안 맞는 상황</h2>
+    <p>
+      AI-DLC 는 <strong>모든 상황에 동일하게 적합한 도구는 아닙니다</strong>.
+      프로젝트의 규모·신/구·변경 성격에 따라 효과가 극단적으로 갈립니다.
+    </p>
+    <p>
+      이 페이지는 <strong>6 가지 대표 시나리오</strong> 별로 AI-DLC 가 어떻게 동작하는지,
+      어떤 설정을 권장하는지, 그리고 <strong>적용 시 주의해야 할 한계</strong>를 정리합니다.
+    </p>
+  </section>
+
+  <!-- ============ Decision matrix ============ -->
+  <div class="matrix">
+    <div class="matrix-header">
+      <h2>📊 한눈에 보는 적합도 매트릭스</h2>
+      <span class="sub">시나리오별 권장 phase·depth·적합도 요약</span>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>시나리오</th>
+          <th>규모 기준</th>
+          <th>권장 phase</th>
+          <th>권장 depth</th>
+          <th>적합도</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>1</td>
+          <td class="row">🌱 신규 시스템 구축 (Greenfield)</td>
+          <td>전 규모</td>
+          <td>Inception → Construction → Operations</td>
+          <td>standard / comprehensive</td>
+          <td><span class="fit ok">✓ 최적</span></td>
+        </tr>
+        <tr>
+          <td>2</td>
+          <td class="row">🔧 기존 시스템 기능 추가 (소-중규모)</td>
+          <td>~ 100k LOC</td>
+          <td>Reverse Engineering → Inception → Construction</td>
+          <td>standard</td>
+          <td><span class="fit ok">✓ 적합</span></td>
+        </tr>
+        <tr>
+          <td>3</td>
+          <td class="row">🐛 핫픽스 / 단순 버그 수정</td>
+          <td>1~수십 줄 변경</td>
+          <td>(skip 가능) — 직접 수정</td>
+          <td>minimal</td>
+          <td><span class="fit warn">⚠ overkill 가능</span></td>
+        </tr>
+        <tr>
+          <td>4</td>
+          <td class="row">📦 마이그레이션 / 리아키텍처</td>
+          <td>중-대규모</td>
+          <td>Reverse Engineering → Inception (재설계)</td>
+          <td>comprehensive</td>
+          <td><span class="fit ok">✓ 매우 적합</span></td>
+        </tr>
+        <tr>
+          <td>5</td>
+          <td class="row">🔍 기존 코드 분석·문서화 only</td>
+          <td>중-대규모</td>
+          <td>Reverse Engineering 만</td>
+          <td>standard / comprehensive</td>
+          <td><span class="fit ok">✓ 적합</span></td>
+        </tr>
+        <tr>
+          <td>6</td>
+          <td class="row">🏢 초대형 레거시</td>
+          <td>1,000만+ LOC</td>
+          <td>scope 분할 후 부분 적용</td>
+          <td>minimal (sub-scope 단위)</td>
+          <td><span class="fit bad">✗ as-is 부적합</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ============ Scenario cards ============ -->
+  <div class="section-title">
+    <h2>시나리오별 상세</h2>
+    <span class="sub">각 시나리오의 AI-DLC 동작·권장 설정·주의사항</span>
+  </div>
+
+  <div class="scenarios">
+
+    <!-- ===== Scenario 1: Greenfield ===== -->
+    <div class="scn ok">
+      <div class="head">
+        <div class="icon">🌱</div>
+        <div class="meta">
+          <div class="num">SCENARIO 1</div>
+          <h3>신규 시스템 구축 (Greenfield)</h3>
+        </div>
+        <span class="fit">✓ 최적</span>
+      </div>
+      <div class="situ">
+        <strong>상황:</strong> 백지 상태에서 새 서비스·MVP·내부 도구를 처음부터 만든다.
+        기존 코드 제약이 없어 AI-DLC 의 14 step 을 그대로 적용할 수 있다.
+      </div>
+      <div class="blk">
+        <div class="label">AI-DLC 동작</div>
+        <ul>
+          <li><strong>Inception</strong> 부터 시작 — <code>vision.md</code> · <code>tech-env.md</code> 작성</li>
+          <li>요구사항 → 사용자 스토리 → 아키텍처 → 컴포넌트 → 유닛 분해까지 자동</li>
+          <li>Brownfield reverse-engineering step <strong>전체 skip</strong></li>
+        </ul>
+      </div>
+      <div class="blk">
+        <div class="label">권장 설정</div>
+        <ul>
+          <li>depth: <code>standard</code> (MVP) / <code>comprehensive</code> (장기 운영용)</li>
+          <li>Extensions: <code>aws-best-practices</code>, <code>security-baseline</code> 초기부터 opt-in</li>
+        </ul>
+      </div>
+      <div class="caveat">
+        <strong>주의:</strong> 너무 작은 prototype 은 minimal depth 로 시작.
+        모든 산출물을 풀세트로 만들면 학습 부담이 커진다.
+      </div>
+    </div>
+
+    <!-- ===== Scenario 2: Small-Medium Brownfield ===== -->
+    <div class="scn ok">
+      <div class="head">
+        <div class="icon">🔧</div>
+        <div class="meta">
+          <div class="num">SCENARIO 2</div>
+          <h3>기존 시스템에 기능 추가 (소-중규모)</h3>
+        </div>
+        <span class="fit">✓ 적합</span>
+      </div>
+      <div class="situ">
+        <strong>상황:</strong> 수만~수십만 줄 규모의 기존 코드베이스에 새 endpoint·기능 모듈을 추가한다.
+        브라우필드의 핵심 use-case.
+      </div>
+      <div class="blk">
+        <div class="label">AI-DLC 동작</div>
+        <ul>
+          <li><strong>workspace-detection</strong> → 기존 워크스페이스 감지 → reverse-engineering 9 artifact 자동 생성</li>
+          <li>그 결과를 입력으로 Inception (이번에 추가하는 기능만 한정)</li>
+          <li>Construction 에서 <strong>기존 파일 수정 + 신규 파일 생성</strong> 혼합</li>
+        </ul>
+      </div>
+      <div class="blk">
+        <div class="label">권장 설정</div>
+        <ul>
+          <li>depth: <code>standard</code></li>
+          <li>RE 결과의 <code>code-quality-assessment.md</code> 먼저 검토</li>
+          <li>변경 범위에 맞춰 <code>scope-limiter</code> Extension 활성화</li>
+        </ul>
+      </div>
+      <div class="caveat">
+        <strong>주의:</strong> RE 가 만든 architecture.md 가 실제와 다를 수 있다.
+        Construction 진입 전에 사람이 한 번 review 권장.
+      </div>
+    </div>
+
+    <!-- ===== Scenario 3: Hotfix ===== -->
+    <div class="scn warn">
+      <div class="head">
+        <div class="icon">🐛</div>
+        <div class="meta">
+          <div class="num">SCENARIO 3</div>
+          <h3>핫픽스 · 단순 버그 수정</h3>
+        </div>
+        <span class="fit">⚠ overkill 가능</span>
+      </div>
+      <div class="situ">
+        <strong>상황:</strong> 1~수십 줄 패치, null 체크 추가, typo, log message 수정 같은 미세 변경.
+      </div>
+      <div class="blk">
+        <div class="label">AI-DLC 동작</div>
+        <ul>
+          <li>워크플로우 전체를 돌리면 <strong>requirements / design 산출물이 과도</strong>하게 생성됨</li>
+          <li>adaptive workflow 가 일부 step 을 skip 해도 audit / approval 오버헤드는 잔존</li>
+        </ul>
+      </div>
+      <div class="blk">
+        <div class="label">권장 설정</div>
+        <ul>
+          <li>워크플로우 진입 <strong>없이</strong> 직접 수정 + 기존 테스트 실행</li>
+          <li>변경이 설계에 영향을 준다면 그때 <strong>설계 update 만</strong> AI-DLC 패턴으로 진행</li>
+          <li>back-propagation standing rule 로 누락 방지</li>
+        </ul>
+      </div>
+      <div class="caveat">
+        <strong>주의:</strong> "버그 같았는데 사실은 잘못된 요구사항" 이라면 즉시 Inception 으로 escalate.
+      </div>
+    </div>
+
+    <!-- ===== Scenario 4: Migration ===== -->
+    <div class="scn ok">
+      <div class="head">
+        <div class="icon">📦</div>
+        <div class="meta">
+          <div class="num">SCENARIO 4</div>
+          <h3>마이그레이션 · 리아키텍처</h3>
+        </div>
+        <span class="fit">✓ 매우 적합</span>
+      </div>
+      <div class="situ">
+        <strong>상황:</strong> 모놀리식 → 마이크로서비스, on-prem → AWS, JS → TS 전환 등 대규모 구조 변경.
+      </div>
+      <div class="blk">
+        <div class="label">AI-DLC 동작</div>
+        <ul>
+          <li>RE 로 <strong>현 상태 baseline</strong> 9 artifact 확보 → 이후 변경의 reference</li>
+          <li>Inception 을 <strong>재설계 관점</strong>으로 다시 진행 (target architecture)</li>
+          <li>Construction 은 unit 단위 점진 마이그레이션</li>
+        </ul>
+      </div>
+      <div class="blk">
+        <div class="label">권장 설정</div>
+        <ul>
+          <li>depth: <code>comprehensive</code> (수많은 의사결정 추적 필요)</li>
+          <li>audit.md 는 <strong>운영진 보고 자료로 그대로</strong> 활용 가능</li>
+          <li>마이그레이션 phase 별 vision.md 분리 권장</li>
+        </ul>
+      </div>
+      <div class="caveat">
+        <strong>주의:</strong> baseline 과 target 두 architecture.md 를 분리 보관.
+        변경 추적이 단일 파일로 흐려지면 가치가 반감된다.
+      </div>
+    </div>
+
+    <!-- ===== Scenario 5: Documentation only ===== -->
+    <div class="scn ok">
+      <div class="head">
+        <div class="icon">🔍</div>
+        <div class="meta">
+          <div class="num">SCENARIO 5</div>
+          <h3>기존 코드 분석 · 문서화 (분석 only)</h3>
+        </div>
+        <span class="fit">✓ 적합</span>
+      </div>
+      <div class="situ">
+        <strong>상황:</strong> 인수인계받은 코드, 오래된 시스템의 현황 파악·온보딩 문서 작성.
+        코드 변경은 하지 않는다.
+      </div>
+      <div class="blk">
+        <div class="label">AI-DLC 동작</div>
+        <ul>
+          <li><strong>Reverse Engineering phase 만</strong> 수행 → 9 artifact 산출</li>
+          <li>Inception / Construction 으로 진행하지 않고 종료</li>
+        </ul>
+      </div>
+      <div class="blk">
+        <div class="label">권장 설정</div>
+        <ul>
+          <li>depth: <code>standard</code> (개요) → 필요한 영역만 <code>comprehensive</code></li>
+          <li>산출물 그대로 <strong>온보딩 가이드 · ADR 인풋</strong>으로 활용</li>
+        </ul>
+      </div>
+      <div class="caveat">
+        <strong>주의:</strong> RE 산출물은 <strong>코드 변경 시점에 stale</strong> 이 된다.
+        주기적 re-run 필요 (<code>workspace-detection</code> 의 stale-artifact 감지 활용).
+      </div>
+    </div>
+
+    <!-- ===== Scenario 6: Huge Legacy ===== -->
+    <div class="scn bad">
+      <div class="head">
+        <div class="icon">🏢</div>
+        <div class="meta">
+          <div class="num">SCENARIO 6</div>
+          <h3>초대형 레거시 (1,000만+ LOC)</h3>
+        </div>
+        <span class="fit">✗ as-is 부적합</span>
+      </div>
+      <div class="situ">
+        <strong>상황:</strong> 은행 코어, 통신사 OSS/BSS 같은 수십만 파일·수천 만 줄 규모.
+        AI-DLC 워크플로우의 기본 가정을 벗어난다.
+      </div>
+      <div class="blk">
+        <div class="label">AI-DLC 동작 (그대로 적용 시)</div>
+        <ul>
+          <li>RE 의 <strong>single architecture.md / code-structure.md</strong> 생성이 사실상 불가능 (전 파일 나열·단일 mermaid diagram 요구)</li>
+          <li>session-continuity 가 시작 시 모든 artifact 를 다시 로드 → <strong>context window 초과</strong></li>
+          <li><code>depth-levels</code> 은 디테일만 줄임 — <strong>scope 자체는 줄지 않음</strong></li>
+          <li><code>error-handling.md</code> 에 "codebase too large" 케이스 없음 → 명확한 fail 가이드 부재</li>
+        </ul>
+      </div>
+      <div class="blk">
+        <div class="label">권장 우회법</div>
+        <ul>
+          <li><strong>도메인/모듈별 sub-workspace 분할</strong> 후 각각 별도 AI-DLC 적용</li>
+          <li>최상위 architecture.md 는 <strong>사람이 high-level</strong> 로 미리 작성·고정</li>
+          <li>AI 는 <strong>한 sub-scope 의 unit-detail</strong> 까지만 담당</li>
+          <li>Extension 으로 <code>scope-limiter</code> 강제 — RE 가 전 코드 스캔하지 못하게 차단</li>
+        </ul>
+      </div>
+      <div class="caveat">
+        <strong>주의:</strong> 1,000만 LOC ≈ 2억+ 토큰. 어떤 LLM context window 로도 통째 분석 불가.
+        AI-DLC 는 <strong>인간이 scope 를 분할해 준 후</strong>에 비로소 정상 동작한다.
+        자세한 한계·대응은 아래 deep-dive 참고.
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ============ Deep dive: 10M LOC ============ -->
+  <section class="deepdive">
+    <div class="dh">
+      <h2>🏢 Deep Dive — 1,000만 LOC 레거시에서 무엇이 무너지는가</h2>
+      <span class="badge">SCALE LIMIT</span>
+      <span class="sub">AI-DLC workflow rule 별 구체적 blocker 와 대응법</span>
+    </div>
+
+    <p class="lead">
+      AI-DLC 의 룰 (<code>aidlc-rules/aws-aidlc-rule-details/</code>) 을 정밀히 읽어 보면,
+      <strong>모든 산출물이 "전 코드베이스 단일 view"</strong> 를 전제로 설계되어 있습니다.
+      이 전제가 깨지는 시점이 약 <strong>수십만 LOC 부근</strong>이며,
+      <strong>1,000만 LOC</strong> 에서는 5 가지 구조적 blocker 가 동시에 발생합니다.
+    </p>
+
+    <div class="sect-title">🚧 구조적 Blocker</div>
+    <div class="blockers">
+      <div class="blocker">
+        <div class="src">aidlc-rules/inception/reverse-engineering.md</div>
+        <h4>1. code-structure.md — 모든 소스 파일 나열 요구</h4>
+        <p>RE rule 은 "list <strong>all source files</strong> with their purpose" 를 요구합니다.
+        5만+ 파일에서는 산출물 자체가 수십 MB 가 되고 LLM 이 한 번에 다룰 수 없습니다.</p>
+      </div>
+      <div class="blocker">
+        <div class="src">aidlc-rules/inception/reverse-engineering.md</div>
+        <h4>2. architecture.md — 단일 Mermaid diagram 요구</h4>
+        <p>"all major packages and their relationships" 를 <strong>하나의 mermaid 그래프</strong>로
+        그리도록 명시. 1만+ 모듈에서는 가독성 0, 렌더링 자체도 실패.</p>
+      </div>
+      <div class="blocker">
+        <div class="src">aidlc-rules/inception/workspace-detection.md</div>
+        <h4>3. workspace scan — 샘플링·상한 없음</h4>
+        <p>워크스페이스 감지 시 <strong>전 파일 스캔</strong>이 기본. cap·sampling 룰이 없어
+        초대형 repo 에서는 detection 자체가 다 끝나기 전에 토큰이 소진됩니다.</p>
+      </div>
+      <div class="blocker">
+        <div class="src">aidlc-rules/common/session-continuity.md</div>
+        <h4>4. session resume — 모든 artifact 재로딩</h4>
+        <p>세션 재개 시 <strong>aidlc-docs/ 의 모든 산출물을 다시 읽어들임</strong>.
+        artifact 가 거대해지면 매 resume 마다 context 의 대부분이 잠식됨.</p>
+      </div>
+      <div class="blocker">
+        <div class="src">aidlc-rules/common/depth-levels.md</div>
+        <h4>5. depth 조정 ≠ scope 조정</h4>
+        <p><code>minimal / standard / comprehensive</code> 는 각 항목의 <strong>설명 디테일</strong>만 조정합니다.
+        "어느 모듈만 다룰지" 의 scope 자체를 줄여 주는 룰은 존재하지 않습니다.</p>
+      </div>
+      <div class="blocker">
+        <div class="src">aidlc-rules/common/error-handling.md</div>
+        <h4>6. "too large" 케이스 없음</h4>
+        <p>error-handling rule 에 codebase 가 너무 커서 처리 불가한 상황이 정의되어 있지 않아,
+        AI 가 시도를 계속하다 token-limit 으로 abort 됩니다 — graceful degradation 없음.</p>
+      </div>
+    </div>
+
+    <div class="sect-title">🛠️ 실전 우회 전략</div>
+    <div class="workarounds">
+      <div class="workaround">
+        <div class="src">STRATEGY 1</div>
+        <h4>도메인 단위 sub-workspace 분할</h4>
+        <p>모놀리식 repo 안에서도 <strong>도메인별 디렉토리를 각각 별도 워크스페이스</strong>로 취급.
+        각 sub-workspace 마다 독립된 <code>aidlc-docs/</code> 를 둔다.</p>
+      </div>
+      <div class="workaround">
+        <div class="src">STRATEGY 2</div>
+        <h4>최상위 architecture.md 를 사람이 사전 고정</h4>
+        <p>RE 가 만들지 않고, <strong>사람이 high-level map</strong> 을 먼저 작성해 둔다.
+        AI 는 그 안의 <strong>한 노드(sub-domain)</strong> 만 detail 화하는 역할로 한정.</p>
+      </div>
+      <div class="workaround">
+        <div class="src">STRATEGY 3</div>
+        <h4>scope-limiter / file-glob extension 활성화</h4>
+        <p>Extension 메커니즘으로 <strong>RE 가 스캔할 파일 범위를 명시적으로 제한</strong>.
+        예: <code>include: ["domain/billing/**"]</code> · <code>exclude: ["vendor/**","legacy/**"]</code>.</p>
+      </div>
+      <div class="workaround">
+        <div class="src">STRATEGY 4</div>
+        <h4>session 단위 artifact 분리 보관</h4>
+        <p><code>aidlc-docs/&lt;sub-scope&gt;/</code> 처럼 폴더 분리.
+        session-continuity 가 resume 시 <strong>해당 sub-scope 의 artifact 만</strong> 로드하도록 운영.</p>
+      </div>
+    </div>
+
+    <p style="margin: 14px 0 0; font-size: 12.5px; color: #5C2424; line-height: 1.65;">
+      💡 <strong>요약</strong> — AI-DLC 가 1,000만 LOC 에서 "안 된다" 는 것은 모델 한계가 아니라
+      <strong>워크플로우 룰이 단일 view 전제로 쓰여 있기 때문</strong>입니다.
+      운영자가 scope 를 잘라 주면 AI-DLC 의 가치(추적성·일관성·Human-in-the-loop)는 그대로 유지됩니다.
+    </p>
+  </section>
+
+</main>
+
+<footer>
+  <p>
+    데이터·컨벤션 출처: AWS Labs
+    <a href="https://github.com/awslabs/aidlc-workflows" target="_blank">aidlc-workflows</a>
+    (Apache-2.0 License) ·
+    <a href="index.html">📊 워크플로우 다이어그램</a> ·
+    <a href="effects.html">✨ AI-DLC 효과</a> ·
+    <a href="reverse-engineering.html">🔍 Reverse Engineering 상세</a>
+  </p>
+</footer>
+
+</body>
+</html>

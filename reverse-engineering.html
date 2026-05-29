@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>Reverse Engineering 상세 — AIDLC Guide</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+  :root {
+    --aidlc-inception: #4A90E2;
+    --aidlc-construction: #7ED321;
+    --aidlc-operations: #F5A623;
+    --sdlc-blue: #2C7BC4;
+    --sdlc-blue-dark: #1F5C92;
+    --sdlc-accent: #F5A623;
+    --text: #2A3142;
+    --text-soft: #5B6577;
+    --text-faint: #8A93A6;
+    --border: #D7E3F0;
+    --bg-card: #FFFFFF;
+    --bg-soft: #F5F8FC;
+  }
+
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    font-family: 'Segoe UI', 'Apple SD Gothic Neo', 'Malgun Gothic', '맑은 고딕', sans-serif;
+    color: var(--text);
+    background: linear-gradient(180deg, #FAFBFE 0%, #EEF3FA 100%);
+    min-height: 100vh;
+    line-height: 1.6;
+  }
+
+  header {
+    padding: 24px 32px 8px;
+    display: flex; align-items: center; justify-content: space-between;
+    flex-wrap: wrap; gap: 16px;
+  }
+  .title-block h1 {
+    margin: 0; font-size: 30px; color: var(--sdlc-blue);
+    letter-spacing: 0.5px; font-weight: 800;
+  }
+  .title-block .subtitle { color: var(--text-soft); font-size: 14px; margin-top: 4px; }
+  .nav { display: flex; gap: 8px; flex-wrap: wrap; }
+  .nav a {
+    text-decoration: none; padding: 8px 16px; border-radius: 6px;
+    border: 1.5px solid var(--sdlc-blue); color: var(--sdlc-blue);
+    font-size: 13px; font-weight: 700; transition: all .15s ease;
+  }
+  .nav a:hover { background: var(--sdlc-blue); color: white; }
+  .nav a.active {
+    background: var(--sdlc-accent); border-color: var(--sdlc-accent); color: white;
+  }
+
+  main { padding: 16px 32px 48px; max-width: 1280px; margin: 0 auto; }
+
+  /* ============ Hero ============ */
+  .hero {
+    background: linear-gradient(135deg, #4A90E2 0%, #2C7BC4 100%);
+    color: white;
+    border-radius: 16px;
+    padding: 32px 36px;
+    margin-bottom: 28px;
+    box-shadow: 0 8px 24px rgba(74,144,226,0.30);
+  }
+  .hero h2 {
+    margin: 0 0 10px; font-size: 26px; letter-spacing: 0.5px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .hero h2 .badge {
+    display: inline-block;
+    background: rgba(255,255,255,0.18);
+    border: 1px solid rgba(255,255,255,0.35);
+    padding: 4px 12px; border-radius: 16px;
+    font-size: 12px; font-weight: 600; letter-spacing: 1px;
+  }
+  .hero p { margin: 0 0 8px; font-size: 15px; line-height: 1.7; opacity: 0.95; }
+  .hero p strong { color: #FFE8B3; }
+  .hero code {
+    background: rgba(255,255,255,0.16);
+    padding: 1px 7px; border-radius: 4px; font-size: 13px;
+  }
+
+  /* ============ Section title ============ */
+  .section-title {
+    display: flex; align-items: baseline; gap: 14px; margin: 36px 0 14px;
+  }
+  .section-title h2 {
+    margin: 0; font-size: 22px; color: var(--sdlc-blue);
+    font-weight: 800; letter-spacing: 0.3px;
+  }
+  .section-title .label {
+    font-size: 11px; background: var(--sdlc-accent); color: white;
+    padding: 3px 10px; border-radius: 12px; font-weight: 700; letter-spacing: 0.8px;
+  }
+  .section-title .sub { color: var(--text-soft); font-size: 13px; font-weight: 500; }
+
+  /* ============ Mermaid card ============ */
+  .diagram {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 18px 20px 8px;
+    margin-bottom: 28px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  }
+  .diagram .dh {
+    display: flex; align-items: baseline; gap: 10px;
+    margin-bottom: 4px; flex-wrap: wrap;
+  }
+  .diagram .dh h3 {
+    margin: 0; font-size: 16px; color: var(--sdlc-blue); font-weight: 800;
+  }
+  .diagram .dh .tag {
+    font-size: 10px; background: var(--bg-soft); color: var(--text-soft);
+    padding: 2px 8px; border-radius: 10px; font-weight: 700; letter-spacing: 0.5px;
+  }
+  .diagram .dh .sub { color: var(--text-soft); font-size: 12px; }
+  .diagram .desc {
+    color: var(--text-soft); font-size: 13px;
+    line-height: 1.65; margin: 6px 0 10px;
+  }
+  .diagram .desc strong { color: var(--text); }
+  .diagram .desc code {
+    background: var(--bg-soft); padding: 1px 6px;
+    border-radius: 4px; font-size: 12px;
+  }
+  .mermaid {
+    background: #FAFBFE;
+    border-radius: 8px;
+    padding: 16px;
+    text-align: center;
+    overflow-x: auto;
+  }
+
+  /* ============ Step list ============ */
+  .steps {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 28px;
+  }
+  .steps .sh {
+    background: var(--bg-soft);
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--border);
+  }
+  .steps .sh h2 { margin: 0; font-size: 17px; color: var(--sdlc-blue); }
+  .steps .sh .sub { color: var(--text-soft); font-size: 12px; }
+  .steps ol {
+    margin: 0; padding: 14px 22px 18px 44px;
+    counter-reset: step;
+  }
+  .steps ol li {
+    margin-bottom: 12px;
+    padding-left: 4px;
+  }
+  .steps ol li::marker {
+    color: var(--sdlc-blue);
+    font-weight: 800;
+  }
+  .steps ol li strong { color: var(--text); font-weight: 800; }
+  .steps ol li .meta {
+    display: block;
+    font-size: 12px; color: var(--text-soft);
+    margin-top: 2px; line-height: 1.55;
+  }
+  .steps ol li code {
+    background: var(--bg-soft); padding: 1px 6px;
+    border-radius: 4px; font-size: 12px;
+  }
+
+  /* ============ Artifact table ============ */
+  .artifacts {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    margin-bottom: 28px;
+  }
+  .artifacts .ah {
+    background: var(--bg-soft);
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--border);
+  }
+  .artifacts .ah h2 { margin: 0; font-size: 17px; color: var(--sdlc-blue); }
+  .artifacts .ah .sub { color: var(--text-soft); font-size: 12px; }
+  .artifacts table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .artifacts th, .artifacts td {
+    padding: 11px 16px;
+    border-bottom: 1px solid var(--border);
+    text-align: left; vertical-align: top;
+  }
+  .artifacts th { background: var(--bg-soft); font-weight: 700; }
+  .artifacts tr:last-child td { border-bottom: none; }
+  .artifacts td.fn { font-weight: 700; color: var(--sdlc-blue); white-space: nowrap; }
+  .artifacts td.fn code { font-size: 12px; }
+
+  /* ============ Tips / standing rule callouts ============ */
+  .callout {
+    background: linear-gradient(135deg, #FFF7E8 0%, #FFEFD0 100%);
+    border: 1.5px solid #E8C97A;
+    border-radius: 12px;
+    padding: 18px 22px;
+    margin-bottom: 24px;
+  }
+  .callout h4 {
+    margin: 0 0 6px; font-size: 14px; color: #8A5A0A;
+    font-weight: 800; letter-spacing: 0.3px;
+  }
+  .callout p {
+    margin: 0; font-size: 13px; color: #5B4520; line-height: 1.65;
+  }
+  .callout p strong { color: #8A5A0A; }
+  .callout p code {
+    background: rgba(138,90,10,0.10);
+    padding: 1px 6px; border-radius: 4px; font-size: 12px;
+  }
+
+  /* ============ Footer ============ */
+  footer {
+    padding: 18px 32px 32px;
+    text-align: center; color: var(--text-soft); font-size: 12px;
+    max-width: 1280px; margin: 0 auto;
+  }
+  footer a { color: var(--sdlc-blue); text-decoration: none; }
+  footer a:hover { text-decoration: underline; }
+
+  @media (max-width: 720px) {
+    .hero { padding: 22px 18px; }
+    main { padding: 12px 16px 32px; }
+    .diagram { padding: 14px 14px 6px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="title-block">
+    <h1>🔍 Reverse Engineering 상세</h1>
+    <div class="subtitle">brownfield 코드베이스를 9 artifact 로 분해하는 워크플로우 내부</div>
+  </div>
+  <nav class="nav">
+    <a href="index.html">📊 워크플로우 다이어그램</a>
+    <a href="effects.html">✨ AI-DLC 효과</a>
+    <a href="scenarios.html">🎬 사용자 시나리오</a>
+    <a href="reverse-engineering.html" class="active">🔍 Reverse Engineering</a>
+  </nav>
+</header>
+
+<main>
+
+  <!-- ============ Hero ============ -->
+  <section class="hero">
+    <h2>Reverse Engineering 이란? <span class="badge">INCEPTION · BROWNFIELD ONLY</span></h2>
+    <p>
+      <strong>기존 코드베이스</strong>를 입력으로 받아, AI-DLC 가 사용할 수 있는
+      <strong>9 개의 분석 산출물 (markdown)</strong> 을 생성하는 phase 입니다.
+      이 산출물들은 이후 Inception · Construction 단계가 참조하는 <strong>baseline</strong> 역할을 합니다.
+    </p>
+    <p>
+      Greenfield 에서는 전체 skip 되며,
+      Brownfield 에서는 <code>workspace-detection</code> 이 기존 워크스페이스를 감지한 직후에 트리거됩니다.
+      모든 산출물은 <code>aidlc-docs/reverse-engineering/</code> 아래 누적됩니다.
+    </p>
+  </section>
+
+  <!-- ============ Diagram 1: Overall flowchart ============ -->
+  <div class="section-title">
+    <h2>전체 흐름도</h2>
+    <span class="label">DIAGRAM 1</span>
+    <span class="sub">workspace 감지 → 산출물 생성 → 사용자 게이트</span>
+  </div>
+
+  <div class="diagram">
+    <div class="dh">
+      <h3>RE Workflow — End-to-End Flowchart</h3>
+      <span class="tag">flowchart</span>
+      <span class="sub">aidlc-rules/inception/reverse-engineering.md + workspace-detection.md</span>
+    </div>
+    <div class="desc">
+      Brownfield 진입 시 가장 먼저 일어나는 분기. <strong>워크스페이스 존재 여부 · stale 여부</strong>에 따라
+      신규 RE / 부분 re-run / skip 으로 갈라집니다. 9 artifact 모두 생성된 후에야
+      Inception 의 다음 step (User Stories 등) 으로 진행할 수 있습니다.
+    </div>
+    <div class="mermaid">
+flowchart TD
+  Start([User: 기존 repo 에서 AI-DLC 시작]) --> Det[workspace-detection 룰 실행]
+  Det --> Q1{aidlc-docs/<br/>이미 존재?}
+
+  Q1 -- No --> RE_New[RE phase 진입<br/>신규 분석]
+  Q1 -- Yes --> Q2{artifact 가<br/>stale?}
+  Q2 -- No --> Skip([RE skip → Inception 다음 step])
+  Q2 -- Yes --> RE_Partial[변경된 영역만<br/>부분 re-run]
+
+  RE_New --> Scan[전 source tree 스캔<br/>technology / dependency 식별]
+  RE_Partial --> Scan
+  Scan --> Gen[9 artifact 병렬 생성<br/>aidlc-docs/reverse-engineering/]
+
+  Gen --> A1[business-overview.md]
+  Gen --> A2[architecture.md]
+  Gen --> A3[api-inventory.md]
+  Gen --> A4[code-structure.md]
+  Gen --> A5[component-inventory.md]
+  Gen --> A6[technology-stack.md]
+  Gen --> A7[dependencies.md]
+  Gen --> A8[domain-model.md]
+  Gen --> A9[code-quality-assessment.md]
+
+  A1 & A2 & A3 & A4 & A5 & A6 & A7 & A8 & A9 --> Audit[audit.md<br/>append-only 기록]
+  Audit --> Gate{사용자<br/>검토·Approve?}
+  Gate -- No --> Revise[clarification-questions.md<br/>발행 → 답변 대기]
+  Revise --> Gen
+  Gate -- Yes --> Done([Inception 다음 step 진행])
+
+  classDef start fill:#2C7BC4,stroke:#1F5C92,color:#fff,font-weight:bold
+  classDef decision fill:#FFF4D9,stroke:#B5751A,color:#5B4520
+  classDef artifact fill:#E8F1FB,stroke:#4A90E2,color:#1F5C92
+  classDef gate fill:#FFE8B3,stroke:#B5751A,color:#5B4520,font-weight:bold
+  classDef done fill:#7ED321,stroke:#5BA316,color:#fff,font-weight:bold
+
+  class Start,Done start
+  class Q1,Q2,Gate decision
+  class A1,A2,A3,A4,A5,A6,A7,A8,A9 artifact
+  class Skip done
+    </div>
+  </div>
+
+  <!-- ============ Diagram 2: Sequence ============ -->
+  <div class="section-title">
+    <h2>참여자 간 상호작용</h2>
+    <span class="label">DIAGRAM 2</span>
+    <span class="sub">User ↔ AI Agent ↔ Source Code ↔ aidlc-docs/</span>
+  </div>
+
+  <div class="diagram">
+    <div class="dh">
+      <h3>RE Workflow — Sequence Diagram</h3>
+      <span class="tag">sequence</span>
+      <span class="sub">human-in-the-loop gate · audit · file-based question pattern</span>
+    </div>
+    <div class="desc">
+      AI 가 임의로 진행하지 않고, <strong>모호함이 발견되면 질문 파일을 발행</strong>하고 사용자의
+      <code>[Answer]:</code> 입력을 기다립니다. 모든 응답·승인은 <code>audit.md</code> 에 append-only 로 누적됩니다.
+    </div>
+    <div class="mermaid">
+sequenceDiagram
+  autonumber
+  actor U as User
+  participant AI as AI Agent
+  participant SRC as Source Tree
+  participant DOC as aidlc-docs/reverse-engineering/
+  participant AUD as audit.md
+
+  U->>AI: "기존 repo 분석해줘"
+  AI->>SRC: workspace-detection scan
+  SRC-->>AI: file tree + manifest 정보
+  AI->>DOC: 기존 artifact 존재 여부 확인
+  DOC-->>AI: (없음 / stale / fresh)
+
+  alt Fresh
+    AI-->>U: RE skip 안내 → 다음 step 제안
+  else 신규 또는 Stale
+    AI->>SRC: 패키지·의존성·entry point 탐색
+    AI->>DOC: 9 artifact 초안 생성<br/>(business / arch / api / ...)
+    AI->>AUD: "RE artifacts drafted" timestamp 기록
+
+    alt 모호함 발견
+      AI->>DOC: clarification-questions.md 작성
+      AI-->>U: 질문 파일 확인 요청
+      U->>DOC: [Answer]: 태그로 답변 입력
+      DOC-->>AI: 답변 파싱
+      AI->>DOC: artifact 재생성·보강
+      AI->>AUD: "Clarification resolved" 기록
+    end
+
+    AI-->>U: 산출물 review 요청 (HITL gate)
+    U->>AI: Approve / 수정 요청
+    AI->>AUD: "Reverse engineering approved by user" 기록
+    AI-->>U: Inception 다음 step 으로 진행
+  end
+    </div>
+  </div>
+
+  <!-- ============ Diagram 3: Artifact dependency ============ -->
+  <div class="section-title">
+    <h2>9 산출물 간 의존성</h2>
+    <span class="label">DIAGRAM 3</span>
+    <span class="sub">한 artifact 가 다른 artifact 의 어떤 부분을 참조하는가</span>
+  </div>
+
+  <div class="diagram">
+    <div class="dh">
+      <h3>9 Artifacts — Dependency Graph</h3>
+      <span class="tag">graph</span>
+      <span class="sub">생성 순서·downstream Inception step 영향도</span>
+    </div>
+    <div class="desc">
+      산출물은 <strong>완전 독립이 아니라 계층적으로 참조</strong>합니다.
+      예: <code>component-inventory</code> 는 <code>code-structure</code> 의 모듈 트리를 입력으로 받고,
+      <code>code-quality-assessment</code> 는 다른 7 개를 종합 분석합니다.
+      한 artifact 가 변경되면 그래프상 downstream artifact 도 함께 점검 대상입니다.
+    </div>
+    <div class="mermaid">
+graph LR
+  subgraph SRC[Source Tree]
+    direction TB
+    REPO[(repo files)]
+    MAN[(manifests:<br/>package.json /<br/>pom.xml ...)]
+  end
+
+  subgraph BASE[Foundation Artifacts]
+    direction TB
+    TECH[technology-stack.md]
+    DEPS[dependencies.md]
+    CODE[code-structure.md]
+  end
+
+  subgraph MID[Structural Artifacts]
+    direction TB
+    COMP[component-inventory.md]
+    API[api-inventory.md]
+    ARCH[architecture.md]
+  end
+
+  subgraph TOP[Domain & Quality Artifacts]
+    direction TB
+    DOM[domain-model.md]
+    BIZ[business-overview.md]
+    QA[code-quality-assessment.md]
+  end
+
+  REPO --> CODE
+  REPO --> API
+  MAN --> TECH
+  MAN --> DEPS
+
+  CODE --> COMP
+  COMP --> ARCH
+  TECH --> ARCH
+  DEPS --> ARCH
+
+  ARCH --> DOM
+  API --> DOM
+  DOM --> BIZ
+
+  CODE --> QA
+  COMP --> QA
+  DEPS --> QA
+  API --> QA
+
+  subgraph DOWN[Downstream — Inception phase]
+    direction TB
+    REQ[requirements.md]
+    STORY[user-stories.md]
+    ARCH2[target architecture.md]
+  end
+
+  BIZ --> REQ
+  DOM --> REQ
+  REQ --> STORY
+  ARCH --> ARCH2
+  QA --> ARCH2
+
+  classDef src fill:#F5F8FC,stroke:#8A93A6,color:#2A3142
+  classDef base fill:#E8F1FB,stroke:#4A90E2,color:#1F5C92,font-weight:bold
+  classDef mid fill:#FFF4D9,stroke:#B5751A,color:#5B4520,font-weight:bold
+  classDef top fill:#E5F6EE,stroke:#2A8,color:#176B3A,font-weight:bold
+  classDef down fill:#FDEDED,stroke:#C44,color:#8C2A2A,font-weight:bold
+
+  class REPO,MAN src
+  class TECH,DEPS,CODE base
+  class COMP,API,ARCH mid
+  class DOM,BIZ,QA top
+  class REQ,STORY,ARCH2 down
+    </div>
+  </div>
+
+  <!-- ============ Step list ============ -->
+  <div class="steps">
+    <div class="sh">
+      <h2>📋 RE 실행 단계 (13 step)</h2>
+      <span class="sub">reverse-engineering.md 의 실제 실행 순서</span>
+    </div>
+    <ol>
+      <li>
+        <strong>Workspace 감지</strong>
+        <span class="meta"><code>workspace-detection.md</code> 룰로 <code>aidlc-docs/</code> 존재·stale 여부 확인.</span>
+      </li>
+      <li>
+        <strong>Manifest · package descriptor 파싱</strong>
+        <span class="meta">언어·프레임워크·빌드툴 식별 (<code>package.json</code>, <code>pom.xml</code>, <code>requirements.txt</code> 등).</span>
+      </li>
+      <li>
+        <strong>Source tree 스캔</strong>
+        <span class="meta">디렉토리 구조 · entry point · 주요 모듈 후보 추출.</span>
+      </li>
+      <li>
+        <strong><code>technology-stack.md</code> 생성</strong>
+        <span class="meta">언어·런타임·라이브러리·DB·인프라 분류.</span>
+      </li>
+      <li>
+        <strong><code>dependencies.md</code> 생성</strong>
+        <span class="meta">외부 의존성 + 모듈 간 의존성 + 버전 risk 식별.</span>
+      </li>
+      <li>
+        <strong><code>code-structure.md</code> 생성</strong>
+        <span class="meta">디렉토리 트리 + 각 파일·모듈의 purpose 기록.</span>
+      </li>
+      <li>
+        <strong><code>component-inventory.md</code> 생성</strong>
+        <span class="meta">서비스·클래스·핸들러 단위 component 목록과 책임.</span>
+      </li>
+      <li>
+        <strong><code>api-inventory.md</code> 생성</strong>
+        <span class="meta">HTTP · gRPC · CLI · message handler 등 모든 외부 인터페이스 카탈로그.</span>
+      </li>
+      <li>
+        <strong><code>architecture.md</code> 생성</strong>
+        <span class="meta">전체 모듈 관계를 단일 mermaid diagram + narrative 로 정리.</span>
+      </li>
+      <li>
+        <strong><code>domain-model.md</code> 생성</strong>
+        <span class="meta">엔터티 · aggregate · invariants 식별 (DDD lens).</span>
+      </li>
+      <li>
+        <strong><code>business-overview.md</code> 생성</strong>
+        <span class="meta">비즈니스 목적 · 핵심 use-case · 주요 stakeholder 추정.</span>
+      </li>
+      <li>
+        <strong><code>code-quality-assessment.md</code> 생성</strong>
+        <span class="meta">tech debt · 테스트 커버리지 · 보안 risk · 리팩터 후보 종합 평가.</span>
+      </li>
+      <li>
+        <strong>Audit + HITL gate</strong>
+        <span class="meta">9 artifact 완료 후 <code>audit.md</code> 기록 → 사용자 review → Approve 시 다음 step 으로.</span>
+      </li>
+    </ol>
+  </div>
+
+  <!-- ============ Artifact table ============ -->
+  <div class="artifacts">
+    <div class="ah">
+      <h2>📦 9 Artifact 상세</h2>
+      <span class="sub">파일명 · 목적 · 핵심 contents · downstream 영향</span>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>파일</th>
+          <th>목적</th>
+          <th>핵심 contents</th>
+          <th>주요 downstream</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>1</td>
+          <td class="fn"><code>technology-stack.md</code></td>
+          <td>기술 스택 카탈로그</td>
+          <td>언어·런타임·DB·infra · build tool</td>
+          <td>architecture / quality assessment</td>
+        </tr>
+        <tr>
+          <td>2</td>
+          <td class="fn"><code>dependencies.md</code></td>
+          <td>외부·내부 의존성 트리</td>
+          <td>패키지 버전 · risk · 모듈 간 dependency</td>
+          <td>architecture / quality assessment</td>
+        </tr>
+        <tr>
+          <td>3</td>
+          <td class="fn"><code>code-structure.md</code></td>
+          <td>디렉토리·파일 purpose 맵</td>
+          <td>모든 source file 의 역할 요약</td>
+          <td>component-inventory / quality</td>
+        </tr>
+        <tr>
+          <td>4</td>
+          <td class="fn"><code>component-inventory.md</code></td>
+          <td>component 단위 책임 정리</td>
+          <td>service·class·handler 목록 + responsibility</td>
+          <td>architecture / quality / target design</td>
+        </tr>
+        <tr>
+          <td>5</td>
+          <td class="fn"><code>api-inventory.md</code></td>
+          <td>외부 인터페이스 카탈로그</td>
+          <td>HTTP/gRPC/CLI/messaging endpoint 목록</td>
+          <td>domain-model / Inception requirements</td>
+        </tr>
+        <tr>
+          <td>6</td>
+          <td class="fn"><code>architecture.md</code></td>
+          <td>전체 시스템 구조 정리</td>
+          <td>단일 mermaid + narrative + key flow</td>
+          <td>domain / target architecture</td>
+        </tr>
+        <tr>
+          <td>7</td>
+          <td class="fn"><code>domain-model.md</code></td>
+          <td>도메인 엔터티·aggregate</td>
+          <td>entity · invariants · bounded context</td>
+          <td>business-overview / requirements</td>
+        </tr>
+        <tr>
+          <td>8</td>
+          <td class="fn"><code>business-overview.md</code></td>
+          <td>비즈니스 목적 추정</td>
+          <td>use-case · stakeholder · 가치 제안</td>
+          <td>requirements · user-stories</td>
+        </tr>
+        <tr>
+          <td>9</td>
+          <td class="fn"><code>code-quality-assessment.md</code></td>
+          <td>품질·리스크 종합 평가</td>
+          <td>tech debt · 커버리지 · 보안 risk · 리팩터 후보</td>
+          <td>target architecture · 리아키텍처 decision</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ============ Standing rule callout ============ -->
+  <div class="callout">
+    <h4>💡 STANDING RULE — RE 결과를 stale 상태로 두지 않으려면</h4>
+    <p>
+      RE artifact 는 <strong>코드가 바뀌는 순간 stale</strong> 됩니다.
+      <code>workspace-detection.md</code> 의 stale 감지 룰을 활용해
+      "code 변경이 감지되면 영향 받은 artifact 를 식별하고 re-run 후보를 알림" 을 standing rule 로 박아 두면,
+      매번 수동 점검할 필요가 줄어듭니다.
+    </p>
+  </div>
+
+  <div class="callout" style="background: linear-gradient(135deg, #FDEDED 0%, #FBE0E0 100%); border-color: #F2B0B0;">
+    <h4 style="color: #8C2A2A;">⚠️ 초대형 레거시 (1,000만+ LOC) 에서의 한계</h4>
+    <p style="color: #5C2424;">
+      9 artifact 중 <strong><code>code-structure.md</code></strong> 와 <strong><code>architecture.md</code></strong> 는
+      "전 파일 나열" · "단일 mermaid" 를 전제로 합니다.
+      이 전제가 깨지는 규모에서는 RE 가 그대로 동작하지 않습니다 —
+      <a href="scenarios.html#" style="color: #8C2A2A; font-weight: 700;">시나리오 6 의 우회 전략</a> 을 참고하세요.
+    </p>
+  </div>
+
+</main>
+
+<footer>
+  <p>
+    데이터·컨벤션 출처: AWS Labs
+    <a href="https://github.com/awslabs/aidlc-workflows" target="_blank">aidlc-workflows</a>
+    (Apache-2.0 License) · 룰 원문:
+    <a href="https://github.com/awslabs/aidlc-workflows/blob/main/aidlc-rules/aws-aidlc-rule-details/inception/reverse-engineering.md" target="_blank">reverse-engineering.md</a> ·
+    <a href="index.html">📊 다이어그램</a> ·
+    <a href="effects.html">✨ 효과</a> ·
+    <a href="scenarios.html">🎬 시나리오</a>
+  </p>
+</footer>
+
+<script>
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: 'default',
+    flowchart: { useMaxWidth: true, htmlLabels: true, curve: 'basis' },
+    sequence: { useMaxWidth: true, mirrorActors: false, showSequenceNumbers: true },
+    securityLevel: 'loose'
+  });
+</script>
+
+</body>
+</html>
