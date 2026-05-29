@@ -322,6 +322,220 @@
   .comparison .dim::before { content: "✗ "; color: #C44; margin-right: 4px; }
   .comparison .bright::before { content: "✓ "; color: #2A8; margin-right: 4px; }
 
+  /* ============ Design rationale section ============ */
+  .rationale {
+    margin: 40px 0 0;
+    background: linear-gradient(135deg, #FFF7E8 0%, #FFEFD0 100%);
+    border: 1.5px solid #E8C97A;
+    border-radius: 14px;
+    padding: 28px 32px;
+  }
+  .rationale .rh {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 6px;
+    flex-wrap: wrap;
+  }
+  .rationale .rh h2 {
+    margin: 0;
+    font-size: 22px;
+    color: #8A5A0A;
+    font-weight: 800;
+  }
+  .rationale .rh .badge {
+    display: inline-block;
+    background: #8A5A0A;
+    color: white;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 11px;
+    letter-spacing: 0.8px;
+    font-weight: 700;
+  }
+  .rationale .rh .sub {
+    color: #7A5A2A;
+    font-size: 13px;
+    font-weight: 500;
+  }
+  .rationale .rlead {
+    font-size: 14px;
+    color: #5B4520;
+    margin: 8px 0 22px;
+    line-height: 1.7;
+  }
+  .rationale .rlead strong { color: #8A5A0A; }
+  .rationale .rlead code {
+    background: rgba(138,90,10,0.10);
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-size: 12.5px;
+  }
+
+  /* Reason cards inside rationale */
+  .reasons {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 14px;
+    margin-bottom: 24px;
+  }
+  .reason {
+    background: white;
+    border: 1px solid #E8C97A;
+    border-left: 4px solid #B5751A;
+    border-radius: 10px;
+    padding: 14px 16px;
+  }
+  .reason .num {
+    font-size: 10px;
+    color: #B5751A;
+    letter-spacing: 1.2px;
+    font-weight: 800;
+  }
+  .reason h4 {
+    margin: 3px 0 6px;
+    font-size: 14px;
+    color: var(--text);
+    font-weight: 800;
+  }
+  .reason p {
+    margin: 0;
+    font-size: 12.5px;
+    color: var(--text-soft);
+    line-height: 1.6;
+  }
+  .reason p strong { color: var(--text); }
+  .reason .quote {
+    margin-top: 8px;
+    padding: 6px 10px;
+    background: #FBF4E6;
+    border-left: 2px solid #B5751A;
+    font-size: 11.5px;
+    color: #6A4F1A;
+    font-style: italic;
+    line-height: 1.5;
+    border-radius: 0 4px 4px 0;
+  }
+
+  /* Manual flow diagram (3 steps) */
+  .flow-title {
+    font-size: 14px;
+    font-weight: 800;
+    color: #8A5A0A;
+    margin: 4px 0 12px;
+    letter-spacing: 0.3px;
+  }
+  .flow-title .tag {
+    display: inline-block;
+    background: white;
+    border: 1px solid #E8C97A;
+    color: #8A5A0A;
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 10px;
+    margin-left: 8px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+  }
+  .flow {
+    display: grid;
+    grid-template-columns: 1fr 28px 1fr 28px 1fr;
+    align-items: stretch;
+    gap: 0;
+    margin-bottom: 22px;
+  }
+  .flow .step {
+    background: white;
+    border: 1.5px solid #B5751A;
+    border-radius: 10px;
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .flow .step .sn {
+    font-size: 10px;
+    color: #B5751A;
+    letter-spacing: 1.2px;
+    font-weight: 800;
+  }
+  .flow .step .st {
+    font-size: 14px;
+    font-weight: 800;
+    color: var(--text);
+  }
+  .flow .step .sd {
+    font-size: 12px;
+    color: var(--text-soft);
+    line-height: 1.55;
+  }
+  .flow .step code {
+    display: block;
+    background: #FBF4E6;
+    color: #5B4520;
+    font-size: 11px;
+    padding: 6px 8px;
+    border-radius: 4px;
+    margin-top: 4px;
+    line-height: 1.5;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+  .flow .ar {
+    text-align: center;
+    align-self: center;
+    font-size: 22px;
+    font-weight: 800;
+    color: #B5751A;
+  }
+
+  /* Trade-off mini-table */
+  .tradeoff {
+    background: white;
+    border: 1px solid #E8C97A;
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .tradeoff table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12.5px;
+  }
+  .tradeoff th {
+    background: #FBF4E6;
+    text-align: left;
+    padding: 10px 14px;
+    font-weight: 700;
+    color: #5B4520;
+    border-bottom: 1px solid #E8C97A;
+  }
+  .tradeoff th.bad { color: #C44; }
+  .tradeoff th.good { color: #2A8; }
+  .tradeoff td {
+    padding: 10px 14px;
+    border-bottom: 1px solid #F1E5C5;
+    vertical-align: top;
+    color: var(--text-soft);
+  }
+  .tradeoff td.row { color: var(--text); font-weight: 700; }
+  .tradeoff td.bad::before { content: "✗ "; color: #C44; margin-right: 3px; }
+  .tradeoff td.good::before { content: "✓ "; color: #2A8; margin-right: 3px; }
+  .tradeoff tr:last-child td { border-bottom: none; }
+
+  .rationale .source {
+    margin-top: 18px;
+    font-size: 11.5px;
+    color: #7A5A2A;
+    text-align: right;
+  }
+  .rationale .source a { color: #8A5A0A; }
+
+  @media (max-width: 720px) {
+    .rationale { padding: 22px 18px; }
+    .flow { grid-template-columns: 1fr; gap: 6px; }
+    .flow .ar { transform: rotate(90deg); }
+  }
+
   /* ============ Footer ============ */
   footer {
     padding: 18px 32px 32px;
@@ -726,6 +940,149 @@
       </tbody>
     </table>
   </div>
+
+  <!-- ============ Design rationale: why no auto-propagation ============ -->
+  <section class="rationale">
+    <div class="rh">
+      <h2>🧭 왜 의존 산출물 자동 재생성 기능이 없는가?</h2>
+      <span class="badge">DESIGN CHOICE</span>
+      <span class="sub">"변경 시 의존 md 들을 자동 update" 가 아닌, 사용자가 명시적으로 트리거하는 구조를 의도적으로 선택</span>
+    </div>
+
+    <p class="rlead">
+      AI-DLC 에는 <strong>"md 파일 의존성 그래프 → 변경 감지 → 자동 cascade 재생성"</strong> 같은 기능이 <strong>의도적으로 없습니다</strong>.
+      변경이 발생하면 사용자가 직접 <code>upstream 영향 확인 → 설계 update → 영향 받은 코드만 regenerate</code> 의 3-step 패턴을 트리거합니다.
+      이는 AI-DLC 의 <strong>핵심 tenet</strong> (Human in the loop / No duplication / Reproducible) 과 직접 연결된 설계 결정입니다.
+    </p>
+
+    <!-- 4 reason cards -->
+    <div class="reasons">
+
+      <div class="reason">
+        <div class="num">REASON 1</div>
+        <h4>🎯 Human-in-the-loop tenet</h4>
+        <p>"Critical decisions require <strong>explicit user confirmation</strong>" — AI 가 임의로 여러 산출물을 동시 수정하면 사용자가 변경 범위를 인지하지 못한 채 silent drift 가 발생할 수 있습니다.</p>
+        <div class="quote">"The agent proposes, the human approves." — AI-DLC Tenets</div>
+      </div>
+
+      <div class="reason">
+        <div class="num">REASON 2</div>
+        <h4>🎲 LLM 비결정성 위험</h4>
+        <p>같은 입력이라도 LLM 은 <strong>재생성 시 다른 표현·구조</strong>를 만들 수 있습니다. 자동 cascade 는 사용자가 이미 승인한 wording 을 임의로 덮어쓸 위험이 있어, audit trail 의 의미를 훼손합니다.</p>
+        <div class="quote">"Rules should be clear enough that different models produce similar outcomes" — 변동성 자체를 최소화하는 방향.</div>
+      </div>
+
+      <div class="reason">
+        <div class="num">REASON 3</div>
+        <h4>📦 No duplication tenet</h4>
+        <p>"The <strong>source of truth lives in one place</strong>" — 의존성 그래프를 별도 메타데이터로 관리하면 그 자체가 또 하나의 동기화 대상이 됩니다. AI-DLC 는 markdown 본문이 곧 단일 출처가 되도록 설계합니다.</p>
+        <div class="quote">"We generate them from the source rather than maintaining separate copies."</div>
+      </div>
+
+      <div class="reason">
+        <div class="num">REASON 4</div>
+        <h4>💰 비용·범위 통제</h4>
+        <p>자동 cascade 는 <strong>불필요한 토큰 사용·과도한 재생성</strong>으로 이어지기 쉽습니다. 사용자가 영향 범위를 먼저 확인하고 필요한 부분만 regenerate 하면 비용·시간을 통제할 수 있습니다.</p>
+        <div class="quote">"re-run code generation for the affected files only" — 영향 범위를 사용자가 명시.</div>
+      </div>
+
+    </div>
+
+    <!-- Manual flow visualization -->
+    <div class="flow-title">
+      📌 대신 권장하는 3-step 변경 흐름
+      <span class="tag">docs/WORKING-WITH-AIDLC.md</span>
+    </div>
+    <div class="flow">
+
+      <div class="step">
+        <div class="sn">STEP 1</div>
+        <div class="st">영향 분석 (no-change)</div>
+        <div class="sd">변경을 가하지 않고 영향 범위를 먼저 파악합니다.</div>
+        <code>Do not update any documents.
+Review the design and help me
+understand where this needs
+to be addressed.</code>
+      </div>
+      <div class="ar">→</div>
+
+      <div class="step">
+        <div class="sn">STEP 2</div>
+        <div class="st">설계 update + upstream 확인</div>
+        <div class="sd">해당 설계 문서 수정 후 상위 산출물 영향도 함께 점검합니다.</div>
+        <code>Please update [design doc].
+Then check whether any
+upstream documents —
+requirements, user stories —
+also need to be updated.</code>
+      </div>
+      <div class="ar">→</div>
+
+      <div class="step">
+        <div class="sn">STEP 3</div>
+        <div class="st">영향 코드만 재생성</div>
+        <div class="sd">전체가 아닌 영향 받은 unit/파일에 한해 코드 재생성을 지시합니다.</div>
+        <code>The design for [unit X]
+has been updated.
+Please re-run code generation
+for the affected files only.</code>
+      </div>
+
+    </div>
+
+    <!-- Trade-off table -->
+    <div class="tradeoff">
+      <table>
+        <thead>
+          <tr>
+            <th>관점</th>
+            <th class="bad">자동 cascade 재생성 (가상)</th>
+            <th class="good">AI-DLC 의 명시적 back-propagation</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="row">변경 인지</td>
+            <td class="bad">어느 파일이 함께 바뀌었는지 사후 diff 로 확인</td>
+            <td class="good">사용자가 단계마다 변경 대상을 직접 승인</td>
+          </tr>
+          <tr>
+            <td class="row">결과 안정성</td>
+            <td class="bad">LLM 재생성으로 승인된 wording 이 silent 변경 위험</td>
+            <td class="good">변경하지 않은 산출물은 그대로 보존 (단일 출처 유지)</td>
+          </tr>
+          <tr>
+            <td class="row">감사·추적</td>
+            <td class="bad">자동 cascade 의 일부는 audit 누락 가능</td>
+            <td class="good">모든 변경 요청이 <code>audit.md</code> 에 append-only 기록</td>
+          </tr>
+          <tr>
+            <td class="row">비용·시간</td>
+            <td class="bad">의존 파일 전체 토큰 소비 → 비용 폭증 가능</td>
+            <td class="good">"affected files only" 로 필요한 부분만 재생성</td>
+          </tr>
+          <tr>
+            <td class="row">실수 회복</td>
+            <td class="bad">잘못된 변경이 cascade 로 동시 전파됨</td>
+            <td class="good">각 step 에서 detect → revert 가능 (게이트 단위 격리)</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p style="margin: 18px 0 4px; font-size: 12.5px; color: #5B4520; line-height: 1.6;">
+      💡 <strong>자동에 가장 근접한 옵션</strong> — Phase 시작 시 standing rule 로 박아둘 수 있습니다 (시스템 기능이 아니라 prompt convention):
+    </p>
+    <div class="reason" style="border-left-color: #2C7BC4; margin-top: 4px;">
+      <div class="num" style="color: #2C7BC4;">STANDING RULE</div>
+      <p>"Every time you update a document, <strong>check whether the change impacts the requirements document and user stories</strong>, and prompt me if it does." — 자동 수정은 아니지만 영향 가능성을 매번 알림.</p>
+    </div>
+
+    <div class="source">
+      출처: <a href="https://github.com/awslabs/aidlc-workflows/blob/main/docs/WORKING-WITH-AIDLC.md" target="_blank">awslabs/aidlc-workflows · docs/WORKING-WITH-AIDLC.md</a>
+      · "The Right Way to Make a Change" / "Standing Rules That Prevent Drift" / Tenets
+    </div>
+  </section>
 
 </main>
 
