@@ -67,6 +67,85 @@
   }
   .toolbar button.danger { border-color: #c44; color: #c44; }
   .toolbar button.danger:hover { background: #c44; color: white; }
+  .toolbar button.mode-active {
+    background: var(--sdlc-blue);
+    color: white;
+  }
+
+  /* ============ Simple Mode overrides — fit-on-one-screen ============ */
+  body.simple-mode header { padding: 10px 24px 4px; }
+  body.simple-mode .title-block h1 { font-size: 22px; }
+  body.simple-mode .title-block .subtitle { font-size: 12px; }
+  body.simple-mode .toolbar button { padding: 5px 10px; font-size: 12px; }
+  body.simple-mode main { padding: 8px 16px 12px; }
+
+  body.simple-mode .board { min-width: 1100px; }
+  body.simple-mode .aidlc-row { gap: 8px; }
+  body.simple-mode .phase-section { gap: 6px; }
+  body.simple-mode .phase-header {
+    padding: 8px 16px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+    gap: 16px;
+  }
+  body.simple-mode .phase-header .phase-name { font-size: 17px; letter-spacing: 1px; }
+  body.simple-mode .phase-header .phase-num { font-size: 10px; padding: 2px 8px; letter-spacing: 1.2px; }
+  body.simple-mode .phase-header .phase-tagline { font-size: 10px; margin-top: 1px; }
+  body.simple-mode .phase-header .phase-question { font-size: 10px; }
+  body.simple-mode .phase-flow-arrow { font-size: 18px; margin: -10px 0; }
+
+  body.simple-mode .step-col { min-width: 140px; gap: 4px; }
+  body.simple-mode .step-arrow-h { flex: 0 0 18px; padding-top: 14px; font-size: 16px; }
+  body.simple-mode .step-header {
+    padding: 6px 6px;
+    min-height: 42px;
+    gap: 1px;
+    border-radius: 6px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  }
+  body.simple-mode .step-header .step-num { font-size: 8px; letter-spacing: 0.4px; opacity: 0.85; }
+  body.simple-mode .step-header .step-title { font-size: 11px; line-height: 1.15; font-weight: 700; }
+  body.simple-mode .step-badges { gap: 2px; margin-top: 2px; }
+  body.simple-mode .step-badge { font-size: 8px; padding: 0px 4px; letter-spacing: 0; line-height: 1.3; border-width: 1px; }
+
+  body.simple-mode .activity-stack { gap: 2px; }
+  body.simple-mode .activity-box {
+    padding: 3px 18px 3px 18px;
+    font-size: 10px;
+    line-height: 1.15;
+    border-radius: 4px;
+    border-width: 1px;
+    min-height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  body.simple-mode .activity-hitl,
+  body.simple-mode .activity-doc {
+    width: 14px;
+    height: 14px;
+    font-size: 9px;
+    top: 2px;
+  }
+  body.simple-mode .activity-hitl { right: 2px; }
+  body.simple-mode .activity-doc  { left: 2px; }
+  body.simple-mode .activity-flow-arrow { display: none; }
+
+  /* Simple mode: cross-cutting brackets + change-control 숨김 (Full 에서 확인) */
+  body.simple-mode .brackets,
+  body.simple-mode .change-row { display: none; }
+
+  body.simple-mode .legend {
+    padding: 4px 10px;
+    margin-bottom: 6px;
+    font-size: 10px;
+    gap: 8px;
+  }
+  body.simple-mode .legend-group { gap: 5px; }
+  body.simple-mode .legend-group-label { font-size: 9px; letter-spacing: 0.2px; }
+  body.simple-mode .legend .step-badge { font-size: 9px; padding: 1px 5px; }
+  body.simple-mode .legend-sep { height: 16px; }
+
+  body.simple-mode footer { padding: 6px 24px 12px; font-size: 10px; }
 
   /* ============ Main board ============ */
   main {
@@ -739,6 +818,7 @@
     <div class="subtitle">AWS Labs <a href="https://github.com/awslabs/aidlc-workflows" target="_blank">aidlc-workflows</a> — AI Development Life Cycle 가이드</div>
   </div>
   <div class="toolbar">
+    <button id="btnViewMode" title="Simple ↔ Full view 토글">◇ Simple</button>
     <button id="btnEdit">✎ Edit</button>
     <button id="btnExport">⬇ Export</button>
     <button id="btnImport">⬆ Import</button>
@@ -1465,8 +1545,10 @@ const DEFAULT_DATA = {
    상태 관리
    ============================================================ */
 const STORAGE_KEY = "aidlc-phases-v2";
+const VIEWMODE_KEY = "aidlc-view-mode";
 let data = loadData();
 let editMode = false;
+let simpleMode = localStorage.getItem(VIEWMODE_KEY) === "simple";
 
 function loadData() {
   try {
@@ -1741,6 +1823,65 @@ function getStepBadges(ss) {
 }
 
 /* ============================================================
+   Simple Mode — 중요 활동만 필터링 (HITL OR 주요 산출물 생성)
+   audit.md / aidlc-state.md 만 갱신하는 procedural 활동은 제외
+   ============================================================ */
+function isImportantActivity(ss, act) {
+  if (!act || typeof act !== "object") return false;
+  if (isHITLActivity(act)) return true;
+  if (isProducingActivity(act)) {
+    const d = getActivityDeliverables(ss, act);
+    if (d.matched.length === 0) return false;
+    const nonProcedural = d.matched.filter(f => {
+      const trimmed = String(f).trim();
+      if (/^updated\s+/i.test(trimmed)) return false;
+      if (/^(aidlc-docs\/)?audit\.md\b/i.test(trimmed)) return false;
+      return true;
+    });
+    return nonProcedural.length > 0;
+  }
+  return false;
+}
+
+/* Simple mode 에서 step 당 최대 4개 활동만 표시하기 위한 우선순위 점수.
+   높을수록 더 중요 (한 화면 fit 보장). */
+function importanceScore(ss, act) {
+  if (!act || typeof act !== "object") return 0;
+  const title = (act.title || "") + " " + (act.titleEn || "");
+  let score = 0;
+  // 1순위: 메인 산출물 생성 활동 (Generation Phase, "Generate ... Artifacts", "Plan 로드·실행 → ...")
+  if (/generate.*artifacts?|load\s+plan|단계\s*실행|산출물\s*생성/i.test(title)) score += 100;
+  // 2순위: 명시적으로 [GATE] 인 활동
+  if (/\[gate\]/i.test(title)) score += 90;
+  // 3순위: HITL 사용자 입력 수집
+  if (/request\s+user\s+input|collect\s+answers|사용자\s*입력/i.test(title)) score += 80;
+  // 4순위: 승인 대기 (HITL)
+  if (/wait\s+for\s+approval|승인\s*대기/i.test(title)) score += 70;
+  // 5순위: Plan 생성
+  if (/create.*plan|plan\s*생성/i.test(title)) score += 60;
+  // 6순위: 질문 생성
+  if (/generate.*questions|질문\s*생성/i.test(title)) score += 40;
+  // 7순위: 그 외 산출물 생성
+  if (isProducingActivity(act)) score += 30;
+  // HITL bonus
+  if (isHITLActivity(act)) score += 20;
+  return score;
+}
+
+/* Simple mode 용: important 활동 중 상위 N개만 (원래 순서 보존) */
+function topImportantActivities(ss, maxCount = 4) {
+  const all = (ss.activities || []).map((a, idx) => ({ a, idx }));
+  const important = all.filter(({ a }) => isImportantActivity(ss, a));
+  if (important.length <= maxCount) return important;
+  // 점수 기반 상위 N개 선택 → 원래 순서로 정렬
+  const scored = important.map(item => ({ ...item, score: importanceScore(ss, item.a) }));
+  scored.sort((x, y) => y.score - x.score);
+  const top = scored.slice(0, maxCount);
+  top.sort((x, y) => x.idx - y.idx);
+  return top;
+}
+
+/* ============================================================
    렌더링
    ============================================================ */
 function render() {
@@ -1798,8 +1939,12 @@ function renderAidlcRow() {
       // Activity boxes cascading below the step header, with ↓ between them
       const actStack = document.createElement("div");
       actStack.className = "activity-stack";
-      const acts = ss.activities || [];
-      acts.forEach((act, actIdx) => {
+      const allActs = ss.activities || [];
+      // Simple mode 에서는 상위 4개 important 활동만 표시 (한 화면 fit)
+      const acts = simpleMode
+        ? topImportantActivities(ss, 4)
+        : allActs.map((a, idx) => ({ a, idx }));
+      acts.forEach(({ a: act, idx: actIdx }, displayIdx) => {
         const actBox = document.createElement("div");
         actBox.className = `activity-box ${aidlc.colorKey}`;
         const label = (act && typeof act === "object") ? (act.title || "") : String(act);
@@ -1813,7 +1958,7 @@ function renderAidlcRow() {
         actBox.addEventListener("click", () => openActivityModal(aidlc, ss, act, actIdx));
         actStack.appendChild(actBox);
 
-        if (actIdx < acts.length - 1) {
+        if (displayIdx < acts.length - 1) {
           const arr = document.createElement("div");
           arr.className = `activity-flow-arrow ${aidlc.colorKey}`;
           arr.textContent = "↓";
@@ -2234,6 +2379,22 @@ document.getElementById("btnEdit").addEventListener("click", () => {
   document.getElementById("btnEdit").classList.toggle("active", editMode);
   if (modalBackdrop.classList.contains("open")) bindEditableFields();
 });
+
+// View mode (Simple ↔ Full) 토글
+function applyViewMode() {
+  document.body.classList.toggle("simple-mode", simpleMode);
+  const btn = document.getElementById("btnViewMode");
+  btn.textContent = simpleMode ? "◆ Full" : "◇ Simple";
+  btn.classList.toggle("mode-active", simpleMode);
+  btn.title = simpleMode ? "Full view 로 전환 (모든 활동 표시)" : "Simple view 로 전환 (중요 활동만)";
+}
+document.getElementById("btnViewMode").addEventListener("click", () => {
+  simpleMode = !simpleMode;
+  localStorage.setItem(VIEWMODE_KEY, simpleMode ? "simple" : "full");
+  applyViewMode();
+  render();
+});
+applyViewMode();
 
 document.getElementById("btnExport").addEventListener("click", () => {
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
