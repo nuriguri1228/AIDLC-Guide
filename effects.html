@@ -911,11 +911,11 @@
 
   </div>
 
-  <!-- ============ Section: AI 를 신뢰성 있게 쓰기 위한 전제 조건 ============ -->
+  <!-- ============ Section: AI-DLC 프레임워크 효과 — 신뢰성 보장 구조 ============ -->
   <div class="section-title">
-    <h2>🛡️ AI 를 신뢰성 있게 쓰기 위한 전제 조건</h2>
-    <span class="label">Framework Preconditions</span>
-    <span class="sub">결과가 아니라, AI 가 안전·일관되게 동작하려면 만족되어야 하는 구조적 조건</span>
+    <h2>🛡️ AI-DLC 프레임워크의 효과 — 신뢰 가능한 AI 사용을 위한 구조적 보장</h2>
+    <span class="label">Framework Guarantees</span>
+    <span class="sub">AI 모델 자체의 능력과 별개로, AI-DLC 가 워크플로우 구조로 강제하는 6 가지 — 이것이 프레임워크가 사용자에게 주는 본질적 가치</span>
   </div>
   <div class="cards">
 
@@ -1019,14 +1019,14 @@
 
   <!-- ============ Cause → Effect bridge ============ -->
   <div class="bridge">
-    <strong>위 6 가지 조건</strong>이 모두 강제되기 때문에 <span class="ar">→</span> 사용자는 다음 <strong>3 가지 효과</strong>를 자연스럽게 얻습니다
+    <strong>위 6 가지 보장</strong>이 프레임워크 차원에서 강제되기 때문에 <span class="ar">→</span> 사용자는 다음 <strong>3 가지 가치</strong>를 실제로 체감합니다
   </div>
 
-  <!-- ============ Section: 그 결과로 얻는 효과 ============ -->
+  <!-- ============ Section: 그 결과 사용자가 체감하는 가치 ============ -->
   <div class="section-title">
-    <h2>✨ 그 결과로 얻는 효과</h2>
-    <span class="label">Resulting Outcomes</span>
-    <span class="sub">위 전제 조건들이 충족됨으로써 비로소 발생하는 실제 가치</span>
+    <h2>✨ 그 결과 사용자가 실제로 체감하는 가치</h2>
+    <span class="label">User-facing Value</span>
+    <span class="sub">위 6 가지 보장이 강제됨으로써 비로소 발생하는 실제 효과</span>
   </div>
   <div class="cards">
 
@@ -1134,6 +1134,80 @@
           <td><strong>오버엔지니어링</strong></td>
           <td class="dim">AI 가 알아서 추가 추상화·feature flag 생성</td>
           <td class="bright">요구사항·NFR 명세에 기반해 필요한 만큼만 생성</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ============ 전통 SDLC vs AI-DLC 비교 ============ -->
+  <div class="comparison" style="margin-top: 24px;">
+    <div class="comparison-header">
+      <h2>📊 전통적 SDLC 와 AI-DLC 비교</h2>
+      <span class="sub">사람 중심 인계 구조의 SDLC 와 AI 중심·게이트 구조의 AI-DLC 의 구조적 차이</span>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>관점</th>
+          <th class="left">전통적 SDLC (Waterfall · Agile)</th>
+          <th class="right">AI-DLC 워크플로우</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>단계 진행</strong></td>
+          <td class="dim">PO → Architect → Dev → QA 인계, 단계별 사람 담당</td>
+          <td class="bright">AI 에이전트가 통합 진행, 인간은 게이트마다 검토·승인만</td>
+        </tr>
+        <tr>
+          <td><strong>요구사항 수집</strong></td>
+          <td class="dim">인터뷰·미팅·문서화 — 여러 사람·여러 회차 필요</td>
+          <td class="bright">vision.md + 자동 생성 clarification-questions [Answer]: 패턴</td>
+        </tr>
+        <tr>
+          <td><strong>설계 산출물 형식</strong></td>
+          <td class="dim">Confluence / Figma / Draw.io / Excel 등 여러 도구로 분산</td>
+          <td class="bright">모든 산출물 = markdown + mermaid 의 단일 형식</td>
+        </tr>
+        <tr>
+          <td><strong>문서화 시점</strong></td>
+          <td class="dim">코드 작성 후 별도 단계 — 자주 누락되거나 outdated</td>
+          <td class="bright">모든 단계 산출물이 곧 문서, 별도 작성 시간 없음</td>
+        </tr>
+        <tr>
+          <td><strong>변경 추적</strong></td>
+          <td class="dim">코드 = git, 설계 = Jira/Confluence — 이중화되고 동기화 깨짐</td>
+          <td class="bright">audit.md + markdown git diff 의 단일 source of truth</td>
+        </tr>
+        <tr>
+          <td><strong>모순 발견 시점</strong></td>
+          <td class="dim">design review · peer review 미팅 — 사후, 시점 늦음</td>
+          <td class="bright">자동 모순 탐지 → 진행 차단 (조기, blocking)</td>
+        </tr>
+        <tr>
+          <td><strong>일관성 보장</strong></td>
+          <td class="dim">style guide + 사람 review — 팀·시기마다 편차 발생</td>
+          <td class="bright">workflow rule 이 패턴 자체를 강제, 사람 의존도 ↓</td>
+        </tr>
+        <tr>
+          <td><strong>도구 전환 비용</strong></td>
+          <td class="dim">툴체인 변경 시 재학습·재셋팅 큰 비용</td>
+          <td class="bright">rule 파일이 표준화되어 AI 도구 간 이식 가능</td>
+        </tr>
+        <tr>
+          <td><strong>적응성</strong></td>
+          <td class="dim">프로세스 고정 — 단순 작업에도 풀세트 적용</td>
+          <td class="bright">adaptive — 단순 작업은 자동 skip, 복잡도에 맞춰 depth 조정</td>
+        </tr>
+        <tr>
+          <td><strong>컴플라이언스</strong></td>
+          <td class="dim">QA gate · security review — 사후 검증, late feedback</td>
+          <td class="bright">Extensions 가 blocking constraint — 단계마다 사전 검증</td>
+        </tr>
+        <tr>
+          <td><strong>속도 (lead time)</strong></td>
+          <td class="dim">단계 간 인계·미팅으로 wait time 누적</td>
+          <td class="bright">게이트 승인만으로 진행, 인계 오버헤드 없음</td>
         </tr>
       </tbody>
     </table>
