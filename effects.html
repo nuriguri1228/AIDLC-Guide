@@ -217,6 +217,7 @@
   }
   .card.ai { border-top-color: var(--aidlc-inception); }
   .card.framework { border-top-color: var(--sdlc-accent); }
+  .card.condition { border-top-color: #5B6A85; }
 
   .card .icon-row {
     display: flex;
@@ -236,6 +237,33 @@
   }
   .card.ai .icon { background: #E8F1FB; color: var(--aidlc-inception); }
   .card.framework .icon { background: #FFF1D9; color: #B5751A; }
+  .card.condition .icon { background: #E8ECF4; color: #3F4D6A; }
+  .card.condition .area { color: #3F4D6A; }
+  .card.condition .effect strong { color: #3F4D6A; }
+
+  /* ============ Cause → Effect bridge ============ */
+  .bridge {
+    margin: 32px auto 18px;
+    max-width: 880px;
+    padding: 14px 24px;
+    background: linear-gradient(135deg, #E8ECF4 0%, #FFF1D9 100%);
+    border: 1px solid var(--border);
+    border-radius: 30px;
+    text-align: center;
+    font-size: 13.5px;
+    color: var(--text);
+    font-weight: 600;
+    line-height: 1.55;
+    box-shadow: 0 2px 8px rgba(44,123,196,0.06);
+  }
+  .bridge .ar {
+    display: inline-block;
+    font-size: 18px;
+    color: var(--sdlc-accent);
+    margin: 0 6px;
+    transform: translateY(2px);
+  }
+  .bridge strong { color: var(--sdlc-blue); }
 
   .card h3 {
     margin: 0;
@@ -883,11 +911,122 @@
 
   </div>
 
-  <!-- ============ Section: AI-DLC 프레임워크 자체가 주는 효과 ============ -->
+  <!-- ============ Section: AI 를 신뢰성 있게 쓰기 위한 전제 조건 ============ -->
   <div class="section-title">
-    <h2>AI-DLC 프레임워크 자체가 주는 효과</h2>
-    <span class="label">Framework Value</span>
-    <span class="sub">AI 모델 자체와 별개로, AI-DLC 의 워크플로우 구조가 보장하는 효과</span>
+    <h2>🛡️ AI 를 신뢰성 있게 쓰기 위한 전제 조건</h2>
+    <span class="label">Framework Preconditions</span>
+    <span class="sub">결과가 아니라, AI 가 안전·일관되게 동작하려면 만족되어야 하는 구조적 조건</span>
+  </div>
+  <div class="cards">
+
+    <div class="card condition">
+      <div class="icon-row">
+        <div class="icon">🎯</div>
+        <div>
+          <div class="area">HUMAN-IN-THE-LOOP</div>
+          <h3>사용자 결정 권한 보장</h3>
+        </div>
+      </div>
+      <div class="effect">AI 가 임의로 진행하지 않도록, <strong>명시적 승인 gate</strong> 가 단계 사이마다 배치되는 구조.</div>
+      <ul>
+        <li>중요 단계마다 사용자가 검토 후 명시적으로 "Approve" 입력</li>
+        <li>[Answer]: 태그로 사용자가 직접 선택지 입력</li>
+        <li>follow-up clarification 라운드로 모순 해소</li>
+      </ul>
+    </div>
+
+    <div class="card condition">
+      <div class="icon-row">
+        <div class="icon">⚠️</div>
+        <div>
+          <div class="area">CONTRADICTION DETECTION</div>
+          <h3>모순 자동 탐지</h3>
+        </div>
+      </div>
+      <div class="effect">사용자 답변 간 충돌·모호함을 자동 분석하고 <code>*-clarification-questions.md</code> 로 차단하는 구조.</div>
+      <ul>
+        <li>scope/risk/timeline mismatch 자동 감지</li>
+        <li>해결 전까지 다음 단계 진행 차단 (blocking gate)</li>
+        <li>일관성 검증 후에만 산출물 생성</li>
+      </ul>
+    </div>
+
+    <div class="card condition">
+      <div class="icon-row">
+        <div class="icon">🔀</div>
+        <div>
+          <div class="area">ADAPTIVE</div>
+          <h3>복잡도 적응성</h3>
+        </div>
+      </div>
+      <div class="effect">프로젝트 특성에 따라 단계가 자동 skip 되거나 depth 가 조정되어 <strong>오버엔지니어링이 구조적으로 차단</strong>됩니다.</div>
+      <ul>
+        <li>단순 API → User Stories / Unit Generation skip</li>
+        <li>NFR 명세 명확 → NFR Requirements / Design skip</li>
+        <li>요청 명확성에 따라 minimal / standard / comprehensive 자동 선택</li>
+      </ul>
+    </div>
+
+    <div class="card condition">
+      <div class="icon-row">
+        <div class="icon">🛡️</div>
+        <div>
+          <div class="area">COMPLIANCE GATES</div>
+          <h3>컴플라이언스 강제</h3>
+        </div>
+      </div>
+      <div class="effect"><strong>Extensions opt-in</strong> 으로 보안·품질·테스트 룰이 <strong>blocking constraint</strong> 로 적용되는 구조.</div>
+      <ul>
+        <li>opt-in 한 룰은 단계 진행을 막는 강제 조건이 됨</li>
+        <li>aws-best-practices, security-baseline 등 사전 정의 룰</li>
+        <li>커버리지 임계값·SAST 결과가 자동 검증됨</li>
+      </ul>
+    </div>
+
+    <div class="card condition">
+      <div class="icon-row">
+        <div class="icon">🤝</div>
+        <div>
+          <div class="area">SHARED FORMAT</div>
+          <h3>사람·AI 공유 형식</h3>
+        </div>
+      </div>
+      <div class="effect">모든 산출물이 <strong>markdown 파일</strong> 이라 사람·AI·다른 도구가 동일하게 읽고 쓸 수 있는 구조.</div>
+      <ul>
+        <li>PR 리뷰·코드 리뷰처럼 산출물도 git diff 가능</li>
+        <li>중단·이어쓰기 가능 (session-continuity)</li>
+        <li>여러 AI agent 가 같은 워크스페이스에서 협업</li>
+      </ul>
+    </div>
+
+    <div class="card condition">
+      <div class="icon-row">
+        <div class="icon">🔌</div>
+        <div>
+          <div class="area">PORTABILITY</div>
+          <h3>AI 에이전트 독립성</h3>
+        </div>
+      </div>
+      <div class="effect"><strong>Claude Code / Cursor / Q Developer / Kiro / Amazon Q</strong> 등 어느 도구에서 실행해도 같은 룰이 적용되는 구조.</div>
+      <ul>
+        <li>도구 변경 시에도 산출물·진행 상태 그대로 이어짐</li>
+        <li><code>.claude/</code>, <code>.kiro/</code>, <code>.amazonq/</code> 등 각 도구의 룰 경로 자동 인식</li>
+        <li>vendor lock-in 방지</li>
+      </ul>
+    </div>
+
+  </div>
+
+  <!-- ============ Cause → Effect bridge ============ -->
+  <div class="bridge">
+    <strong>위 6 가지 조건</strong>이 모두 강제되기 때문에 <span class="ar">→</span> 사용자는 다음 <strong>3 가지 효과</strong>를 자연스럽게 얻습니다
+  </div>
+
+  <!-- ============ Section: 그 결과로 얻는 효과 ============ -->
+  <div class="section-title">
+    <h2>✨ 그 결과로 얻는 효과</h2>
+    <span class="label">Resulting Outcomes</span>
+    <span class="sub">위 전제 조건들이 충족됨으로써 비로소 발생하는 실제 가치</span>
   </div>
   <div class="cards">
 
@@ -899,59 +1038,11 @@
           <h3>추적성</h3>
         </div>
       </div>
-      <div class="effect">모든 사용자 결정·승인·AI 응답이 <code>audit.md</code> 에 <strong>ISO 8601 timestamp 와 함께 append-only</strong> 로 기록됩니다.</div>
+      <div class="effect">HITL + 모순 탐지 + markdown 형식이 결합된 결과 — 모든 결정·승인·AI 응답이 <code>audit.md</code> 에 <strong>ISO 8601 timestamp 와 함께 append-only</strong> 로 남습니다.</div>
       <ul>
         <li>누가 언제 무엇을 승인했는지 항상 확인 가능</li>
         <li>감사·컴플라이언스 대응에 그대로 사용 가능</li>
         <li>잘못된 결정의 원인 분석 (post-mortem) 가능</li>
-      </ul>
-    </div>
-
-    <div class="card framework">
-      <div class="icon-row">
-        <div class="icon">🎯</div>
-        <div>
-          <div class="area">HUMAN-IN-THE-LOOP</div>
-          <h3>사용자 결정 권한 보장</h3>
-        </div>
-      </div>
-      <div class="effect">AI 가 임의로 진행하지 않도록, <strong>명시적 승인 gate</strong> 가 단계 사이마다 배치됩니다.</div>
-      <ul>
-        <li>중요 단계마다 사용자가 검토 후 명시적으로 "Approve" 입력</li>
-        <li>[Answer]: 태그로 사용자가 직접 선택지 입력</li>
-        <li>follow-up clarification 라운드로 모순 해소</li>
-      </ul>
-    </div>
-
-    <div class="card framework">
-      <div class="icon-row">
-        <div class="icon">🔀</div>
-        <div>
-          <div class="area">ADAPTIVE</div>
-          <h3>복잡도 적응성</h3>
-        </div>
-      </div>
-      <div class="effect">프로젝트 특성에 따라 단계가 자동 skip 되거나 depth 가 조정되어 <strong>오버엔지니어링을 방지</strong>합니다.</div>
-      <ul>
-        <li>단순 API → User Stories / Unit Generation skip</li>
-        <li>NFR 명세 명확 → NFR Requirements / Design skip</li>
-        <li>요청 명확성에 따라 minimal / standard / comprehensive 자동 선택</li>
-      </ul>
-    </div>
-
-    <div class="card framework">
-      <div class="icon-row">
-        <div class="icon">⚠️</div>
-        <div>
-          <div class="area">CONTRADICTION DETECTION</div>
-          <h3>모순 자동 탐지</h3>
-        </div>
-      </div>
-      <div class="effect">사용자 답변 간의 충돌·모호함을 자동 분석하고, <code>*-clarification-questions.md</code> 파일로 후속 질문을 발행합니다.</div>
-      <ul>
-        <li>scope/risk/timeline mismatch 자동 감지</li>
-        <li>해결 전까지 다음 단계 진행 차단 (blocking gate)</li>
-        <li>일관성 검증 후에만 산출물 생성</li>
       </ul>
     </div>
 
@@ -963,59 +1054,11 @@
           <h3>일관된 워크플로우 패턴</h3>
         </div>
       </div>
-      <div class="effect">모든 step 이 <strong>plan → 질문 → 답변 → 검증 → 산출물 생성</strong> 의 동일 패턴을 따라 예측 가능한 결과를 보장합니다.</div>
+      <div class="effect">Adaptive + HITL + 공유 형식이 결합된 결과 — 모든 step 이 <strong>plan → 질문 → 답변 → 검증 → 산출물 생성</strong> 의 동일 패턴을 따라 예측 가능합니다.</div>
       <ul>
         <li>매번 같은 step 순서·산출물 구조</li>
         <li>팀원이 산출물 위치를 외울 필요 없음 (표준 경로)</li>
         <li>새 unit / phase 추가 시 학습 비용 최소화</li>
-      </ul>
-    </div>
-
-    <div class="card framework">
-      <div class="icon-row">
-        <div class="icon">🛡️</div>
-        <div>
-          <div class="area">COMPLIANCE GATES</div>
-          <h3>컴플라이언스 강제</h3>
-        </div>
-      </div>
-      <div class="effect"><strong>Extensions opt-in</strong> 으로 보안·품질·테스트 룰을 <strong>blocking constraint</strong> 로 적용합니다.</div>
-      <ul>
-        <li>opt-in 한 룰은 단계 진행을 막는 강제 조건이 됨</li>
-        <li>aws-best-practices, security-baseline 등 사전 정의 룰</li>
-        <li>커버리지 임계값·SAST 결과가 자동 검증됨</li>
-      </ul>
-    </div>
-
-    <div class="card framework">
-      <div class="icon-row">
-        <div class="icon">🤝</div>
-        <div>
-          <div class="area">COLLABORATION</div>
-          <h3>사람·AI 공동 작업</h3>
-        </div>
-      </div>
-      <div class="effect">모든 산출물이 <strong>markdown 파일</strong> 이라 사람·AI·다른 도구가 동일하게 읽고 쓸 수 있습니다.</div>
-      <ul>
-        <li>PR 리뷰·코드 리뷰처럼 산출물도 git diff 가능</li>
-        <li>중단·이어쓰기 가능 (session-continuity)</li>
-        <li>여러 AI agent 가 같은 워크스페이스에서 협업</li>
-      </ul>
-    </div>
-
-    <div class="card framework">
-      <div class="icon-row">
-        <div class="icon">🔌</div>
-        <div>
-          <div class="area">PORTABILITY</div>
-          <h3>AI 에이전트 독립성</h3>
-        </div>
-      </div>
-      <div class="effect"><strong>Claude Code / Cursor / Q Developer / Kiro / Amazon Q</strong> 등 어느 AI agent 에서 실행해도 같은 워크플로우 룰이 적용됩니다.</div>
-      <ul>
-        <li>도구 변경 시에도 산출물·진행 상태 그대로 이어짐</li>
-        <li><code>.claude/</code>, <code>.kiro/</code>, <code>.amazonq/</code> 등 각 도구의 룰 경로 자동 인식</li>
-        <li>vendor lock-in 방지</li>
       </ul>
     </div>
 
@@ -1027,7 +1070,7 @@
           <h3>재현성</h3>
         </div>
       </div>
-      <div class="effect">같은 입력 (vision.md / tech-env.md + 답변) → 같은 산출물 구조를 보장합니다.</div>
+      <div class="effect">Portability + Compliance Gates + 결정론적 워크플로우가 결합된 결과 — 같은 입력 (vision.md / tech-env.md + 답변) → 같은 산출물 구조를 보장.</div>
       <ul>
         <li>aidlc-evaluator 의 golden sample 기반 검증</li>
         <li>workflow 가 결정론적 (state machine 기반)</li>
