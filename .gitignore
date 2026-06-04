@@ -12,3 +12,9 @@ Thumbs.db
 # Misc
 *.log
 .tmp/
+
+# Windows WSL metadata
+*:Zone.Identifier
+
+# OMC state
+.omc/
