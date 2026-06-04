@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>AI-DLC 실사례 — AIDLC Guide</title>
+<style>
+  :root {
+    --aidlc-inception: #4A90E2;
+    --aidlc-construction: #7ED321;
+    --aidlc-operations: #F5A623;
+    --sdlc-blue: #2C7BC4;
+    --sdlc-blue-dark: #1F5C92;
+    --sdlc-accent: #F5A623;
+    --text: #2A3142;
+    --text-soft: #5B6577;
+    --text-faint: #8A93A6;
+    --border: #D7E3F0;
+    --bg-card: #FFFFFF;
+    --bg-soft: #F5F8FC;
+    --ok: #2A8;
+    --warn: #C90;
+    --bad: #C44;
+  }
+
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    font-family: 'Segoe UI', 'Apple SD Gothic Neo', 'Malgun Gothic', '맑은 고딕', sans-serif;
+    color: var(--text);
+    background: linear-gradient(180deg, #FAFBFE 0%, #EEF3FA 100%);
+    min-height: 100vh;
+    line-height: 1.6;
+  }
+
+  header {
+    padding: 24px 32px 8px;
+    display: flex; align-items: center; justify-content: space-between;
+    flex-wrap: wrap; gap: 16px;
+  }
+  .title-block h1 {
+    margin: 0; font-size: 30px; color: var(--sdlc-blue);
+    letter-spacing: 0.5px; font-weight: 800;
+  }
+  .title-block .subtitle { color: var(--text-soft); font-size: 14px; margin-top: 4px; }
+  .nav { display: flex; gap: 8px; flex-wrap: wrap; }
+  .nav a {
+    text-decoration: none; padding: 8px 16px; border-radius: 6px;
+    border: 1.5px solid var(--sdlc-blue); color: var(--sdlc-blue);
+    font-size: 13px; font-weight: 700; transition: all .15s ease;
+  }
+  .nav a:hover { background: var(--sdlc-blue); color: white; }
+  .nav a.active { background: var(--sdlc-accent); border-color: var(--sdlc-accent); color: white; }
+
+  main { padding: 16px 32px 48px; max-width: 1280px; margin: 0 auto; }
+
+  /* ============ Hero ============ */
+  .hero {
+    background: linear-gradient(135deg, #2C7BC4 0%, #1F5C92 100%);
+    color: white; border-radius: 16px;
+    padding: 30px 36px; margin-bottom: 28px;
+    box-shadow: 0 8px 24px rgba(44,123,196,0.25);
+  }
+  .hero h2 { margin: 0 0 8px; font-size: 26px; letter-spacing: 0.5px; }
+  .hero p { margin: 0 0 8px; font-size: 14.5px; line-height: 1.7; opacity: 0.95; }
+  .hero p strong { color: #FFE8B3; }
+
+  /* ============ Section heading ============ */
+  .section-head {
+    margin: 38px 0 16px;
+    padding: 14px 22px;
+    border-radius: 12px;
+    color: white;
+    display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+  }
+  .section-head.external { background: linear-gradient(135deg, #4A90E2, #2C7BC4); }
+  .section-head.internal { background: linear-gradient(135deg, #7ED321, #5BA316); }
+  .section-head h2 { margin: 0; font-size: 22px; font-weight: 800; letter-spacing: 0.5px; }
+  .section-head .sh-tag {
+    background: rgba(255,255,255,0.22);
+    border: 1px solid rgba(255,255,255,0.4);
+    padding: 3px 10px; border-radius: 12px;
+    font-size: 11px; letter-spacing: 1px; font-weight: 700;
+  }
+  .section-head .sh-sub { font-size: 13px; opacity: 0.95; }
+
+  /* ============ Case card ============ */
+  .case-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-left: 5px solid var(--sdlc-blue);
+    border-radius: 12px;
+    padding: 22px 26px;
+    margin-bottom: 22px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  }
+  .case-card .case-head {
+    display: flex; align-items: center; gap: 12px;
+    flex-wrap: wrap; margin-bottom: 12px;
+  }
+  .case-card .case-no {
+    background: var(--sdlc-blue); color: white;
+    width: 32px; height: 32px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800; font-size: 14px; flex-shrink: 0;
+  }
+  .case-card .case-company {
+    background: #EEF3FA;
+    color: var(--sdlc-blue);
+    padding: 4px 11px; border-radius: 12px;
+    font-size: 12px; font-weight: 800;
+    letter-spacing: 0.5px;
+  }
+  .case-card h3 {
+    margin: 0; font-size: 18px; font-weight: 800; color: var(--text);
+    flex: 1; min-width: 200px;
+  }
+  .case-card .case-summary {
+    color: var(--text-soft); font-size: 13.5px; line-height: 1.75;
+    margin: 0 0 16px;
+  }
+  .case-card .case-summary strong { color: var(--text); }
+  .case-card .case-summary code {
+    background: var(--bg-soft); padding: 1px 6px;
+    border-radius: 4px; font-size: 12px;
+  }
+
+  .case-actions {
+    display: flex; gap: 10px; flex-wrap: wrap;
+    margin-bottom: 14px;
+  }
+  .case-actions a {
+    text-decoration: none;
+    background: var(--sdlc-accent);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 700;
+    transition: all .15s ease;
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+  .case-actions a:hover {
+    background: #C2811A;
+    transform: translateY(-1px);
+  }
+  .case-actions a.secondary {
+    background: white;
+    color: var(--sdlc-blue);
+    border: 1.5px solid var(--sdlc-blue);
+  }
+  .case-actions a.secondary:hover {
+    background: var(--sdlc-blue);
+    color: white;
+  }
+
+  /* ============ Deck viewer ============ */
+  .case-deck {
+    background: var(--bg-soft);
+    border: 1px dashed var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    margin-top: 8px;
+  }
+  .case-deck iframe {
+    display: block;
+    width: 100%;
+    height: 600px;
+    border: 0;
+    background: white;
+  }
+  .ppt-placeholder {
+    padding: 40px 24px;
+    text-align: center;
+    color: var(--text-faint);
+    font-size: 13.5px;
+    line-height: 1.7;
+  }
+  .ppt-placeholder .ppt-icon {
+    font-size: 36px; display: block; margin-bottom: 8px;
+  }
+  .ppt-placeholder code {
+    background: white;
+    padding: 2px 7px;
+    border-radius: 4px;
+    color: var(--sdlc-blue);
+    font-size: 12px;
+    border: 1px solid var(--border);
+  }
+
+  /* ============ Internal "coming soon" ============ */
+  .coming-soon {
+    background: var(--bg-card);
+    border: 2px dashed var(--border);
+    border-radius: 12px;
+    padding: 60px 30px;
+    text-align: center;
+    color: var(--text-soft);
+  }
+  .coming-soon .cs-icon {
+    font-size: 48px; display: block; margin-bottom: 12px;
+  }
+  .coming-soon h3 {
+    margin: 0 0 8px; font-size: 20px; color: var(--text);
+    font-weight: 800;
+  }
+  .coming-soon p {
+    margin: 0; font-size: 14px; line-height: 1.7;
+  }
+
+  /* ============ TOC ============ */
+  .toc {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 22px;
+    margin-bottom: 28px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+  }
+  .toc h3 {
+    margin: 0 0 10px; font-size: 14px;
+    color: var(--sdlc-blue); font-weight: 800;
+    letter-spacing: 0.5px;
+  }
+  .toc ol {
+    margin: 0; padding-left: 22px;
+    font-size: 13px; color: var(--text-soft);
+  }
+  .toc ol li { margin-bottom: 4px; }
+  .toc ol li a { color: var(--text); text-decoration: none; font-weight: 600; }
+  .toc ol li a:hover { color: var(--sdlc-blue); text-decoration: underline; }
+
+  /* ============ Footer ============ */
+  footer {
+    text-align: center;
+    padding: 24px 32px;
+    color: var(--text-soft);
+    font-size: 12px;
+    border-top: 1px solid var(--border);
+    margin-top: 40px;
+  }
+  footer a { color: var(--sdlc-blue); text-decoration: none; font-weight: 600; }
+  footer a:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="title-block">
+    <h1>🏢 AI-DLC 실사례</h1>
+    <div class="subtitle">실제 기업이 AI-DLC 를 어떻게 도입하고 적용했는지 — 외부 사례 + 내부 사례</div>
+  </div>
+  <nav class="nav">
+    <a href="index.html">📊 워크플로우 다이어그램</a>
+    <a href="effects.html">✨ AI-DLC 효과</a>
+    <a href="scenarios.html">🎬 사용자 시나리오</a>
+    <a href="reverse-engineering.html">🔍 Reverse Engineering</a>
+    <a href="user-flow.html">🧭 사용자 흐름</a>
+    <a href="cases.html" class="active">🏢 실사례</a>
+  </nav>
+</header>
+
+<main>
+
+  <!-- ============ Hero ============ -->
+  <section class="hero">
+    <h2>실전에서 AI-DLC 는 어떻게 작동하는가</h2>
+    <p>
+      AWS Summit Seoul 등에서 공개된 <strong>국내 기업의 AI-DLC 도입 사례</strong>를 정리합니다.
+      각 사례마다 <strong>핵심 요약 · 라이브 스트리밍 링크 · 발표 자료 (PPT)</strong> 를 함께 제공합니다.
+    </p>
+    <p>
+      💡 PPT 파일이 추가되면 자동으로 페이지 내에서 viewer 로 렌더링됩니다.
+      (Microsoft Office Online Viewer · GitHub Pages 호스팅 기준)
+    </p>
+  </section>
+
+  <!-- ============ TOC ============ -->
+  <div class="toc">
+    <h3>📑 목차</h3>
+    <ol>
+      <li><a href="#external">외부 사례 — 국내 기업의 AI-DLC 도입</a>
+        <ol>
+          <li><a href="#case-samsung">[삼성전자] 에이전틱 AI 전략 — 개발혁신과 AIOps 여정</a></li>
+          <li><a href="#case-woongjin">[웅진씽크빅] 교육자용 AI 에이전트 구축기</a></li>
+          <li><a href="#case-babitalk">[바비톡] AX 여정 — 에이전틱 AI 로 K-beauty 를 바꾸다</a></li>
+          <li><a href="#case-lg">[LG전자] 큰 규모 코드베이스에서 AI-DLC 도입</a></li>
+        </ol>
+      </li>
+      <li><a href="#internal">내부 사례 — 준비 중</a></li>
+    </ol>
+  </div>
+
+  <!-- ===================================================== -->
+  <!-- ============ 외부 사례 =================== -->
+  <!-- ===================================================== -->
+  <div class="section-head external" id="external">
+    <h2>🌐 외부 사례</h2>
+    <span class="sh-tag">EXTERNAL</span>
+    <span class="sh-sub">AWS Summit Seoul 2025 발표 사례 모음</span>
+  </div>
+
+  <!-- ============ Case 1: 삼성전자 ============ -->
+  <div class="case-card" id="case-samsung">
+    <div class="case-head">
+      <div class="case-no">1</div>
+      <span class="case-company">삼성전자</span>
+      <h3>삼성전자의 에이전틱 AI 전략 — 개발혁신과 AIOps 여정</h3>
+    </div>
+    <p class="case-summary">
+      삼성전자는 <strong>21억 사용자 Samsung Account</strong> 와 50여 개 주요 서비스 위에서 에이전틱 AI 를
+      개발과 운영 전 영역으로 확산시키는 대표적 사례입니다.
+      개발은 <strong>AI-DLC</strong> 로 <strong>'의도와 실행을 분리'</strong> 하고
+      <code>Knowledge Base</code> · <code>Human-in-the-Loop</code> 거버넌스를 결합해
+      <strong>리드타임 70% 단축</strong>을 실증했고,
+      운영은 중앙 SRE 가 <code>AIOps</code> · <code>SecOps</code> · <code>FinOps</code> 분과에 AI 에이전트를 배치해
+      <strong>변경영향도 분석 · ARB · 이상 탐지 · WAF 대응</strong> 을 자동화했습니다.
+      <code>Kiro</code> · <code>Amazon Quick</code> · <code>Bedrock AgentCore</code> 를
+      <strong>Supervisor–Domain–Task 계층</strong> 으로 표준화한
+      <strong>4단계 성숙도 로드맵</strong> 위에서 <strong>Toil 0% · Human First</strong> 를 지향하는 여정을 공유합니다.
+    </p>
+    <div class="case-actions">
+      <a href="https://summitseoul.awslivestream.com/sel-ind225/live/" target="_blank">
+        🎬 라이브 스트리밍 보기
+      </a>
+    </div>
+    <div class="case-deck" data-ppt="decks/case-samsung.pptx" data-ppt-title="삼성전자 AI-DLC 발표 자료"></div>
+  </div>
+
+  <!-- ============ Case 2: 웅진씽크빅 ============ -->
+  <div class="case-card" id="case-woongjin">
+    <div class="case-head">
+      <div class="case-no">2</div>
+      <span class="case-company">웅진씽크빅</span>
+      <h3>웅진씽크빅의 AI-DLC 를 활용한 교육자용 AI 에이전트 구축기</h3>
+    </div>
+    <p class="case-summary">
+      웅진씽크빅은 <strong>학습 컨설턴트의 생산성 향상 및 고객 경험 개선</strong>을 위한
+      AI 에이전트 구축 과제에 직면했을 때,
+      <code>Kiro</code> 와 <strong>AI-DLC 방법론</strong>을 도입하여
+      <strong>개발 속도를 단축</strong>시키고 서비스를 성공적으로 런치하였습니다.
+      본 세션에서는 이러한 웅진씽크빅의 AI 에이전트 구축 여정을 공유합니다.
+    </p>
+    <div class="case-actions">
+      <a href="https://summitseoul.awslivestream.com/sel-ind213/live/" target="_blank">
+        🎬 라이브 스트리밍 보기
+      </a>
+    </div>
+    <div class="case-deck" data-ppt="decks/case-woongjin.pptx" data-ppt-title="웅진씽크빅 AI-DLC 발표 자료"></div>
+  </div>
+
+  <!-- ============ Case 3: 바비톡 ============ -->
+  <div class="case-card" id="case-babitalk">
+    <div class="case-head">
+      <div class="case-no">3</div>
+      <span class="case-company">바비톡</span>
+      <h3>바비톡의 AX 여정 — 에이전틱 AI 로 K-beauty 를 바꾸다</h3>
+    </div>
+    <p class="case-summary">
+      <strong>1,000만 유저의 바비톡</strong>은 <strong>AI 특공대</strong> 와 <strong>Monthly PoC</strong> 로
+      AX 를 추진하고 있습니다.
+      본 세션에서는 <code>Amazon Bedrock</code> 기반 <strong>K-Beauty 어시스턴트</strong> 등
+      Agentic AI 도입 사례와,
+      <strong>AI-DLC (AI Development Life Cycle)</strong> 를 사용해
+      <strong>마케팅팀과 개발팀 협업 모델 변화</strong>를 통한 개발 문화 및 생산성 혁신 경험을 공유합니다.
+    </p>
+    <div class="case-actions">
+      <a href="https://summitseoul.awslivestream.com/sel-ind211/live/" target="_blank">
+        🎬 라이브 스트리밍 보기
+      </a>
+    </div>
+    <div class="case-deck" data-ppt="decks/case-babitalk.pptx" data-ppt-title="바비톡 AI-DLC 발표 자료"></div>
+  </div>
+
+  <!-- ============ Case 4: LG전자 ============ -->
+  <div class="case-card" id="case-lg">
+    <div class="case-head">
+      <div class="case-no">4</div>
+      <span class="case-company">LG전자</span>
+      <h3>AI 기반 개발 라이프사이클 (AI-DLC) 소개</h3>
+    </div>
+    <p class="case-summary">
+      <strong>AI-DLC</strong> 는 AI 와 사람의 협업 모델을 기반으로
+      소프트웨어 개발 방식을 근본적으로 혁신하는 <strong>AI 네이티브 개발 방법론</strong>입니다.
+      본 세션에서는 AI-DLC 워크플로우를 소개하고,
+      이러한 패러다임 전환이 <strong>개발자와 조직, 비즈니스에 가져다줄 변화와 이점</strong>을 다룹니다.
+      특히 <strong>큰 규모의 코드베이스 환경에서 AI-DLC 를 도입한 LG전자의 사례</strong>와
+      그 과정에서 얻은 교훈을 공유합니다.
+    </p>
+    <div class="case-actions">
+      <a href="https://summitseoul.awslivestream.com/sel-dvt203/live/" target="_blank">
+        🎬 라이브 스트리밍 보기
+      </a>
+    </div>
+    <div class="case-deck" data-ppt="decks/case-lg.pptx" data-ppt-title="LG전자 AI-DLC 발표 자료"></div>
+  </div>
+
+  <!-- ===================================================== -->
+  <!-- ============ 내부 사례 =================== -->
+  <!-- ===================================================== -->
+  <div class="section-head internal" id="internal">
+    <h2>🏠 내부 사례</h2>
+    <span class="sh-tag">INTERNAL</span>
+    <span class="sh-sub">조직 내 AI-DLC 도입 사례 — 정리 중</span>
+  </div>
+
+  <div class="coming-soon">
+    <span class="cs-icon">🚧</span>
+    <h3>준비 중입니다</h3>
+    <p>
+      조직 내 AI-DLC 도입 사례를 정리하고 있습니다.<br/>
+      추후 업데이트될 예정이니 조금만 기다려 주세요.
+    </p>
+  </div>
+
+</main>
+
+<footer>
+  <p>
+    데이터 출처: AWS Summit Seoul 2025 발표 세션 ·
+    <a href="https://github.com/awslabs/aidlc-workflows" target="_blank">aidlc-workflows</a> (Apache-2.0) ·
+    <a href="index.html">📊 다이어그램</a> ·
+    <a href="effects.html">✨ 효과</a> ·
+    <a href="scenarios.html">🎬 시나리오</a> ·
+    <a href="user-flow.html">🧭 사용자 흐름</a>
+  </p>
+</footer>
+
+<script>
+  // PPT viewer: data-ppt 경로에 파일이 있으면 Microsoft Office Online Viewer 로 임베드.
+  // 파일이 없거나 file:// 로 열렸으면 placeholder 표시.
+  (function () {
+    const decks = document.querySelectorAll('.case-deck[data-ppt]');
+    const isHttp = location.protocol === 'http:' || location.protocol === 'https:';
+
+    function showPlaceholder(el, path, title) {
+      el.innerHTML =
+        '<div class="ppt-placeholder">' +
+          '<span class="ppt-icon">📎</span>' +
+          '<div><strong>' + (title || '발표 자료') + ' 추가 예정</strong></div>' +
+          '<div style="margin-top:6px;">파일을 <code>' + path + '</code> 경로에 업로드하면 이 영역에 자동으로 viewer 가 렌더링됩니다.</div>' +
+        '</div>';
+    }
+
+    function embedDeck(el, path, title) {
+      // file:// 에서는 Office viewer 가 접근 불가 → placeholder.
+      if (!isHttp) { showPlaceholder(el, path, title); return; }
+
+      // 원격 PPT URL 생성 (현재 페이지 기준 절대 경로).
+      const fullUrl = new URL(path, location.href).href;
+      // localhost / 사설망은 Office viewer 가 접근 불가 → placeholder 로 안내.
+      const host = location.hostname;
+      const isLocal = host === 'localhost' || host === '127.0.0.1' || host.endsWith('.local');
+      if (isLocal) {
+        el.innerHTML =
+          '<div class="ppt-placeholder">' +
+            '<span class="ppt-icon">📎</span>' +
+            '<div><strong>' + (title || '발표 자료') + '</strong> — 로컬 서버에서는 viewer 미리보기가 불가합니다.</div>' +
+            '<div style="margin-top:6px;">GitHub Pages 등에 배포된 환경에서 자동 렌더링됩니다. 파일 경로: <code>' + path + '</code></div>' +
+          '</div>';
+        return;
+      }
+
+      const viewerSrc = 'https://view.officeapps.live.com/op/embed.aspx?src=' + encodeURIComponent(fullUrl);
+      el.innerHTML = '<iframe src="' + viewerSrc + '" allowfullscreen title="' + (title || 'PPT viewer') + '"></iframe>';
+    }
+
+    decks.forEach(function (el) {
+      const path = el.getAttribute('data-ppt');
+      const title = el.getAttribute('data-ppt-title') || '';
+      if (!path) { showPlaceholder(el, '(미지정)', title); return; }
+
+      if (!isHttp) { showPlaceholder(el, path, title); return; }
+
+      // 파일 존재 여부를 HEAD 로 확인.
+      fetch(path, { method: 'HEAD' })
+        .then(function (res) {
+          if (res.ok) embedDeck(el, path, title);
+          else showPlaceholder(el, path, title);
+        })
+        .catch(function () { showPlaceholder(el, path, title); });
+    });
+  })();
+</script>
+
+</body>
+</html>
