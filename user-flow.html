@@ -283,6 +283,93 @@
     border-radius: 4px; font-size: 11.5px;
   }
 
+  /* ============ User-operable knobs ============ */
+  .knobs {
+    margin-top: 36px;
+    background: linear-gradient(135deg, #E8F1FB 0%, #D7E3F0 100%);
+    border: 1.5px solid #B8CCE0;
+    border-radius: 14px;
+    padding: 28px 32px;
+  }
+  .knobs h2 {
+    margin: 0 0 6px; font-size: 22px;
+    color: #1F5C92; font-weight: 800;
+  }
+  .knobs .lead {
+    font-size: 13.5px; color: #2C5680;
+    margin: 0 0 20px; line-height: 1.7;
+  }
+  .knobs .lead strong { color: #1F5C92; }
+  .knobs .lead code {
+    background: rgba(31,92,146,0.08);
+    padding: 1px 6px; border-radius: 4px; font-size: 12.5px;
+  }
+  .knobs .kgrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+    gap: 16px;
+  }
+  .knobs .knob {
+    background: white;
+    border: 1px solid #B8CCE0;
+    border-radius: 12px;
+    padding: 18px 20px;
+    display: flex; flex-direction: column; gap: 12px;
+  }
+  .knobs .knob h4 {
+    margin: 0; font-size: 16px;
+    color: #1F5C92; font-weight: 800;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .knobs .knob h4 .ib {
+    background: #2C7BC4; color: white;
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 28px; height: 28px;
+    border-radius: 8px; font-size: 15px;
+  }
+  .knobs .k-row {
+    border-left: 3px solid #B8CCE0;
+    padding-left: 12px;
+  }
+  .knobs .k-row .lb {
+    font-size: 10px; color: #2C7BC4;
+    letter-spacing: 1.2px; font-weight: 800;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+  .knobs .k-row p {
+    margin: 0; font-size: 12.5px;
+    color: var(--text); line-height: 1.6;
+  }
+  .knobs .k-row p strong { color: var(--text); font-weight: 700; }
+  .knobs .k-row p code {
+    background: var(--bg-soft); padding: 1px 5px;
+    border-radius: 4px; font-size: 11.5px;
+  }
+  .knobs .ex {
+    background: #1E2433; color: #DDE3F0;
+    border-radius: 6px;
+    padding: 10px 12px;
+    font-family: 'JetBrains Mono', 'Consolas', 'Menlo', monospace;
+    font-size: 11.5px;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    word-break: break-word;
+    margin-top: 6px;
+  }
+  .knobs .ex .pf { color: #F5A623; font-weight: 700; }
+  .knobs .ex .pa { color: #7ED321; }
+  .knobs .note {
+    background: #FFF7E8;
+    border: 1px solid #E8C97A;
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 12px;
+    color: #6A4F1A; line-height: 1.6;
+    margin-top: 4px;
+  }
+  .knobs .note strong { color: #8A5A0A; }
+
   /* ============ After-completion ============ */
   .after {
     margin-top: 30px;
@@ -397,6 +484,7 @@
       <li><a href="#bt">Phase 2.6 — Build &amp; Test</a></li>
       <li><a href="#ops">Phase 3 — Operations (placeholder)</a></li>
       <li><a href="#cross">Cross-cutting: HITL · audit · session · extension</a></li>
+      <li><a href="#knobs">🎛️ 사용자가 실제로 조작할 수 있는 부분 (extension · depth)</a></li>
       <li><a href="#after">완료 후 — 변경 시 3-step back-propagation</a></li>
     </ol>
   </div>
@@ -1030,6 +1118,119 @@ E) Other (describe below)
         <p><code>overconfidence-prevention.md</code> 룰이 AI 의 임의 결정·추측을 차단.
         명확치 않은 사항은 추측 대신 <strong>질문 발행</strong> 으로 처리하도록 강제.</p>
       </div>
+    </div>
+  </section>
+
+  <!-- ===================================================== -->
+  <!-- ============ USER-OPERABLE KNOBS ================== -->
+  <!-- ===================================================== -->
+  <section class="knobs" id="knobs">
+    <h2>🎛️ 사용자가 실제로 조작할 수 있는 부분</h2>
+    <p class="lead">
+      Cross-cutting 항목 중 <strong>Extension</strong> 과 <strong>Adaptive depth</strong> 는 사용자가 적극적으로 개입할 수 있는 knob 입니다.
+      나머지(HITL · audit · session-continuity 등) 가 <strong>자동으로 깔리는 기반</strong>이라면, 이 둘은 <strong>"내가 어떻게 적용할지" 를 선택</strong>하는 부분.
+      구체적으로 어디서·어떻게 조작하는지 정리합니다.
+    </p>
+
+    <div class="kgrid">
+
+      <!-- ===== Extension 사용법 ===== -->
+      <div class="knob">
+        <h4><span class="ib">🔌</span> Extension — 룰을 강제 적용하는 스위치</h4>
+
+        <div class="k-row">
+          <div class="lb">STEP 1 · 활성화</div>
+          <p>원하는 extension 의 <code>.md</code> + <code>.opt-in.md</code> 한 쌍을
+          <code>aidlc-rules/extensions/&lt;도메인&gt;/&lt;이름&gt;/</code> 경로에 두면 자동 인식.
+          기본 제공: <code>security/baseline</code>, <code>testing/property-based</code>.</p>
+        </div>
+
+        <div class="k-row">
+          <div class="lb">STEP 2 · 응답 — Requirements Analysis 시점</div>
+          <p>extension 의 <code>.opt-in.md</code> 질문이 <strong>clarification-questions 파일에 자동 삽입</strong>됨.
+          사용자는 해당 파일을 열고 <code>[Answer]:</code> 한 글자만 입력하면 됨.</p>
+          <div class="ex"><span class="pf">requirement-verification-questions.md</span>
+
+## Question: Security Extensions
+A) Yes — enforce all SECURITY rules as blocking
+B) No — skip all SECURITY rules
+E) Other (describe below)
+
+<span class="pa">[Answer]: A</span></div>
+        </div>
+
+        <div class="k-row">
+          <div class="lb">STEP 3 · 결과</div>
+          <p><strong>A 선택</strong> → 이후 모든 단계에서 해당 룰이 <strong>blocking constraint</strong>.
+          Build &amp; Test 의 SAST 결과·커버리지 임계값이 통과 못 하면 진행 불가.
+          <br/><strong>B 선택</strong> → 룰 비활성. PoC·prototype 에 적합.</p>
+        </div>
+
+        <div class="k-row">
+          <div class="lb">STEP 4 · 사내 커스텀 룰 추가</div>
+          <p>회사 표준이 있다면 같은 패턴으로 직접 만들 수 있음:
+          <code>aidlc-rules/extensions/my-org/coding-style/coding-style.md</code> +
+          <code>coding-style.opt-in.md</code>. 폴더에 두는 것만으로 다음 세션부터 opt-in 질문이 자동 추가됨.</p>
+        </div>
+
+        <div class="note">
+          <strong>💡 Tip:</strong> opt-in 응답은 <code>audit.md</code> 에 함께 기록되어,
+          "이 프로젝트에 어떤 룰이 enforce 됐는가" 를 사후에 항상 추적 가능합니다.
+        </div>
+      </div>
+
+      <!-- ===== Depth 조정법 ===== -->
+      <div class="knob">
+        <h4><span class="ib">🎚️</span> Adaptive Depth — 산출물 detail 수준 조정</h4>
+
+        <div class="k-row">
+          <div class="lb">기본 — 자동 판단</div>
+          <p>사용자가 별도 표현을 하지 않으면 AI 가 <strong>요청 명확도 · 복잡도 · scope · risk · greenfield/brownfield · 사용자 선호</strong>
+          의 6 가지를 종합해 minimal / standard / comprehensive 중 자동 선택.</p>
+        </div>
+
+        <div class="k-row">
+          <div class="lb">방법 1 · vision.md 에 의도 명시 (가장 추천)</div>
+          <p>vision 의 Notes 섹션에 한 줄만 적어 두면 이후 모든 stage 의 detail 수준이 그 방향으로 자동 편향됨.</p>
+          <div class="ex"><span class="pf">vision.md</span>
+
+## Notes
+<span class="pa"># minimal 편향</span>
+This is a 2-week prototype — keep
+all artifacts minimal and concise.
+
+<span class="pa"># 또는 comprehensive 편향</span>
+Long-term production system; the docs
+will serve as ADR. Be comprehensive,
+include alternatives considered.</div>
+        </div>
+
+        <div class="k-row">
+          <div class="lb">방법 2 · 세션 중 자연어로 즉시 조정</div>
+          <p>특정 산출물이 너무 장황하거나 부족하면 그 stage 의 review 시점에 자연어로 지시. AI 가 해당 산출물을 다시 작성.</p>
+          <div class="ex"><span class="pf">User &gt;</span> The requirements.md is too verbose.
+Please trim it to a minimal version
+focused on the MVP only.
+
+<span class="pf">User &gt;</span> The component-diagram.md is too
+abstract — please add data flow
+and integration points (comprehensive).</div>
+        </div>
+
+        <div class="k-row">
+          <div class="lb">중요 — depth ≠ scope</div>
+          <p><strong>depth 는 각 산출물의 detail 수준만 조정</strong>. "어떤 stage 를 skip 할지" 는 별도로 Workflow Planning 이 결정.
+          depth=minimal 이라도 ALWAYS stage (Workspace Detection · Requirements Analysis · Workflow Planning ·
+          Code Generation · Build &amp; Test) 는 모두 실행됨.</p>
+        </div>
+
+        <div class="note">
+          <strong>⚠️ 주의:</strong> "<code>--depth=minimal</code>" 같은 flag 는 없음.
+          모두 <strong>자연어로 의도를 명시</strong>하는 방식이며, AI 가 그 의도를
+          향후 stage 에도 일관 적용합니다.
+        </div>
+      </div>
+
     </div>
   </section>
 
