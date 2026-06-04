@@ -270,6 +270,81 @@
   }
   .card ul li::marker { color: var(--text-faint); }
 
+  /* ============ Layered capability stack ============ */
+  /* 위층 — 4 phase-action cards / 아래층 — 2 foundation cards */
+  .cap-stack { display: flex; flex-direction: column; gap: 0; }
+
+  .cap-top {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 14px;
+    position: relative;
+    z-index: 2;
+    padding-bottom: 22px;
+  }
+  .cap-top .card.action {
+    border-top-color: var(--aidlc-inception);
+    box-shadow: 0 8px 16px rgba(74,144,226,0.15);
+    transition: transform .15s ease, box-shadow .15s ease;
+  }
+  .cap-top .card.action:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 22px rgba(74,144,226,0.22);
+  }
+  .cap-top .card.action .icon {
+    background: #E8F1FB;
+    color: var(--aidlc-inception);
+  }
+
+  .cap-base {
+    position: relative;
+    z-index: 1;
+    background: linear-gradient(135deg, #F5EFE3 0%, #ECE1CB 100%);
+    border: 1.5px solid #D9C79A;
+    border-radius: 14px;
+    padding: 32px 24px 22px;
+    margin-top: -10px;
+    box-shadow: inset 0 8px 18px rgba(138,90,10,0.08);
+  }
+  .cap-base::before {
+    content: "🧱 FOUNDATION · 모든 단계의 베이스에 깔리는 효과";
+    position: absolute;
+    top: -12px;
+    left: 22px;
+    background: #8A5A0A;
+    color: white;
+    font-size: 10.5px;
+    padding: 4px 12px;
+    border-radius: 10px;
+    letter-spacing: 1.2px;
+    font-weight: 800;
+    box-shadow: 0 2px 6px rgba(138,90,10,0.25);
+  }
+  .cap-base .base-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+  .cap-base .card.base {
+    background: #FFFCF5;
+    border: 1px solid #E5D4A8;
+    border-top: 4px solid #8A5A0A;
+  }
+  .cap-base .card.base .area { color: #8A5A0A; }
+  .cap-base .card.base .icon {
+    background: #F5EFE3;
+    color: #8A5A0A;
+  }
+  .cap-base .card.base .effect strong { color: #8A5A0A; }
+  .cap-base .card.base:hover {
+    box-shadow: 0 6px 16px rgba(138,90,10,0.15);
+  }
+
+  @media (max-width: 720px) {
+    .cap-base { padding: 28px 16px 16px; }
+    .cap-base .base-grid { grid-template-columns: 1fr; }
+  }
+
   /* ============ Comparison table (Without vs With) ============ */
   .comparison {
     margin: 36px 0 0;
@@ -631,102 +706,114 @@
     <span class="label">AI Capability</span>
     <span class="sub">AI 코딩 에이전트가 실제로 처리하는 작업 영역과 그 결과로 얻는 가치</span>
   </div>
-  <div class="cards">
+  <div class="cap-stack">
 
-    <div class="card ai">
-      <div class="icon-row">
-        <div class="icon">📋</div>
-        <div>
-          <div class="area">REQUIREMENTS</div>
-          <h3>요구사항 분석</h3>
+    <!-- ===== 위층: 4 phase-action cards ===== -->
+    <div class="cap-top">
+
+      <div class="card ai action">
+        <div class="icon-row">
+          <div class="icon">📋</div>
+          <div>
+            <div class="area">REQUIREMENTS</div>
+            <h3>요구사항 분석</h3>
+          </div>
         </div>
+        <div class="effect">사용자 요청을 product owner 관점으로 받아 <strong>6 영역 완성도 분석</strong>(Functional / NFR / User Scenarios / Business Context / Technical Context / Quality Attributes) 을 자동 수행합니다.</div>
+        <ul>
+          <li>요청 명확성·복잡도 자동 판별 (clear / vague / incomplete)</li>
+          <li>모호한 응답·답변 충돌 자동 탐지 → clarification 라운드</li>
+          <li>구조화된 multiple-choice 질문 자동 생성</li>
+        </ul>
       </div>
-      <div class="effect">사용자 요청을 product owner 관점으로 받아 <strong>6 영역 완성도 분석</strong>(Functional / NFR / User Scenarios / Business Context / Technical Context / Quality Attributes) 을 자동 수행합니다.</div>
-      <ul>
-        <li>요청 명확성·복잡도 자동 판별 (clear / vague / incomplete)</li>
-        <li>모호한 응답·답변 충돌 자동 탐지 → clarification 라운드</li>
-        <li>구조화된 multiple-choice 질문 자동 생성</li>
-      </ul>
+
+      <div class="card ai action">
+        <div class="icon-row">
+          <div class="icon">🏗️</div>
+          <div>
+            <div class="area">DESIGN</div>
+            <h3>아키텍처·컴포넌트 설계</h3>
+          </div>
+        </div>
+        <div class="effect">high-level 컴포넌트와 service layer 를 자동 식별하고, 의존성 그래프와 unit-of-work 까지 분해합니다.</div>
+        <ul>
+          <li>components / methods / services / dependency 4개 산출물 자동 생성</li>
+          <li>병렬 개발 가능한 unit-of-work 로 자동 분해</li>
+          <li>DDD aggregate / circular dependency 자동 검출</li>
+        </ul>
+      </div>
+
+      <div class="card ai action">
+        <div class="icon-row">
+          <div class="icon">💻</div>
+          <div>
+            <div class="area">CODE GENERATION</div>
+            <h3>코드 작성</h3>
+          </div>
+        </div>
+        <div class="effect">설계 산출물을 입력으로 <strong>Unit 단위 병렬 코드 생성</strong>. brownfield 는 기존 파일 수정, greenfield 는 신규 생성.</div>
+        <ul>
+          <li>2-phase (plan → execute) 로 코드 생성 전 사용자 검토</li>
+          <li>일관된 패턴 적용 (repository / state machine / strategy 등)</li>
+          <li>inline documentation 자동 작성</li>
+        </ul>
+      </div>
+
+      <div class="card ai action">
+        <div class="icon-row">
+          <div class="icon">🧪</div>
+          <div>
+            <div class="area">TESTING</div>
+            <h3>테스트 자동 생성</h3>
+          </div>
+        </div>
+        <div class="effect">unit / integration / performance / contract / security / e2e 테스트 instruction 을 자동 생성하여 빌드·검증 단계를 표준화합니다.</div>
+        <ul>
+          <li>NFR 에 따라 조건부 테스트 활성화 (perf / security 등)</li>
+          <li>build-and-test-summary.md 로 전체 결과 통합 리포트</li>
+          <li>실패 시 자동 디버깅·수정 시도 (real golden sample 192/192 PASS)</li>
+        </ul>
+      </div>
+
     </div>
 
-    <div class="card ai">
-      <div class="icon-row">
-        <div class="icon">🏗️</div>
-        <div>
-          <div class="area">DESIGN</div>
-          <h3>아키텍처·컴포넌트 설계</h3>
-        </div>
-      </div>
-      <div class="effect">high-level 컴포넌트와 service layer 를 자동 식별하고, 의존성 그래프와 unit-of-work 까지 분해합니다.</div>
-      <ul>
-        <li>components / methods / services / dependency 4개 산출물 자동 생성</li>
-        <li>병렬 개발 가능한 unit-of-work 로 자동 분해</li>
-        <li>DDD aggregate / circular dependency 자동 검출</li>
-      </ul>
-    </div>
+    <!-- ===== 아래층: 2 foundation cards ===== -->
+    <div class="cap-base">
+      <div class="base-grid">
 
-    <div class="card ai">
-      <div class="icon-row">
-        <div class="icon">💻</div>
-        <div>
-          <div class="area">CODE GENERATION</div>
-          <h3>코드 작성</h3>
+        <div class="card base">
+          <div class="icon-row">
+            <div class="icon">📚</div>
+            <div>
+              <div class="area">DOCUMENTATION</div>
+              <h3>문서화</h3>
+            </div>
+          </div>
+          <div class="effect">모든 단계의 산출물이 <strong>markdown 으로 자동 누적</strong>됩니다. 별도 문서화 작업이 필요 없으며, 위 4 가지 활동의 결과물이 그대로 문서가 됩니다.</div>
+          <ul>
+            <li><code>aidlc-docs/</code> 디렉토리에 단계별 산출물 자동 정리</li>
+            <li>설계 도면(컴포넌트/의존성)을 Mermaid 다이어그램으로 자동 작성</li>
+            <li>API 문서·domain model·business rules 모두 markdown</li>
+          </ul>
         </div>
-      </div>
-      <div class="effect">설계 산출물을 입력으로 <strong>Unit 단위 병렬 코드 생성</strong>. brownfield 는 기존 파일 수정, greenfield 는 신규 생성.</div>
-      <ul>
-        <li>2-phase (plan → execute) 로 코드 생성 전 사용자 검토</li>
-        <li>일관된 패턴 적용 (repository / state machine / strategy 등)</li>
-        <li>inline documentation 자동 작성</li>
-      </ul>
-    </div>
 
-    <div class="card ai">
-      <div class="icon-row">
-        <div class="icon">🧪</div>
-        <div>
-          <div class="area">TESTING</div>
-          <h3>테스트 자동 생성</h3>
+        <div class="card base">
+          <div class="icon-row">
+            <div class="icon">🔍</div>
+            <div>
+              <div class="area">BROWNFIELD ANALYSIS</div>
+              <h3>기존 코드베이스 분석</h3>
+            </div>
+          </div>
+          <div class="effect">brownfield 프로젝트의 경우 <strong>reverse engineering</strong> 으로 9개 baseline 문서를 먼저 생성하여, 위 4 가지 활동이 그 위에서 동작하도록 합니다.</div>
+          <ul>
+            <li>business-overview / architecture / API / code-structure 문서화</li>
+            <li>component-inventory / technology-stack / dependencies 식별</li>
+            <li>code-quality-assessment 로 tech debt·테스트 커버리지 평가</li>
+          </ul>
         </div>
-      </div>
-      <div class="effect">unit / integration / performance / contract / security / e2e 테스트 instruction 을 자동 생성하여 빌드·검증 단계를 표준화합니다.</div>
-      <ul>
-        <li>NFR 에 따라 조건부 테스트 활성화 (perf / security 등)</li>
-        <li>build-and-test-summary.md 로 전체 결과 통합 리포트</li>
-        <li>실패 시 자동 디버깅·수정 시도 (real golden sample 192/192 PASS)</li>
-      </ul>
-    </div>
 
-    <div class="card ai">
-      <div class="icon-row">
-        <div class="icon">📚</div>
-        <div>
-          <div class="area">DOCUMENTATION</div>
-          <h3>문서화</h3>
-        </div>
       </div>
-      <div class="effect">모든 단계의 산출물이 markdown 으로 자동 누적됩니다. 별도 문서화 작업이 필요 없습니다.</div>
-      <ul>
-        <li><code>aidlc-docs/</code> 디렉토리에 단계별 산출물 자동 정리</li>
-        <li>설계 도면(컴포넌트/의존성)을 Mermaid 다이어그램으로 자동 작성</li>
-        <li>API 문서·domain model·business rules 모두 markdown</li>
-      </ul>
-    </div>
-
-    <div class="card ai">
-      <div class="icon-row">
-        <div class="icon">🔍</div>
-        <div>
-          <div class="area">BROWNFIELD ANALYSIS</div>
-          <h3>기존 코드베이스 분석</h3>
-        </div>
-      </div>
-      <div class="effect">brownfield 프로젝트에 대해 <strong>reverse engineering</strong> 으로 9개 분석 문서를 자동 생성합니다.</div>
-      <ul>
-        <li>business-overview / architecture / API / code-structure 문서화</li>
-        <li>component-inventory / technology-stack / dependencies 식별</li>
-        <li>code-quality-assessment 로 tech debt·테스트 커버리지 평가</li>
-      </ul>
     </div>
 
   </div>
