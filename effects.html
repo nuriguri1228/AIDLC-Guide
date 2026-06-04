@@ -270,17 +270,66 @@
   }
   .card ul li::marker { color: var(--text-faint); }
 
-  /* ============ Layered capability stack ============ */
-  /* 위층 — 4 phase-action cards / 아래층 — 2 foundation cards */
+  /* ============ 3-tier capability stack ============ */
+  /* 상단(선행) → 중간(4 phase actions) → 하단(누적 문서) */
   .cap-stack { display: flex; flex-direction: column; gap: 0; }
 
+  /* ----- 공통 — single-card wrapper for prereq / base ----- */
+  .cap-single {
+    display: grid;
+    grid-template-columns: 1fr;
+    max-width: 920px;
+    margin: 0 auto;
+  }
+
+  /* ----- 상단 — brownfield prerequisite ----- */
+  .cap-prereq {
+    position: relative;
+    z-index: 1;
+    background: linear-gradient(135deg, #F1E4D6 0%, #E5D1B8 100%);
+    border: 1.5px dashed #B5751A;
+    border-radius: 14px;
+    padding: 32px 24px 22px;
+    margin-bottom: -10px;
+    box-shadow: inset 0 -8px 18px rgba(181,117,26,0.08);
+  }
+  .cap-prereq::before {
+    content: "🔻 선행 단계 · brownfield 만 · 본작업의 baseline 을 먼저 생성";
+    position: absolute;
+    top: -12px;
+    left: 22px;
+    background: #B5751A;
+    color: white;
+    font-size: 10.5px;
+    padding: 4px 12px;
+    border-radius: 10px;
+    letter-spacing: 1.2px;
+    font-weight: 800;
+    box-shadow: 0 2px 6px rgba(181,117,26,0.25);
+  }
+  .cap-prereq .card.prereq {
+    background: #FFFCF5;
+    border: 1px solid #D9C79A;
+    border-top: 4px solid #B5751A;
+  }
+  .cap-prereq .card.prereq .area { color: #B5751A; }
+  .cap-prereq .card.prereq .icon {
+    background: #F1E4D6;
+    color: #B5751A;
+  }
+  .cap-prereq .card.prereq .effect strong { color: #B5751A; }
+  .cap-prereq .card.prereq:hover {
+    box-shadow: 0 6px 16px rgba(181,117,26,0.15);
+  }
+
+  /* ----- 중간 — 4 phase actions ----- */
   .cap-top {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
     gap: 14px;
     position: relative;
     z-index: 2;
-    padding-bottom: 22px;
+    padding: 24px 0 22px;
   }
   .cap-top .card.action {
     border-top-color: var(--aidlc-inception);
@@ -296,6 +345,7 @@
     color: var(--aidlc-inception);
   }
 
+  /* ----- 하단 — accumulated documentation foundation ----- */
   .cap-base {
     position: relative;
     z-index: 1;
@@ -307,7 +357,7 @@
     box-shadow: inset 0 8px 18px rgba(138,90,10,0.08);
   }
   .cap-base::before {
-    content: "🧱 FOUNDATION · 모든 단계의 베이스에 깔리는 효과";
+    content: "🧱 FOUNDATION · 모든 단계의 산출물이 누적되는 베이스";
     position: absolute;
     top: -12px;
     left: 22px;
@@ -319,11 +369,6 @@
     letter-spacing: 1.2px;
     font-weight: 800;
     box-shadow: 0 2px 6px rgba(138,90,10,0.25);
-  }
-  .cap-base .base-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 14px;
   }
   .cap-base .card.base {
     background: #FFFCF5;
@@ -340,9 +385,20 @@
     box-shadow: 0 6px 16px rgba(138,90,10,0.15);
   }
 
+  /* ----- between-tier arrow ----- */
+  .tier-arrow {
+    text-align: center;
+    color: var(--text-faint);
+    font-size: 22px;
+    line-height: 1;
+    margin: -4px 0;
+    position: relative;
+    z-index: 3;
+    user-select: none;
+  }
+
   @media (max-width: 720px) {
-    .cap-base { padding: 28px 16px 16px; }
-    .cap-base .base-grid { grid-template-columns: 1fr; }
+    .cap-prereq, .cap-base { padding: 28px 16px 16px; }
   }
 
   /* ============ Comparison table (Without vs With) ============ */
@@ -708,7 +764,31 @@
   </div>
   <div class="cap-stack">
 
-    <!-- ===== 위층: 4 phase-action cards ===== -->
+    <!-- ===== 상단 tier — 선행 단계 (brownfield prereq) ===== -->
+    <div class="cap-prereq">
+      <div class="cap-single">
+        <div class="card prereq">
+          <div class="icon-row">
+            <div class="icon">🔍</div>
+            <div>
+              <div class="area">BROWNFIELD ANALYSIS · STAGE 1.2</div>
+              <h3>기존 코드베이스 분석 (선행)</h3>
+            </div>
+          </div>
+          <div class="effect">brownfield 프로젝트에 한해 <strong>본작업 전에 1 회</strong> 수행. reverse engineering 으로 9 개 baseline 문서를 만들어 아래 4 phase action 들의 입력으로 공급합니다.</div>
+          <ul>
+            <li>business-overview / architecture / API / code-structure 문서화</li>
+            <li>component-inventory / technology-stack / dependencies 식별</li>
+            <li>code-quality-assessment 로 tech debt·테스트 커버리지 평가</li>
+            <li>Greenfield 에서는 통째로 skip</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="tier-arrow">▼</div>
+
+    <!-- ===== 중간 tier — 4 phase actions ===== -->
     <div class="cap-top">
 
       <div class="card ai action">
@@ -777,42 +857,27 @@
 
     </div>
 
-    <!-- ===== 아래층: 2 foundation cards ===== -->
-    <div class="cap-base">
-      <div class="base-grid">
+    <div class="tier-arrow">▼</div>
 
+    <!-- ===== 하단 tier — 누적 문서화 foundation ===== -->
+    <div class="cap-base">
+      <div class="cap-single">
         <div class="card base">
           <div class="icon-row">
             <div class="icon">📚</div>
             <div>
               <div class="area">DOCUMENTATION</div>
-              <h3>문서화</h3>
+              <h3>문서화 (자동 누적)</h3>
             </div>
           </div>
-          <div class="effect">모든 단계의 산출물이 <strong>markdown 으로 자동 누적</strong>됩니다. 별도 문서화 작업이 필요 없으며, 위 4 가지 활동의 결과물이 그대로 문서가 됩니다.</div>
+          <div class="effect">위 모든 활동의 산출물이 <strong>markdown 으로 자동 누적</strong>됩니다. 별도 문서화 작업이 필요 없으며, 모든 단계의 결과가 그대로 영구 문서가 됩니다 — <strong>진정한 cross-cutting 효과</strong>.</div>
           <ul>
             <li><code>aidlc-docs/</code> 디렉토리에 단계별 산출물 자동 정리</li>
             <li>설계 도면(컴포넌트/의존성)을 Mermaid 다이어그램으로 자동 작성</li>
             <li>API 문서·domain model·business rules 모두 markdown</li>
+            <li><code>audit.md</code> 에 모든 결정·승인 timestamp 와 함께 append-only</li>
           </ul>
         </div>
-
-        <div class="card base">
-          <div class="icon-row">
-            <div class="icon">🔍</div>
-            <div>
-              <div class="area">BROWNFIELD ANALYSIS</div>
-              <h3>기존 코드베이스 분석</h3>
-            </div>
-          </div>
-          <div class="effect">brownfield 프로젝트의 경우 <strong>reverse engineering</strong> 으로 9개 baseline 문서를 먼저 생성하여, 위 4 가지 활동이 그 위에서 동작하도록 합니다.</div>
-          <ul>
-            <li>business-overview / architecture / API / code-structure 문서화</li>
-            <li>component-inventory / technology-stack / dependencies 식별</li>
-            <li>code-quality-assessment 로 tech debt·테스트 커버리지 평가</li>
-          </ul>
-        </div>
-
       </div>
     </div>
 
