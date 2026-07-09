@@ -496,7 +496,7 @@
   <div class="toc">
     <h3>📑 목차</h3>
     <ol>
-      <li><a href="#prep">Step 0 — 사전 준비 (harness 설치 · intent)</a></li>
+      <li><a href="#prep">Step 0 — 초기 세팅 (bun · Bedrock · harness) · 1.0 대비 대폭 변경 · Bedrock 필요?</a></li>
       <li><a href="#trigger">Step 0.5 — /aidlc 트리거 · scope 자동 compose</a></li>
       <li><a href="#workspace-scaffold">Phase 1 — Initialization (3 stage)</a></li>
       <li><a href="#intent-capture">Phase 2 — Ideation (7 stage · VG1)</a></li>
@@ -566,48 +566,176 @@ flowchart TD
   <!-- ============ STEP 0 : 사전 준비 =================== -->
   <!-- ===================================================== -->
   <div class="phase p1" id="prep">
-    <h2>STEP 0 · 사전 준비</h2>
+    <h2>STEP 0 · 사전 준비 (초기 세팅)</h2>
     <span class="ph-tag">BEFORE AI-DLC 2.0</span>
-    <span class="ph-sub">harness 설치 + 만들고 싶은 것(intent) 한 줄</span>
+    <span class="ph-sub">runtime(bun) · AWS Bedrock · harness 설치 — 1.0 대비 대폭 변경</span>
   </div>
 
+  <!-- 1.0 vs 2.0 설치 비교 -->
   <div class="step p1">
     <div class="sh">
-      <span class="sn">STEP 0.1</span>
-      <h3>🛠️ Harness 설치</h3>
-      <span class="badge always">REQUIRED</span>
+      <span class="sn">한눈에</span>
+      <h3>⚖️ 1.0 vs 2.0 — 초기 세팅이 이렇게 달라졌다</h3>
     </div>
     <div class="summary">
-      2.0 는 <strong>"one core, many harnesses"</strong> — 하나의 core 를 도구별로 패키징합니다.
-      <code>bun</code> 런타임과 <strong>AWS Bedrock</strong> 접근이 필요하며, 최적 성능을 위해 <strong>Claude Opus 4.8</strong> 이 권장됩니다.
-      사용하는 도구의 디렉토리를 프로젝트에 복사하면 됩니다.
+      1.0 은 <strong>순수 마크다운 룰 묶음</strong>이라 "복사해서 붙이면 끝"이었습니다. 2.0 은 <strong>실행되는 엔진</strong>
+      (TypeScript 훅·CLI 툴 + 멀티에이전트 런타임 + 결정적 lifecycle hook)을 갖기 때문에, 룰 복사 이전에
+      <strong>런타임(bun)과 모델 플랫폼(AWS Bedrock)</strong> 준비가 선행돼야 합니다. 이것이 초기 세팅이 크게 달라진 근본 이유입니다.
     </div>
     <div class="grid">
       <div class="box">
-        <div class="lb">harness 별 설치 · 호출</div>
+        <div class="lb">AI-DLC 1.0 설치</div>
         <ul>
-          <li>Claude Code — <code>.claude/</code> + <code>aidlc/</code> → <code>/aidlc</code></li>
-          <li>Kiro IDE / CLI(≥2.6) — <code>.kiro/</code> + <code>aidlc/</code> → <code>/aidlc</code></li>
-          <li>Codex CLI(≥0.139) — <code>.codex/</code>+<code>.agents/</code>+<code>aidlc/</code> → <code>$aidlc</code></li>
+          <li>순수 <code>.md</code> steering rule 묶음</li>
+          <li>룰을 도구 경로(<code>.claude/</code>·<code>.cursor/</code>·<code>.amazonq/</code>…)에 복사</li>
+          <li>런타임·빌드·클라우드 <strong>불필요</strong></li>
+          <li>모델·도구·벤더 <strong>무관</strong> (any IDE / any model)</li>
+          <li>트리거: 채팅에 <code>"Using AI-DLC, …"</code></li>
         </ul>
       </div>
+      <div class="box skip">
+        <div class="lb">AI-DLC 2.0 설치 — 새로 필요한 것</div>
+        <ul>
+          <li><code>bun</code> 런타임 — 전 harness 공통 <strong>필수</strong></li>
+          <li><strong>AWS Bedrock</strong> — 모델 접근 활성화 + AWS 자격증명 <strong>필수</strong></li>
+          <li>harness 별 <code>dist/&lt;도구&gt;/</code> 디렉토리 복사 (core 는 하나, 배포는 도구별)</li>
+          <li><code>/aidlc --doctor</code> 헬스체크 통과 필요</li>
+          <li>트리거: <code>/aidlc &lt;intent&gt;</code> (Codex 는 <code>$aidlc</code>)</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- 0.1 전제조건 -->
+  <div class="step p1">
+    <div class="sh">
+      <span class="sn">STEP 0.1</span>
+      <h3>🧩 전제조건 — bun 런타임 + AWS Bedrock</h3>
+      <span class="badge always">REQUIRED</span>
+    </div>
+    <div class="summary">
+      2.0 의 모든 harness 는 동일한 <strong>TypeScript 훅·CLI 툴</strong>을 <code>bun</code> 으로 실행합니다 — 그래서 <strong>bun 을 가장 먼저</strong> 설치합니다
+      (모든 harness 가 공유하는 유일한 요구사항). 그리고 모든 harness 는 <strong>AWS Bedrock</strong> 위에서 동작하므로 첫 실행 전에 Bedrock 을 준비합니다.
+    </div>
+    <div class="prompt"><span class="pf"># 1) bun 설치 (macOS/Linux)</span>
+curl -fsSL https://bun.sh/install | bash
+
+<span class="pf"># 2) AWS Bedrock — 모델 접근 활성화 + 자격증명</span>
+aws configure                 <span class="pa"># 또는 SSO / IAM 역할</span>
+<span class="pa"># 콘솔: Bedrock &gt; Model access 에서 사용할 모델 enable</span>
+export AWS_REGION=us-east-1</div>
+    <div class="grid">
+      <div class="box skip">
+        <div class="lb">⚠️ 가장 자주 막히는 곳 — bun PATH</div>
+        <p>harness 는 훅·툴을 <strong>비대화형(non-interactive) 셸</strong>로 실행합니다. 이 셸은 <code>~/.zshrc</code> 가 아니라
+        <code>~/.zshenv</code>(zsh) · <code>~/.bashrc</code>(bash) 를 읽습니다. 설치 스크립트가 <code>~/.zshrc</code> 에만 PATH 를 넣으므로,
+        <strong>bun 의 PATH export 를 <code>~/.zshenv</code>/<code>~/.bashrc</code> 로 복사</strong>해야 훅이 정상 동작합니다.</p>
+      </div>
       <div class="box user">
-        <div class="lb">검증</div>
-        <p>새 세션에서 <code>/aidlc</code>(또는 <code>$aidlc</code>) 가 인식되면 정상. <strong>GA Preview</strong> 이므로 known-good 버전 pin 권장.</p>
+        <div class="lb">모델 권장</div>
+        <p>2.0 는 <strong>Claude Opus 4.8</strong> 에서 가장 잘 동작합니다. 약한 모델에선 conductor 가 선택적 stage 스텝(reviewer pass·learnings 의례)을
+        건너뛰거나 승인 게이트를 서두를 수 있습니다. <code>.claude/settings.json</code> 은 Bedrock 리전(<code>us-east-1</code>)에 Fable/Opus/Sonnet/Haiku 를 pin 합니다.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 0.2 Bedrock 꼭 필요한가 -->
+  <div class="step p1">
+    <div class="sh">
+      <span class="sn">STEP 0.2</span>
+      <h3>❓ AWS Bedrock 이 꼭 필요한가?</h3>
+      <span class="badge cond">핵심 질문</span>
+    </div>
+    <div class="summary">
+      <strong>결론 — 현재 v2(GA Preview)에서는 사실상 필요합니다.</strong> README 전제조건이 <em>"모든 harness 는 AWS Bedrock 위에서 동작하니
+      첫 실행 전에 Bedrock 을 설정하고, 계정에서 모델 접근을 켜고, harness 가 AWS 자격증명을 볼 수 있게 하라"</em> 고 명시하며,
+      배포본의 모델 설정(<code>.claude/settings.json</code> · <code>.codex/config.toml</code>)이 <strong>Bedrock 에 고정</strong>돼 있고, 문서 어디에도
+      Anthropic 직접 API 등 <strong>대체 provider 설정이 없습니다</strong>.
+    </div>
+    <div class="grid">
+      <div class="box user">
+        <div class="lb">왜 Bedrock 인가 (설계 의도)</div>
+        <ul>
+          <li><strong>엔진 일관성·재현성</strong> — 전 harness 가 byte-identical 엔진 + 동일 모델 pin 으로 동작</li>
+          <li><strong>엔터프라이즈 거버넌스</strong> — IAM 기반 모델 접근·리전·데이터 residency, 2.0 의 68-event 감사·컴플라이언스 지향과 정합</li>
+          <li><strong>강한 모델 필요</strong> — 자율성·자기교정에는 Opus 4.8 급 필요, Bedrock 이 first-party 접근 경로</li>
+          <li>AWS Labs 프로젝트 — Bedrock 이 기본 모델 플랫폼</li>
+        </ul>
+      </div>
+      <div class="box">
+        <div class="lb">"원리상" vs "현재 지원"</div>
+        <p>방법론 자체는 <strong>모델·도구 무관(tool-agnostic)</strong> 설계입니다(1.0 의 유산). 이론상 harness 의 모델 설정을 다른 백엔드로 바꿀 여지는 있으나,
+        <strong>v2 배포본·문서는 Bedrock 만 지원·검증</strong>합니다. Bedrock 을 벗어나면 "지원되지 않는 경로" 이며 <code>--doctor</code>·훅·모델 pin 이 어긋날 수 있습니다.</p>
+      </div>
+    </div>
+    <div class="grid" style="margin-top:12px;">
+      <div class="box skip">
+        <div class="lb">Bedrock 미설정 시 증상</div>
+        <p>Bedrock 호출이 <code>AccessDenied</code> 또는 model-not-found 로 실패 → AWS 계정에서 <strong>모델 접근을 enable</strong> 하고
+        <code>AWS_REGION</code> 이 모델을 활성화한 리전과 일치하는지 확인.</p>
+      </div>
+      <div class="box user">
+        <div class="lb">Kiro 사용자 참고</div>
+        <p>Kiro(IDE/CLI)에서 <strong>Opus 4.8</strong> 을 쓰려면 <strong>유료 Kiro 플랜</strong>이 필요합니다.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 0.3 Harness 선택·설치 -->
+  <div class="step p1">
+    <div class="sh">
+      <span class="sn">STEP 0.3</span>
+      <h3>🛠️ Harness 선택 · 설치 · doctor</h3>
+      <span class="badge always">REQUIRED</span>
+    </div>
+    <div class="summary">
+      <strong>"one core, many harnesses"</strong> — 방법론은 harness-neutral <code>core/</code> 에 한 번 정의되고 각 도구용 배포본이 <code>dist/&lt;harness&gt;/</code> 로 생성됩니다.
+      사용할 harness 의 디렉토리를 프로젝트에 복사한 뒤 <code>--doctor</code> 로 확인합니다. <strong><code>aidlc/</code> 셸에는 엔진이 읽는 사전 빌드 method 트리
+      (<code>aidlc/spaces/default/memory/</code>)</strong> 가 들어 있어 반드시 함께 복사해야 <code>--doctor</code> 의 'workspace shell ready' 검사를 통과합니다.
+    </div>
+    <div class="prompt"><span class="pf"># Claude Code</span>
+cp -r dist/claude/.claude/ your-project/.claude/
+cp -r dist/claude/aidlc/   your-project/aidlc/
+cd your-project &amp;&amp; claude
+<span class="pa">/aidlc --doctor</span>
+
+<span class="pf"># Kiro IDE / Kiro CLI(≥2.6)  — CLI 는 dist/kiro/</span>
+cp -r dist/kiro-ide/.kiro  your-project/.kiro
+cp -r dist/kiro-ide/aidlc  your-project/aidlc
+cp dist/kiro-ide/AGENTS.md your-project/AGENTS.md
+
+<span class="pf"># Codex CLI(≥0.139) — 반드시 git 저장소</span>
+cp -r dist/codex/.codex/  your-project/.codex/
+cp -r dist/codex/.agents/ your-project/.agents/
+cp -r dist/codex/aidlc/   your-project/aidlc/
+cp dist/codex/AGENTS.md   your-project/AGENTS.md
+bun .codex/tools/aidlc-utility.ts doctor</div>
+    <div class="grid">
+      <div class="box">
+        <div class="lb">호출 방법</div>
+        <ul>
+          <li>Claude Code / Kiro — <code>/aidlc &lt;intent&gt;</code></li>
+          <li>Codex CLI — <code>$aidlc</code> 또는 <code>/skills → aidlc</code></li>
+        </ul>
+      </div>
+      <div class="box skip">
+        <div class="lb">⚠️ Codex — trust 필수</div>
+        <p>trust 하지 않으면 <strong>훅이 전혀 실행되지 않습니다</strong>(감사 행 없음 · 게이트 없음).
+        <code>bun scripts/package.ts codex trust --project &lt;dir&gt;</code> 또는 TUI 의 "Trust all" 로 신뢰 설정.</p>
       </div>
     </div>
   </div>
 
   <div class="step p1">
     <div class="sh">
-      <span class="sn">STEP 0.2</span>
-      <h3>📝 intent 준비 — 무엇을, 왜</h3>
+      <span class="sn">STEP 0.4</span>
+      <h3>📚 knowledge 준비 + intent 한 줄</h3>
       <span class="badge cond">권장</span>
     </div>
     <div class="summary">
-      1.0 처럼 <code>vision.md</code> 를 미리 완성할 필요는 없습니다. 2.0 은 <strong>2.1 Intent Capture</strong> stage 가
-      대화형 명확화 질문으로 의도를 정제하기 때문입니다(원칙 2). 다만 <strong>한 문단의 freeform intent</strong> 와
-      (있다면) 팀 표준·제약을 <code>knowledge/</code> 에 미리 넣어 두면 훨씬 효율적입니다.
+      1.0 처럼 <code>vision.md</code>/<code>tech-env.md</code> 를 미리 완성할 필요는 없습니다 — 2.0 은 <strong>2.1 Intent Capture</strong> 가
+      대화형 명확화로 의도를 정제합니다(원칙 2). 대신 2.0 은 <strong>two-tier knowledge</strong> — 방법론 지식(프레임워크 제공)과
+      <strong>팀 지식(사용자 관리)</strong>을 분리합니다. 팀 표준·제약을 <code>knowledge/</code> 에 넣어 둘수록 AI 의 자율 범위가 커집니다.
     </div>
     <div class="grid">
       <div class="box">
@@ -620,7 +748,8 @@ flowchart TD
       </div>
       <div class="box user">
         <div class="lb">High-leverage tip</div>
-        <p>기계 검증 가능한 규칙(린터·정적분석)을 <code>knowledge/</code> 에 많이 넣을수록 AI 가 <strong>자율 halt</strong> 하는 stage 가 늘어 사람 개입이 줄어듭니다.</p>
+        <p>기계 검증 가능한 규칙(린터·정적분석·executable 후조건)을 <code>knowledge/</code> 에 많이 넣을수록 AI 가 <strong>자율 halt</strong> 하는 stage 가
+        늘어 사람 개입이 줄어듭니다 — 2.0 이 말하는 <strong>"안전한 증분 자율화"</strong> 의 출발점입니다.</p>
       </div>
     </div>
   </div>
