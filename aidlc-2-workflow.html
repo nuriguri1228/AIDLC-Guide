@@ -1,0 +1,1547 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI-DLC 2.0 워크플로우 다이어그램 · AIDLC Guide</title>
+<script src="https://cdn.jsdelivr.net/npm/marked@9.1.6/marked.min.js"></script>
+<style>
+/* ===== base styles reused verbatim from index.html ===== */
+  :root {
+    --aidlc-inception: #4A90E2;
+    --aidlc-construction: #7ED321;
+    --aidlc-operations: #F5A623;
+    --sdlc-blue: #2C7BC4;
+    --sdlc-blue-dark: #1F5C92;
+    --sdlc-accent: #F5A623;
+    --text: #2A3142;
+    --text-soft: #5B6577;
+    --border: #D7E3F0;
+  }
+
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    font-family: 'Segoe UI', 'Apple SD Gothic Neo', 'Malgun Gothic', '맑은 고딕', sans-serif;
+    color: var(--text);
+    background: linear-gradient(180deg, #FAFBFE 0%, #EEF3FA 100%);
+    min-height: 100vh;
+  }
+
+  /* ============ Header / Toolbar ============ */
+  header {
+    padding: 24px 32px 8px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+  .title-block h1 {
+    margin: 0;
+    font-size: 32px;
+    color: var(--sdlc-blue);
+    letter-spacing: 0.5px;
+    font-weight: 800;
+  }
+  .title-block .subtitle {
+    color: var(--text-soft);
+    font-size: 14px;
+    margin-top: 4px;
+  }
+  .nav {
+    display: flex;
+    gap: 8px;
+  }
+  .nav a {
+    text-decoration: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    border: 1.5px solid var(--sdlc-blue);
+    color: var(--sdlc-blue);
+    font-size: 13px;
+    font-weight: 700;
+    transition: all .15s ease;
+  }
+  .nav a:hover { background: var(--sdlc-blue); color: white; }
+  .nav a.active {
+    background: var(--sdlc-accent);
+    border-color: var(--sdlc-accent);
+    color: white;
+  }
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  body.simple-mode .nav a { padding: 5px 10px; font-size: 12px; }
+
+  .toolbar { display: flex; gap: 8px; }
+  .toolbar button {
+    background: white;
+    border: 1.5px solid var(--sdlc-blue);
+    color: var(--sdlc-blue);
+    padding: 8px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    transition: all .15s ease;
+  }
+  .toolbar button:hover { background: var(--sdlc-blue); color: white; }
+  .toolbar button.active {
+    background: var(--sdlc-accent);
+    border-color: var(--sdlc-accent);
+    color: white;
+  }
+  .toolbar button.danger { border-color: #c44; color: #c44; }
+  .toolbar button.danger:hover { background: #c44; color: white; }
+  .toolbar button.mode-active {
+    background: var(--sdlc-blue);
+    color: white;
+  }
+
+  /* ============ Simple Mode overrides — fit-on-one-screen ============ */
+  body.simple-mode header { padding: 10px 24px 4px; }
+  body.simple-mode .title-block h1 { font-size: 22px; }
+  body.simple-mode .title-block .subtitle { font-size: 12px; }
+  body.simple-mode .toolbar button { padding: 5px 10px; font-size: 12px; }
+  body.simple-mode main { padding: 8px 16px 12px; }
+
+  body.simple-mode .board { min-width: 1100px; }
+  body.simple-mode .aidlc-row { gap: 8px; }
+  body.simple-mode .phase-section { gap: 6px; }
+  body.simple-mode .phase-header {
+    padding: 8px 16px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+    gap: 16px;
+  }
+  body.simple-mode .phase-header .phase-name { font-size: 17px; letter-spacing: 1px; }
+  body.simple-mode .phase-header .phase-num { font-size: 10px; padding: 2px 8px; letter-spacing: 1.2px; }
+  body.simple-mode .phase-header .phase-tagline { font-size: 10px; margin-top: 1px; }
+  body.simple-mode .phase-header .phase-question { font-size: 10px; }
+  body.simple-mode .phase-flow-arrow { font-size: 18px; margin: -10px 0; }
+
+  body.simple-mode .step-col { min-width: 140px; gap: 4px; }
+  body.simple-mode .step-arrow-h { flex: 0 0 18px; padding-top: 14px; font-size: 16px; }
+  body.simple-mode .step-header {
+    padding: 6px 6px;
+    min-height: 42px;
+    gap: 1px;
+    border-radius: 6px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  }
+  body.simple-mode .step-header .step-num { font-size: 8px; letter-spacing: 0.4px; opacity: 0.85; }
+  body.simple-mode .step-header .step-title { font-size: 11px; line-height: 1.15; font-weight: 700; }
+  body.simple-mode .step-badges { gap: 2px; margin-top: 2px; }
+  body.simple-mode .step-badge { font-size: 8px; padding: 0px 4px; letter-spacing: 0; line-height: 1.3; border-width: 1px; }
+
+  body.simple-mode .activity-stack { gap: 2px; }
+  body.simple-mode .activity-box {
+    padding: 3px 18px 3px 18px;
+    font-size: 10px;
+    line-height: 1.15;
+    border-radius: 4px;
+    border-width: 1px;
+    min-height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  body.simple-mode .activity-hitl,
+  body.simple-mode .activity-doc {
+    width: 14px;
+    height: 14px;
+    font-size: 9px;
+    top: 2px;
+  }
+  body.simple-mode .activity-hitl { right: 2px; }
+  body.simple-mode .activity-doc  { left: 2px; }
+  body.simple-mode .activity-flow-arrow { display: none; }
+
+  /* Simple mode: cross-cutting brackets + change-control 숨김 (Full 에서 확인) */
+  body.simple-mode .brackets,
+  body.simple-mode .change-row { display: none; }
+
+  body.simple-mode .legend {
+    padding: 4px 10px;
+    margin-bottom: 6px;
+    font-size: 10px;
+    gap: 8px;
+  }
+  body.simple-mode .legend-group { gap: 5px; }
+  body.simple-mode .legend-group-label { font-size: 9px; letter-spacing: 0.2px; }
+  body.simple-mode .legend .step-badge { font-size: 9px; padding: 1px 5px; }
+  body.simple-mode .legend-sep { height: 16px; }
+
+  body.simple-mode footer { padding: 6px 24px 12px; font-size: 10px; }
+
+  /* ============ Main board ============ */
+  main {
+    padding: 16px 32px 48px;
+    overflow-x: auto;
+  }
+  .board { min-width: 1400px; }
+
+  /* AIDLC phase sections - stacked full-width banners */
+  .aidlc-row {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+  }
+
+  .phase-section {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+
+  /* Phase header - full-width prominent banner */
+  .phase-header {
+    padding: 22px 28px;
+    border-radius: 14px;
+    color: white;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 28px;
+  }
+  .phase-header .phase-num {
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    opacity: 0.92;
+    text-transform: uppercase;
+    padding: 6px 14px;
+    background: rgba(255,255,255,0.18);
+    border-radius: 20px;
+    white-space: nowrap;
+  }
+  .phase-header .phase-name {
+    font-size: 30px;
+    font-weight: 800;
+    letter-spacing: 2px;
+    line-height: 1.1;
+  }
+  .phase-header .phase-tagline {
+    font-size: 13px;
+    opacity: 0.92;
+    margin-top: 6px;
+    font-weight: 500;
+  }
+  .phase-header .phase-question {
+    font-size: 13px;
+    opacity: 0.92;
+    font-style: italic;
+    text-align: right;
+    white-space: nowrap;
+  }
+  .phase-header.inception { background: linear-gradient(135deg, #4A90E2, #2C6FB8); }
+  .phase-header.construction { background: linear-gradient(135deg, #7ED321, #5BAA13); }
+  .phase-header.operations { background: linear-gradient(135deg, #F5A623, #C7841A); }
+
+  .phase-header-clickable { cursor: pointer; transition: transform .15s ease; }
+  .phase-header-clickable:hover { transform: translateY(-2px); }
+
+  /* Step row - horizontal columns of steps under each phase, with → arrows between */
+  .step-row {
+    display: flex;
+    align-items: stretch;
+    gap: 0;
+  }
+  .step-col {
+    flex: 1 1 0;
+    min-width: 170px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .step-arrow-h {
+    flex: 0 0 28px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding-top: 22px;
+    font-size: 22px;
+    font-weight: 800;
+    line-height: 1;
+    user-select: none;
+  }
+  .step-arrow-h.inception    { color: var(--aidlc-inception); }
+  .step-arrow-h.construction { color: var(--aidlc-construction); }
+  .step-arrow-h.operations   { color: var(--aidlc-operations); }
+
+  /* Phase-to-phase ↓ arrow between phase sections */
+  .phase-flow-arrow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: -10px 0;
+    font-size: 32px;
+    line-height: 1;
+    color: var(--sdlc-blue);
+    text-shadow: 0 2px 4px rgba(0,0,0,0.15);
+    user-select: none;
+  }
+
+  /* Activity-to-activity ↓ arrow within a step column */
+  .activity-flow-arrow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 12px;
+    margin: -2px 0;
+    font-size: 13px;
+    line-height: 1;
+    user-select: none;
+    opacity: 0.7;
+  }
+  .activity-flow-arrow.inception    { color: var(--aidlc-inception); }
+  .activity-flow-arrow.construction { color: #4F8E1A; }
+  .activity-flow-arrow.operations   { color: #B6791A; }
+
+  /* Step header - now a mini phase-style header */
+  .step-header {
+    border-radius: 8px;
+    padding: 12px 10px;
+    color: white;
+    text-align: center;
+    cursor: pointer;
+    transition: all .15s ease;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    min-height: 64px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 3px;
+  }
+  .step-header:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 14px rgba(0,0,0,0.18);
+  }
+  .step-header .step-num {
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    opacity: 0.88;
+  }
+  .step-header .step-title {
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1.3;
+  }
+  .step-header.inception { background: linear-gradient(135deg, #5BA0E8, #3A7BC4); }
+  .step-header.construction { background: linear-gradient(135deg, #8DD935, #6BB81F); }
+  .step-header.operations { background: linear-gradient(135deg, #F6B23A, #D08F1E); }
+
+  /* Step badges - applicability & execution mode markers */
+  .step-badges {
+    display: flex;
+    justify-content: center;
+    gap: 4px;
+    margin-top: 5px;
+    flex-wrap: wrap;
+  }
+  .step-badge {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.2px;
+    padding: 2px 7px;
+    border-radius: 10px;
+    background: rgba(255,255,255,0.22);
+    color: white;
+    white-space: nowrap;
+    border: 1px solid rgba(255,255,255,0.35);
+    line-height: 1.4;
+  }
+  .step-badge.always       { background: rgba(255,255,255,0.32); border-color: rgba(255,255,255,0.5); }
+  .step-badge.conditional  { background: rgba(255,200,150,0.42); border-color: rgba(255,200,150,0.55); }
+  .step-badge.inactive     { background: rgba(180,180,180,0.45); border-color: rgba(220,220,220,0.5); }
+  .step-badge.both         { background: rgba(255,255,255,0.18); border-color: rgba(255,255,255,0.35); }
+  .step-badge.brownfield   { background: rgba(200,120,40,0.55);  border-color: rgba(255,200,140,0.7); }
+  .step-badge.greenfield   { background: rgba(80,180,80,0.55);   border-color: rgba(180,255,180,0.7); }
+
+  /* Legend bar */
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    align-items: center;
+    padding: 10px 14px;
+    margin-bottom: 16px;
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 12px;
+    color: var(--text-soft);
+  }
+  .legend-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .legend-group-label {
+    font-weight: 700;
+    color: var(--text);
+    font-size: 11px;
+    letter-spacing: 0.3px;
+  }
+  .legend-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .legend .step-badge {
+    color: var(--text);
+    background: #f0f0f0;
+    border-color: #d8d8d8;
+  }
+  .legend .step-badge.always       { background: #E8F1FB; border-color: #B6D5F1; color: #1F5C92; }
+  .legend .step-badge.conditional  { background: #FFEEDB; border-color: #F5C892; color: #B5751A; }
+  .legend .step-badge.inactive     { background: #EDEDED; border-color: #CFCFCF; color: #666; }
+  .legend .step-badge.both         { background: #F0F4F9; border-color: #D7E3F0; color: var(--text); }
+  .legend .step-badge.brownfield   { background: #F9E1C6; border-color: #D8A767; color: #7A4A12; }
+  .legend .step-badge.greenfield   { background: #DAF3DA; border-color: #88C988; color: #2F6B2F; }
+  .legend-sep {
+    width: 1px;
+    height: 22px;
+    background: var(--border);
+  }
+
+  /* Activity boxes - small detail boxes cascading below each step */
+  .activity-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .activity-box {
+    position: relative;
+    background: white;
+    border-radius: 6px;
+    padding: 8px 24px 8px 24px;
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1.35;
+    cursor: pointer;
+    transition: all .12s ease;
+    text-align: center;
+  }
+  .activity-hitl,
+  .activity-doc {
+    position: absolute;
+    top: 4px;
+    width: 18px;
+    height: 18px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    font-size: 11px;
+    line-height: 1;
+  }
+  .activity-hitl {
+    right: 4px;
+    background: #FFD93D;
+    color: #5A4300;
+    border: 1px solid #C5A700;
+  }
+  .activity-doc {
+    left: 4px;
+    background: #DCE9F8;
+    color: #1F5C92;
+    border: 1px solid #6FA5D8;
+  }
+  .activity-box:hover .activity-hitl { background: #FFE680; }
+  .activity-box:hover .activity-doc  { background: #EAF2FB; }
+  .activity-box:hover {
+    transform: translateX(2px);
+  }
+  .activity-box.inception {
+    border: 1.5px solid var(--aidlc-inception);
+    color: var(--aidlc-inception);
+  }
+  .activity-box.inception:hover {
+    background: var(--aidlc-inception);
+    color: white;
+  }
+  .activity-box.construction {
+    border: 1.5px solid var(--aidlc-construction);
+    color: #4F8E1A;
+  }
+  .activity-box.construction:hover {
+    background: var(--aidlc-construction);
+    color: white;
+  }
+  .activity-box.operations {
+    border: 1.5px solid var(--aidlc-operations);
+    color: #B6791A;
+  }
+  .activity-box.operations:hover {
+    background: var(--aidlc-operations);
+    color: white;
+  }
+
+  /* Cross-cutting brackets */
+  .brackets {
+    margin-top: 32px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .bracket {
+    border: 2px solid var(--sdlc-blue);
+    border-radius: 8px;
+    padding: 14px 18px;
+    color: var(--sdlc-accent);
+    font-weight: 800;
+    font-size: 16px;
+    letter-spacing: 1.5px;
+    background: white;
+    cursor: pointer;
+    transition: all .15s ease;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .bracket:hover {
+    background: #FFF7EB;
+    box-shadow: 0 4px 10px rgba(245,166,35,0.2);
+  }
+  .bracket-label { flex: 0 0 auto; }
+  .bracket-desc {
+    color: var(--text-soft);
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0;
+    flex: 1;
+  }
+
+  /* Change Control row */
+  .change-row {
+    margin-top: 32px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .change-box {
+    background: var(--sdlc-blue);
+    color: white;
+    padding: 14px 20px;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 13px;
+    min-width: 220px;
+    text-align: center;
+    cursor: pointer;
+    transition: all .15s ease;
+    box-shadow: 0 2px 6px rgba(44,123,196,0.25);
+  }
+  .change-box:hover {
+    background: var(--sdlc-blue-dark);
+    transform: translateY(-1px);
+  }
+  .change-arrow {
+    flex: 1;
+    height: 2px;
+    background: var(--sdlc-blue);
+    position: relative;
+    max-width: 500px;
+  }
+  .change-arrow::after {
+    content: '';
+    position: absolute;
+    right: -2px; top: 50%;
+    transform: translateY(-50%);
+    border-top: 6px solid transparent;
+    border-bottom: 6px solid transparent;
+    border-left: 9px solid var(--sdlc-blue);
+  }
+
+  /* ============ Clickable file link ============ */
+  .file-link {
+    cursor: pointer;
+    color: var(--sdlc-blue);
+    text-decoration: underline dotted;
+    text-underline-offset: 2px;
+  }
+  .file-link:hover {
+    color: var(--sdlc-blue-dark);
+    background: #EAF2FB;
+    border-radius: 3px;
+  }
+  .file-link::before {
+    content: "📄 ";
+    font-size: 0.9em;
+    opacity: 0.7;
+  }
+
+  /* ============ MD viewer modal ============ */
+  .mdv-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(20, 30, 50, 0.65);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 200;
+    padding: 24px;
+  }
+  .mdv-backdrop.open { display: flex; }
+  .mdv {
+    background: white;
+    border-radius: 14px;
+    max-width: 920px;
+    width: 100%;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 24px 60px rgba(0,0,0,0.35);
+  }
+  .mdv-header {
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    background: #FAFBFE;
+    border-radius: 14px 14px 0 0;
+  }
+  .mdv-header h2 {
+    margin: 0;
+    font-size: 16px;
+    color: var(--sdlc-blue);
+    font-family: 'Consolas', 'SF Mono', Menlo, monospace;
+  }
+  .mdv-header .mdv-path {
+    font-size: 11px;
+    color: var(--text-soft);
+    margin-top: 2px;
+    font-family: 'Consolas', 'SF Mono', Menlo, monospace;
+  }
+  .mdv-close {
+    background: transparent;
+    border: none;
+    font-size: 22px;
+    cursor: pointer;
+    color: var(--text-soft);
+    line-height: 1;
+    padding: 4px 8px;
+  }
+  .mdv-close:hover { color: var(--text); }
+  .mdv-body {
+    padding: 24px 28px;
+    overflow-y: auto;
+    flex: 1;
+    line-height: 1.6;
+    color: var(--text);
+  }
+  .mdv-body h1 { font-size: 24px; color: var(--sdlc-blue); margin: 0 0 14px; padding-bottom: 8px; border-bottom: 2px solid var(--border); }
+  .mdv-body h2 { font-size: 19px; color: var(--text); margin: 22px 0 10px; }
+  .mdv-body h3 { font-size: 16px; color: var(--text); margin: 18px 0 8px; }
+  .mdv-body h4 { font-size: 14px; color: var(--text); margin: 14px 0 6px; }
+  .mdv-body p { margin: 8px 0; }
+  .mdv-body ul, .mdv-body ol { padding-left: 24px; margin: 8px 0; }
+  .mdv-body li { margin: 4px 0; }
+  .mdv-body code {
+    background: #F0F4F9;
+    padding: 1px 6px;
+    border-radius: 3px;
+    font-size: 0.9em;
+    color: #C25C00;
+    font-family: 'Consolas', 'SF Mono', Menlo, monospace;
+  }
+  .mdv-body pre {
+    background: #2A3142;
+    color: #E8EBF0;
+    padding: 12px 16px;
+    border-radius: 6px;
+    overflow-x: auto;
+    margin: 12px 0;
+    font-size: 12px;
+  }
+  .mdv-body pre code { background: none; padding: 0; color: inherit; font-size: 12px; }
+  .mdv-body blockquote {
+    border-left: 4px solid var(--sdlc-blue);
+    padding: 4px 14px;
+    margin: 12px 0;
+    color: var(--text-soft);
+    background: #F0F4F9;
+    border-radius: 0 6px 6px 0;
+  }
+  .mdv-body table { border-collapse: collapse; margin: 12px 0; width: 100%; }
+  .mdv-body th, .mdv-body td { border: 1px solid var(--border); padding: 6px 12px; text-align: left; }
+  .mdv-body th { background: #F0F4F9; font-weight: 700; }
+  .mdv-body a { color: var(--sdlc-blue); }
+  .mdv-status {
+    padding: 40px;
+    text-align: center;
+    color: var(--text-soft);
+    font-size: 14px;
+  }
+  .mdv-error {
+    padding: 16px 20px;
+    background: #FEF0F0;
+    border: 1px solid #F5B6B6;
+    border-radius: 6px;
+    color: #8B2424;
+    font-size: 13px;
+    margin: 16px;
+  }
+  .mdv-error code { color: inherit; background: rgba(0,0,0,0.05); }
+  .mdv-sample-note {
+    background: #FFF8E1;
+    border: 1px solid #F5D87A;
+    padding: 8px 12px;
+    border-radius: 6px;
+    color: #7A5C00;
+    font-size: 12px;
+    margin: 0 16px 14px;
+  }
+
+  /* ============ Modal ============ */
+  .modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(20, 30, 50, 0.55);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    padding: 24px;
+  }
+  .modal-backdrop.open { display: flex; }
+  .modal {
+    background: white;
+    border-radius: 14px;
+    max-width: 720px;
+    width: 100%;
+    max-height: 88vh;
+    overflow: auto;
+    box-shadow: 0 24px 60px rgba(0,0,0,0.3);
+    animation: modalIn .18s ease-out;
+  }
+  @keyframes modalIn {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+  .modal-header {
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    position: sticky;
+    top: 0;
+    background: white;
+    border-radius: 14px 14px 0 0;
+  }
+  .modal-header h2 {
+    margin: 0;
+    font-size: 22px;
+    color: var(--sdlc-blue);
+  }
+  .modal-header .phase-meta {
+    font-size: 12px;
+    color: var(--text-soft);
+    margin-top: 4px;
+  }
+  .modal-close {
+    background: transparent;
+    border: none;
+    font-size: 22px;
+    cursor: pointer;
+    color: var(--text-soft);
+    line-height: 1;
+    padding: 4px 8px;
+  }
+  .modal-close:hover { color: var(--text); }
+
+  .modal-body { padding: 20px 24px 24px; }
+  .modal-section { margin-bottom: 22px; }
+  .modal-section h3 {
+    font-size: 13px;
+    color: var(--sdlc-blue);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin: 0 0 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .modal-section p, .modal-section li {
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--text);
+  }
+  .modal-section ul {
+    margin: 0;
+    padding-left: 20px;
+  }
+  .aidlc-mapping-chip {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 14px;
+    color: white;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+  }
+
+  /* Edit mode */
+  body.edit-mode [contenteditable="true"] {
+    outline: 1.5px dashed var(--sdlc-accent);
+    border-radius: 4px;
+    padding: 2px 4px;
+    background: #FFFCF3;
+  }
+  body.edit-mode [contenteditable="true"]:focus {
+    outline: 2px solid var(--sdlc-accent);
+    background: white;
+  }
+  .list-edit-controls { display: none; gap: 6px; margin-top: 8px; }
+  body.edit-mode .list-edit-controls { display: flex; }
+  .list-edit-controls button {
+    background: white;
+    border: 1px solid var(--sdlc-blue);
+    color: var(--sdlc-blue);
+    padding: 3px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 11px;
+  }
+  .list-edit-controls button:hover { background: var(--sdlc-blue); color: white; }
+
+  .edit-badge {
+    background: var(--sdlc-accent);
+    color: white;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 700;
+    margin-left: 8px;
+    display: none;
+  }
+  body.edit-mode .edit-badge { display: inline-block; }
+
+  footer {
+    padding: 16px 32px 32px;
+    text-align: center;
+    color: var(--text-soft);
+    font-size: 12px;
+  }
+  footer a { color: var(--sdlc-blue); text-decoration: none; }
+  footer a:hover { text-decoration: underline; }
+
+  .file-input { display: none; }
+
+/* ============================================================
+   2.0 ADDITIONS — extra colorKeys, agent chips, panels
+   ============================================================ */
+:root {
+  --aidlc-initialization: #17A2B8;
+  --aidlc-ideation: #7B4FE0;
+  --v2: #7B4FE0;
+  --v2-dark: #5E37B8;
+  --v2-soft: #F3EEFD;
+}
+.edit-badge{ background:var(--v2); }
+.nav a.v2link { border-color: var(--v2); color: var(--v2); }
+.nav a.v2link:hover { background: var(--v2); color:#fff; }
+.nav a.active { background: var(--v2); border-color: var(--v2); color:#fff; }
+
+/* new phase colorKeys — mirror the .inception/.construction/.operations rules */
+.phase-header.initialization { background: linear-gradient(135deg, #17A2B8, #0E7C8C); }
+.phase-header.ideation       { background: linear-gradient(135deg, #7B4FE0, #5E37B8); }
+.step-header.initialization  { background: linear-gradient(135deg, #2CB7CC, #128698); }
+.step-header.ideation        { background: linear-gradient(135deg, #8D66E8, #6A43C4); }
+.step-arrow-h.initialization { color: var(--aidlc-initialization); }
+.step-arrow-h.ideation       { color: var(--aidlc-ideation); }
+.activity-flow-arrow.initialization { color: #0E7C8C; }
+.activity-flow-arrow.ideation       { color: #5E37B8; }
+.activity-box.initialization { border:1.5px solid var(--aidlc-initialization); color:#0E7C8C; }
+.activity-box.initialization:hover { background: var(--aidlc-initialization); color:#fff; }
+.activity-box.ideation { border:1.5px solid var(--aidlc-ideation); color: var(--v2-dark); }
+.activity-box.ideation:hover { background: var(--aidlc-ideation); color:#fff; }
+
+/* agent chip on a stage header */
+.agent-chip {
+  display:inline-flex; align-items:center; gap:4px;
+  margin-top:6px; padding:2px 8px; border-radius:11px;
+  background: rgba(255,255,255,0.22); border:1px solid rgba(255,255,255,0.42);
+  font-size:10.5px; font-weight:700; color:#fff; letter-spacing:0.2px;
+}
+.agent-chip .a-sup { opacity:0.8; font-weight:600; }
+.mode-tag {
+  display:inline-block; margin-top:6px; margin-left:5px;
+  padding:2px 7px; border-radius:11px; font-size:10px; font-weight:800;
+  background:#2A3142; color:#fff; letter-spacing:0.5px;
+}
+.gate-mark {
+  display:inline-block; margin-left:5px; padding:2px 7px; border-radius:11px;
+  font-size:10px; font-weight:800; letter-spacing:0.3px;
+  background:#FFD93D; color:#5A4300; border:1px solid #C5A700;
+}
+.auto-mark {
+  display:inline-block; margin-left:5px; padding:2px 7px; border-radius:11px;
+  font-size:10px; font-weight:800; letter-spacing:0.3px;
+  background:rgba(255,255,255,0.28); color:#fff; border:1px solid rgba(255,255,255,0.5);
+}
+
+/* section panels below the board */
+.panel {
+  background:#fff; border:1px solid var(--border); border-radius:14px;
+  padding:22px 26px; margin:22px 0; box-shadow:0 2px 10px rgba(0,0,0,0.04);
+}
+.panel > h2 {
+  margin:0 0 4px; font-size:20px; font-weight:800; color:var(--v2-dark);
+  display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+}
+.panel > .p-sub { margin:0 0 18px; color:var(--text-soft); font-size:13.5px; line-height:1.7; }
+.panel .p-tag {
+  background:var(--v2-soft); color:var(--v2-dark); border:1px solid #E0D4F7;
+  padding:3px 10px; border-radius:12px; font-size:11px; letter-spacing:1px; font-weight:700;
+}
+
+/* agents grid */
+.agents-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(300px,1fr)); gap:14px; }
+.agent-card {
+  border:1px solid var(--border); border-left:5px solid #999; border-radius:11px;
+  padding:14px 16px; background:var(--bg-soft);
+}
+.agent-card h4 { margin:0 0 4px; font-size:14.5px; font-weight:800; color:var(--text); display:flex; align-items:center; gap:7px; }
+.agent-card .a-model { font-size:10px; font-weight:800; letter-spacing:0.5px; padding:1px 7px; border-radius:9px; background:#2A3142; color:#fff; }
+.agent-card .a-resp { margin:0 0 8px; font-size:12.3px; color:var(--text-soft); line-height:1.6; }
+.agent-card .a-leads { font-size:11.5px; color:var(--text); line-height:1.7; }
+.agent-card .a-leads b { color:var(--v2-dark); }
+.agent-card .a-leads .lead-pill {
+  display:inline-block; margin:2px 4px 0 0; padding:1px 7px; border-radius:9px;
+  background:#fff; border:1px solid var(--border); font-size:10.5px; font-weight:700; color:var(--text);
+}
+
+/* review-only agents */
+.review-agents { display:grid; grid-template-columns:repeat(auto-fit, minmax(240px,1fr)); gap:12px; margin-top:14px; }
+.review-card { border:1px dashed var(--border); border-radius:10px; padding:12px 15px; background:#fff; }
+.review-card h5 { margin:0 0 3px; font-size:13px; font-weight:800; color:var(--text); }
+.review-card p { margin:0; font-size:11.8px; color:var(--text-soft); line-height:1.55; }
+
+/* scopes table */
+.scope-legend { display:grid; grid-template-columns:repeat(auto-fit, minmax(220px,1fr)); gap:12px; margin-bottom:18px; }
+.scope-item { border:1px solid var(--border); border-radius:10px; padding:12px 14px; background:var(--bg-soft); }
+.scope-item .s-name { font-size:13.5px; font-weight:800; color:var(--v2-dark); }
+.scope-item .s-meta { font-size:11px; color:var(--text-faint); font-weight:700; margin:2px 0 6px; letter-spacing:0.3px; }
+.scope-item .s-desc { font-size:12px; color:var(--text-soft); line-height:1.55; }
+.scope-item .s-count { float:right; font-size:11px; font-weight:800; color:#fff; background:var(--v2); padding:1px 8px; border-radius:9px; }
+.scope-item .s-kw { margin-top:6px; font-size:10.5px; color:var(--text-faint); }
+.scope-item .s-kw code { background:#fff; }
+
+.grid-wrap { overflow-x:auto; border:1px solid var(--border); border-radius:10px; }
+table.grid { border-collapse:collapse; font-size:11px; min-width:760px; width:100%; }
+table.grid th, table.grid td { padding:5px 6px; text-align:center; border-bottom:1px solid #EEF2F7; white-space:nowrap; }
+table.grid thead th { position:sticky; top:0; background:var(--v2); color:#fff; font-weight:700; font-size:10.5px; }
+table.grid tbody td:first-child, table.grid tbody th { text-align:left; font-weight:600; color:var(--text); white-space:nowrap; }
+table.grid tbody th { position:sticky; left:0; background:#fff; z-index:1; font-size:10.5px; box-shadow:1px 0 0 #EEF2F7; }
+table.grid .e { color:#2A8; font-weight:800; }
+table.grid .x { color:#D7DEE7; }
+table.grid tbody tr:hover td, table.grid tbody tr:hover th { background:#F5F0FF; }
+table.grid .phase-row td, table.grid .phase-row th {
+  background:var(--v2-soft); color:var(--v2-dark); font-weight:800; text-align:left; font-size:10.5px; letter-spacing:0.5px;
+}
+
+/* orchestration facts */
+.orch-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(260px,1fr)); gap:14px; }
+.orch-card { border:1px solid var(--border); border-radius:11px; padding:15px 17px; background:var(--bg-soft); }
+.orch-card h4 { margin:0 0 6px; font-size:13.5px; font-weight:800; color:var(--v2-dark); display:flex; align-items:center; gap:7px; }
+.orch-card p { margin:0; font-size:12.3px; color:var(--text-soft); line-height:1.65; }
+.orch-card p strong { color:var(--text); }
+
+/* modal 2.0 compartment cards */
+.comp-cards { display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; }
+@media(max-width:600px){ .comp-cards{ grid-template-columns:1fr; } }
+.comp-mini { border-radius:9px; padding:9px 11px; color:#fff; }
+.comp-mini.c1 { background:linear-gradient(135deg,#4A90E2,#2C6FB8); }
+.comp-mini.c2 { background:linear-gradient(135deg,#7ED321,#5BAA13); }
+.comp-mini.c3 { background:linear-gradient(135deg,#F5A623,#C7841A); }
+.comp-mini .cm-tag { font-size:9.5px; font-weight:800; letter-spacing:0.8px; opacity:0.9; }
+.comp-mini .cm-t { font-size:12.5px; font-weight:800; margin:2px 0 3px; }
+.comp-mini p { margin:0; font-size:10.8px; line-height:1.5; opacity:0.97; }
+
+.pill-row { display:flex; flex-wrap:wrap; gap:6px; }
+.meta-pill { display:inline-block; padding:3px 10px; border-radius:12px; font-size:11px; font-weight:700; }
+.meta-pill.always { background:#E8F7EC; color:#1E7A3A; border:1px solid #A9E2BC; }
+.meta-pill.cond { background:#FFF1DE; color:#9A6412; border:1px solid #F3D19A; }
+.meta-pill.gate { background:#FFF8E1; color:#7A5C00; border:1px solid #F5D87A; }
+.meta-pill.nogate { background:#EEF2F7; color:#5B6577; border:1px solid #D7E3F0; }
+.meta-pill.sub { background:#2A3142; color:#fff; }
+.meta-pill.inline { background:#EEF2F7; color:#2A3142; border:1px solid #D7E3F0; }
+.scope-tick { display:inline-block; margin:2px 3px 0 0; padding:1px 8px; border-radius:9px; background:var(--v2-soft); color:var(--v2-dark); font-size:10.5px; font-weight:700; }
+
+/* intro hero for the workflow page */
+.wf-hero {
+  background:linear-gradient(135deg,#7B4FE0 0%, #5E37B8 55%, #2C7BC4 130%);
+  color:#fff; border-radius:16px; padding:26px 32px; margin:0 0 20px;
+  box-shadow:0 8px 26px rgba(94,55,184,0.26);
+}
+.wf-hero h2 { margin:0 0 8px; font-size:22px; }
+.wf-hero p { margin:0; font-size:13.5px; line-height:1.7; opacity:0.96; }
+.wf-hero p strong { color:#FFE39A; }
+.wf-hero .h-badges { margin-top:12px; display:flex; gap:8px; flex-wrap:wrap; }
+.wf-hero .h-badges span { background:rgba(255,255,255,0.18); border:1px solid rgba(255,255,255,0.4); padding:4px 11px; border-radius:20px; font-size:11px; font-weight:700; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="title-block">
+    <h1>AI-DLC 2.0 PHASES <span class="edit-badge">v2 · READ-ONLY</span></h1>
+    <div class="subtitle">AWS Labs <a href="https://github.com/awslabs/aidlc-workflows/tree/v2" target="_blank">aidlc-workflows @ v2</a> — 5 Phase · 32 Stage · 11 Agent 워크플로우</div>
+  </div>
+  <div class="header-right">
+    <nav class="nav">
+      <a href="index.html">📊 1.0 다이어그램</a>
+      <a href="aidlc-2.html">🚀 AI-DLC 2.0</a>
+      <a href="aidlc-2-workflow.html" class="active">🗺️ 2.0 워크플로우</a>
+      <a href="aidlc-2-flow.html" class="v2link">🧭 2.0 사용자 흐름</a>
+      <a href="effects.html">✨ 효과</a>
+      <a href="cases.html">🏢 실사례</a>
+    </nav>
+    <div class="toolbar">
+      <button id="btnViewMode" title="Simple ↔ Full view 토글">◆ Full</button>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section class="wf-hero">
+    <h2>🗺️ AI-DLC 2.0 워크플로우 — Phase → Stage → 산출물</h2>
+    <p>
+      2.0 의 실제 <strong>5 Phase · 32 Stage</strong> 구조를 <strong>awslabs/aidlc-workflows @ v2</strong> 의 컴파일된 stage-graph 기준으로
+      그대로 시각화합니다. 각 stage 는 <strong>담당 Persona-Agent</strong>, 실행 조건(ALWAYS/CONDITIONAL), 실행 모드(inline/subagent),
+      승인 게이트, 그리고 <strong>생성 산출물(produces)</strong> 을 함께 보여 줍니다. Stage/산출물 박스를 클릭하면 상세가 열립니다.
+    </p>
+    <div class="h-badges">
+      <span>5 Phase</span><span>32 Stage</span><span>11 Persona-Agent</span><span>9 Adaptive Scope</span><span>3-Compartment</span>
+      <span>👤 HITL 승인 게이트</span><span>Verification Gate ×3</span><span>Bolt 기반 Construction</span>
+    </div>
+  </section>
+
+  <div class="board">
+    <div class="legend">
+      <div class="legend-group">
+        <span class="legend-group-label">실행 조건</span>
+        <span class="legend-item"><span class="step-badge always">ALWAYS</span><span>scope 에 포함되면 항상 실행</span></span>
+        <span class="legend-item"><span class="step-badge conditional">COND</span><span>조건/scope 충족 시에만 실행</span></span>
+      </div>
+      <div class="legend-sep"></div>
+      <div class="legend-group">
+        <span class="legend-group-label">실행 모드</span>
+        <span class="legend-item"><span class="meta-pill inline">inline</span><span>conductor 가 persona 음성으로 직접 수행</span></span>
+        <span class="legend-item"><span class="meta-pill sub">subagent</span><span>Task 경계 뒤로 dispatch (RE · Code Gen)</span></span>
+      </div>
+      <div class="legend-sep"></div>
+      <div class="legend-group">
+        <span class="legend-group-label">상세</span>
+        <span class="legend-item">
+          <span style="display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;background:#DCE9F8;color:#1F5C92;border-radius:50%;border:1px solid #6FA5D8;font-size:11px;">📄</span>
+          <span>생성 산출물 (produces) — 클릭 시 stage 상세</span>
+        </span>
+        <span class="legend-item"><span class="agent-chip" style="background:#5E37B8;border-color:#5E37B8">🎯 Agent</span><span>stage 담당 Persona-Agent</span></span>
+      </div>
+      <div class="legend-sep"></div>
+      <div class="legend-group">
+        <span class="legend-group-label">사람 개입 (HITL)</span>
+        <span class="legend-item"><span class="gate-mark">👤 GATE</span><span>승인 게이트 — 산출 후 사람 승인 필요</span></span>
+        <span class="legend-item"><span class="auto-mark" style="background:#2A3142;border-color:#2A3142">⚙ AUTO</span><span>자동 진행 (Initialization 3 stage)</span></span>
+      </div>
+    </div>
+    <div class="aidlc-row" id="aidlcRow"></div>
+  </div>
+
+  <!-- panels rendered by JS -->
+  <div id="panelAgents"></div>
+  <div id="panelScopes"></div>
+  <div id="panelOrch"></div>
+  <div id="panelCompartment"></div>
+
+</main>
+
+<div class="modal-backdrop" id="modalBackdrop">
+  <div class="modal" id="modal">
+    <div class="modal-header">
+      <div>
+        <h2 id="modalTitle">제목</h2>
+        <div class="phase-meta" id="modalMeta"></div>
+      </div>
+      <button class="modal-close" id="modalClose">✕</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+
+<footer>
+  데이터 출처: <a href="https://github.com/awslabs/aidlc-workflows/tree/v2" target="_blank">awslabs/aidlc-workflows @ v2</a> ·
+  컴파일된 stage-graph.json / core/aidlc-common/stages / core/agents / core/scopes 기준 · GA Preview
+</footer>
+
+<script>
+/* ============================================================
+   AI-DLC 2.0 workflow data (from v2 stage-graph — verified)
+   phase numbering renumbered 1..5 for readability;
+   slug = the stable canonical stage identifier.
+   ============================================================ */
+const AGENTS = {
+  product:        { name:"Product",        icon:"🎯", color:"#4A90E2", model:"opus",   resp:"PM/비즈니스 분석 — 요구사항·유저스토리·시장조사·스코프" },
+  design:         { name:"Design",         icon:"🎨", color:"#E8508D", model:"opus",   resp:"UX/UI — 와이어프레임·인터랙션·접근성·디자인시스템" },
+  delivery:       { name:"Delivery",       icon:"📦", color:"#2FA88C", model:"sonnet", resp:"엔지니어링 매니저 — 팀 구성·Bolt 시퀀싱·phase handoff" },
+  architect:      { name:"Architect",      icon:"🏛️", color:"#7B4FE0", model:"opus",   resp:"솔루션 아키텍트 — 앱 설계·도메인 모델링·NFR 패턴·분해" },
+  awsPlatform:    { name:"AWS Platform",   icon:"☁️", color:"#F5A623", model:"opus",   resp:"AWS 아키텍트 — 인프라 설계·환경 프로비저닝·클라우드 네이티브" },
+  compliance:     { name:"Compliance",     icon:"⚖️", color:"#8A6D3B", model:"opus",   resp:"GRC/규제 — 컴플라이언스 매핑·데이터 분류·리스크 (support 전용)" },
+  devsecops:      { name:"DevSecOps",      icon:"🛡️", color:"#C0392B", model:"opus",   resp:"보안 엔지니어 — 위협 모델링·보안 요구사항·시큐어 설계·보안 파이프라인" },
+  developer:      { name:"Developer",      icon:"💻", color:"#2C3E70", model:"opus",   resp:"시니어 개발자 — 코드 생성·리버스 엔지니어링·데이터 모델링" },
+  quality:        { name:"Quality",        icon:"🧪", color:"#16A085", model:"opus",   resp:"QA 리드 — 테스트 전략·테스트 설계·품질 게이트·성능 검증" },
+  pipelineDeploy: { name:"Pipeline Deploy",icon:"🚀", color:"#D35400", model:"sonnet", resp:"CI/CD 엔지니어·릴리스 매니저 — 파이프라인·배포 전략·릴리스" },
+  operations:     { name:"Operations",     icon:"📡", color:"#27AE60", model:"sonnet", resp:"SRE — 관측성·인시던트 대응·운영 최적화" }
+};
+const REVIEW_AGENTS = [
+  { name:"Composer 🎼", desc:"워크플로우 컴포저 — task/scan/실행상태를 읽어 EXECUTE/SKIP 그리드를 제안하고, 게이트 승인 후 scope 데이터를 저작. /aidlc 오케스트레이터가 dispatch (stage 가 호출하지 않음)." },
+  { name:"Architecture Reviewer 🔍", desc:"시니어 아키텍트 리뷰어 — 기술 설계 산출물의 건전성·구현가능성 검토, 깨진 cross-ref·숨은 의존성·달성 불가 목표 탐지. 리뷰 전용." },
+  { name:"Product Lead 👔", desc:"시니어 프로덕트 리더 — 요구사항/스토리/UX 의 완결성·비즈니스 정합·테스트가능성 검토. 산출물 생성 없이 품질 게이트에서 고객의 목소리 역할." }
+];
+
+/* helper to build a stage */
+function S(num, slug, title, exec, lead, support, mode, produces, note){
+  return { num, slug, title, exec, lead, support:support||[], mode:mode||"inline", produces:produces||[], note:note||"" };
+}
+
+const DATA = {
+  phases: [
+    {
+      id:"initialization", num:"PHASE 1", name:"INITIALIZATION", colorKey:"initialization", color:"#17A2B8",
+      tagline:"작업공간 준비 · 상태 초기화", question:"어디서 시작하는가?",
+      gateAfter:"", autoproceed:true,
+      description:"단일 결정적 도구 호출(aidlc-utility init)로 실행되는 부트스트랩 phase. record 트리와 space-level knowledge 디렉토리를 만들고, greenfield/brownfield 를 판별하며, 엔진이 해석한 라우팅으로 aidlc-state.md 를 초기화합니다. 3 stage 모두 ALWAYS 이며 승인 게이트 없이 자동 진행됩니다.",
+      stages:[
+        S("1.1","workspace-scaffold","Workspace Scaffold","ALWAYS","orchestrator",[],"engine",
+          ["stage 산출물 디렉토리 트리","verification 디렉토리","space-level knowledge/ 디렉토리"],
+          "엔진(orchestrator)이 소유하는 결정적 스캐폴딩. per-intent record 트리를 생성."),
+        S("1.2","workspace-detection","Workspace Detection","ALWAYS","orchestrator",[],"engine",
+          ["workspace 분류 (greenfield / brownfield)","tech-stack 감지 결과"],
+          "greenfield/brownfield 판별 + 기술스택 감지."),
+        S("1.3","state-init","State Initialization","ALWAYS","orchestrator",[],"engine",
+          ["aidlc-state.md (엔진 해석 · 라우팅 결정)"],
+          "라우팅이 결정된 상태 파일 생성 → Ideation 으로 자동 진행.")
+      ]
+    },
+    {
+      id:"ideation", num:"PHASE 2", name:"IDEATION", colorKey:"ideation", color:"#7B4FE0",
+      tagline:"의도 포착 · 시장 · 타당성 · 스코프", question:"무엇을, 왜, 만들 가치가 있는가?",
+      gateAfter:"Verification Gate 1 (Ideation → Inception)", autoproceed:false,
+      description:"모호한 비즈니스 의도를 포착·프레이밍하고, (조건부로) 시장·타당성·팀을 평가한 뒤 스코프를 확정하고 승인·핸드오프합니다. 끝나면 Verification Gate 1 이 traceability 검사를 수행합니다. ALWAYS: intent-capture · scope-definition · approval-handoff.",
+      stages:[
+        S("2.1","intent-capture","Intent Capture & Framing","ALWAYS","product",["architect"],"inline",
+          ["intent-statement","stakeholder-map","intent-capture-questions"],
+          "모호한 의도를 명확화 질문으로 포착·프레이밍 (원칙 2)."),
+        S("2.2","market-research","Market Research","CONDITIONAL","product",[],"inline",
+          ["competitive-analysis","market-trends","build-vs-buy","market-research-questions"],
+          "경쟁·트렌드·빌드vs바이 분석."),
+        S("2.3","feasibility","Feasibility & Constraints","CONDITIONAL","architect",["awsPlatform","compliance"],"inline",
+          ["feasibility-assessment","constraint-register","raid-log","feasibility-questions"],
+          "intent-capture + market-research 를 요구(requires). 제약·RAID 로그 산출."),
+        S("2.4","scope-definition","Scope Definition","ALWAYS","product",["delivery"],"inline",
+          ["scope-document","intent-backlog","scope-definition-questions"],
+          "무엇을 이번 범위에 넣고 뺄지 확정."),
+        S("2.5","team-formation","Team Formation","CONDITIONAL","delivery",[],"inline",
+          ["team-assessment","skill-matrix","mob-composition","team-formation-questions"],
+          "팀 역량·스킬 매트릭스·mob 구성."),
+        S("2.6","rough-mockups","Rough Mockups","CONDITIONAL","design",["product"],"inline",
+          ["wireframes","user-flow","rough-mockups-questions"],
+          "초기 와이어프레임·유저플로우 (1.0 은 mockup 위치가 고정이었던 반면 2.0 은 scope 별로 유연)."),
+        S("2.7","approval-handoff","Approval & Handoff","ALWAYS","delivery",["product"],"inline",
+          ["initiative-brief","decision-log","approval-handoff-questions"],
+          "이니셔티브 브리프·결정 로그로 Inception 에 핸드오프 → VG1.")
+      ]
+    },
+    {
+      id:"inception", num:"PHASE 3", name:"INCEPTION", colorKey:"inception", color:"#4A90E2",
+      tagline:"요구사항 · 설계 · Unit 분해 · 딜리버리 계획", question:"무엇을·어떻게 구조화하는가?",
+      gateAfter:"Verification Gate 2 (Inception → Construction)", autoproceed:false,
+      description:"(brownfield 시) 리버스 엔지니어링과 실천 규칙 발견으로 시작해, 요구사항·유저스토리·정제 목업·애플리케이션 설계를 만들고, Construction 을 위한 Unit of Work 로 분해한 뒤 Bolt 계획을 세웁니다. units-generation 과 delivery-planning 은 항상 함께 실행/생략됩니다. 끝나면 VG2.",
+      stages:[
+        S("3.1","reverse-engineering","Reverse Engineering","CONDITIONAL","developer",["architect"],"subagent",
+          ["business-overview","architecture","code-structure","api-documentation","component-inventory","technology-stack","dependencies","code-quality-assessment","reverse-engineering-timestamp"],
+          "brownfield 전용 · subagent(Task 경계) 로 dispatch. codekb 9 산출물."),
+        S("3.2","practices-discovery","Practices Discovery","CONDITIONAL","pipelineDeploy",["quality","developer","devsecops"],"inline",
+          ["team-practices","discovered-rules","evidence","practices-discovery-timestamp"],
+          "팀 실천 규칙 발견 → 확인 시 aidlc-team.md / aidlc-project.md 로 승격 (Compound Engineering)."),
+        S("3.3","requirements-analysis","Requirements Analysis","ALWAYS","product",[],"inline",
+          ["requirements","requirements-analysis-questions"],
+          "product 페르소나로 요구사항 수집·명확화."),
+        S("3.4","user-stories","User Stories","CONDITIONAL","product",["design"],"inline",
+          ["stories","personas","user-stories-assessment"],
+          "유저 스토리·페르소나."),
+        S("3.5","refined-mockups","Refined Mockups","CONDITIONAL","design",["product"],"inline",
+          ["mockups","interaction-spec","design-system-mapping","accessibility-checklist","refined-mockups-questions"],
+          "정제 목업·인터랙션 스펙·접근성 체크리스트."),
+        S("3.6","application-design","Application Design","CONDITIONAL","architect",["awsPlatform","design"],"inline",
+          ["components","component-methods","services","component-dependency","decisions"],
+          "컴포넌트·서비스·의존성·설계 결정."),
+        S("3.7","units-generation","Units Generation","ALWAYS","architect",["delivery"],"inline",
+          ["unit-of-work","unit-of-work-dependency","unit-of-work-story-map"],
+          "Construction Bolt 가 소비하는 의존성 DAG 생성. 3.8 과 함께 실행/생략."),
+        S("3.8","delivery-planning","Delivery Planning","ALWAYS","delivery",["architect"],"inline",
+          ["bolt-plan","team-allocation","risk-and-sequencing-rationale","external-dependency-map","delivery-planning-questions"],
+          "Bolt 순서·팀 배치·리스크. bolt-plan.md 가 Construction 을 구동. → VG2.")
+      ]
+    },
+    {
+      id:"construction", num:"PHASE 4", name:"CONSTRUCTION", colorKey:"construction", color:"#7ED321",
+      tagline:"Bolt 단위 설계·구현·테스트", question:"어떻게 만드는가?",
+      gateAfter:"Verification Gate 3 (Construction → Operation)", autoproceed:false,
+      description:"핵심 비선형 오케스트레이션. 4.1–4.5 는 각 Unit of Work 를 하나의 'Bolt' 로 fan-out 하여 반복하고, 4.6·4.7 은 마지막에 전체에 대해 1회 실행합니다. Bolt 1 은 walking skeleton(항상 게이트/인터랙티브)이며, 이후 한 번의 ladder 프롬프트로 자율/게이트 모드를 정해 나머지 Bolt 를 처리합니다. 끝나면 VG3.",
+      stages:[
+        S("4.1","functional-design","Functional Design","CONDITIONAL","architect",["developer"],"inline",
+          ["business-logic-model","business-rules","domain-entities","(cond) frontend-components"],
+          "per-Bolt. 비즈니스 로직 모델·규칙·도메인 엔티티."),
+        S("4.2","nfr-requirements","NFR Requirements","CONDITIONAL","architect",["devsecops","compliance","quality"],"inline",
+          ["performance-requirements","security-requirements","scalability-requirements","reliability-requirements","tech-stack-decisions"],
+          "per-Bolt. 비기능 요구사항 + 기술스택 결정."),
+        S("4.3","nfr-design","NFR Design","CONDITIONAL","architect",["awsPlatform"],"inline",
+          ["performance-design","security-design","scalability-design","reliability-design","logical-components"],
+          "per-Bolt. 비기능 설계."),
+        S("4.4","infrastructure-design","Infrastructure Design","CONDITIONAL","awsPlatform",["devsecops","compliance"],"inline",
+          ["deployment-architecture","infrastructure-services","monitoring-design","cicd-pipeline","(cond) shared-infrastructure"],
+          "per-Bolt. 배포 아키텍처·인프라 서비스·모니터링·CICD."),
+        S("4.5","code-generation","Code Generation","ALWAYS","developer",[],"subagent",
+          ["application code","code-generation-plan","code-summary"],
+          "per-Bolt · subagent(Task 경계). units-generation + 4.1~4.4 를 requires. 자기교정 loop."),
+        S("4.6","build-and-test","Build and Test","ALWAYS","quality",["devsecops"],"inline",
+          ["build-instructions","unit-test-instructions","integration-test-instructions","performance-test-instructions","security-test-instructions","build-and-test-summary","build-test-results"],
+          "마지막 1회. test-strategy 레벨에 따라 커버리지 결정."),
+        S("4.7","ci-pipeline","CI Pipeline","CONDITIONAL","pipelineDeploy",[],"inline",
+          ["ci-config","quality-gates","ci-pipeline-questions"],
+          "마지막 1회. CI 설정·품질 게이트. → VG3.")
+      ]
+    },
+    {
+      id:"operations", num:"PHASE 5", name:"OPERATION", colorKey:"operations", color:"#F5A623",
+      tagline:"배포 · 관측성 · 인시던트 · 최적화", question:"어떻게 운영·개선하는가?",
+      gateAfter:"feedback loop → 2.1 Intent Capture", autoproceed:false,
+      description:"배포 파이프라인·환경 프로비저닝·배포 실행·관측성·인시던트 대응·성능 검증·피드백 최적화. 마지막 stage(feedback-optimization)는 SLO·비용·drift 를 분석해 다시 2.1 Intent Capture 로 피드백 루프를 형성합니다. 전 stage CONDITIONAL — scope 에 따라 활성화.",
+      stages:[
+        S("5.1","deployment-pipeline","Deployment Pipeline","CONDITIONAL","pipelineDeploy",[],"inline",
+          ["cd-config","deployment-strategy","rollback-runbook","deployment-pipeline-questions"],
+          "CD 설정·배포 전략·롤백 런북."),
+        S("5.2","environment-provisioning","Environment Provisioning","CONDITIONAL","awsPlatform",["devsecops","compliance"],"inline",
+          ["environment-inventory","validation-report","environment-provisioning-questions"],
+          "환경 인벤토리·검증 리포트."),
+        S("5.3","deployment-execution","Deployment Execution","CONDITIONAL","pipelineDeploy",["developer"],"inline",
+          ["deployment-log","smoke-test-results","health-check-report","deployment-execution-questions"],
+          "실제 배포·스모크 테스트·헬스체크."),
+        S("5.4","observability-setup","Observability Setup","CONDITIONAL","operations",[],"inline",
+          ["dashboards","alarms","slo-config","log-queries","tracing-config","anomaly-config","observability-setup-questions"],
+          "대시보드·알람·SLO·로그·트레이싱·이상탐지 (6 config)."),
+        S("5.5","incident-response","Incident Response","CONDITIONAL","operations",[],"inline",
+          ["runbooks","incident-plan","escalation-matrix","incident-response-questions"],
+          "런북·인시던트 플랜·에스컬레이션 매트릭스."),
+        S("5.6","performance-validation","Performance Validation","CONDITIONAL","quality",[],"inline",
+          ["load-test-plan","load-test-results","nfr-validation-matrix","performance-validation-questions"],
+          "부하 테스트·NFR 검증 매트릭스."),
+        S("5.7","feedback-optimization","Feedback & Optimization","CONDITIONAL","operations",["awsPlatform"],"inline",
+          ["slo-report","cost-analysis","drift-report","feedback-loop","feedback-optimization-questions"],
+          "SLO·비용·drift 분석 → 2.1 로 피드백 루프.")
+      ]
+    }
+  ]
+};
+
+/* scopes + execute/skip grid */
+const SCOPES = [
+  { key:"enterprise",     name:"enterprise",     depth:"Comprehensive", test:"Comprehensive", exec:32, kw:"(의도적 선택)",                         desc:"규제 대상 기능 · 전체 감사 추적. 모든 scope 의 기준 열(reference)." },
+  { key:"feature",        name:"feature",        depth:"Standard",      test:"Standard",      exec:32, kw:"(기본 fallback)",                        desc:"신규 기능 기본값 · 실용적 깊이. 전 stage, 표준 상세." },
+  { key:"mvp",            name:"mvp",            depth:"Standard",      test:"Standard",      exec:22, kw:"mvp, minimum viable",                    desc:"greenfield · 핵심만 출시, 후반 운영은 생략." },
+  { key:"poc",            name:"poc",            depth:"Minimal",       test:"Minimal",       exec:8,  kw:"proof of concept, prototype, poc, spike", desc:"타당성 빠르게 증명." },
+  { key:"bugfix",         name:"bugfix",         depth:"Minimal",       test:"Minimal",       exec:7,  kw:"fix, bug, broken",                       desc:"특정 버그 수정." },
+  { key:"refactor",       name:"refactor",       depth:"Minimal",       test:"Minimal",       exec:8,  kw:"refactor, clean up, simplify",           desc:"기존 코드 정리." },
+  { key:"infra",          name:"infra",          depth:"Standard",      test:"Standard",      exec:13, kw:"infrastructure, deploy, infra",          desc:"인프라 변경." },
+  { key:"securityPatch",  name:"security-patch", depth:"Minimal",       test:"Minimal",       exec:10, kw:"security, CVE, vulnerability, patch",     desc:"CVE 대응." },
+  { key:"workshop",       name:"workshop",       depth:"Standard",      test:"Minimal*",      exec:25, kw:"workshop, lab, training",               desc:"진행형 그룹 세션 · 필수 게이트 유지, 속도 위해 Minimal 테스트 하한." }
+];
+/* execute grid: slug -> [enterprise,feature,mvp,poc,bugfix,refactor,infra,securityPatch,workshop] booleans */
+const GRID = {
+  "workspace-scaffold":[1,1,1,1,1,1,1,1,1],"workspace-detection":[1,1,1,1,1,1,1,1,1],"state-init":[1,1,1,1,1,1,1,1,1],
+  "intent-capture":[1,1,1,1,0,0,0,0,0],"market-research":[1,1,0,0,0,0,0,0,0],"feasibility":[1,1,1,0,0,0,0,0,0],
+  "scope-definition":[1,1,1,0,0,0,0,0,0],"team-formation":[1,1,0,0,0,0,0,0,0],"rough-mockups":[1,1,1,0,0,0,0,0,0],
+  "approval-handoff":[1,1,0,0,0,0,0,0,0],
+  "reverse-engineering":[1,1,1,1,1,1,0,1,1],"practices-discovery":[1,1,1,0,0,0,1,0,1],"requirements-analysis":[1,1,1,1,1,1,1,1,1],
+  "user-stories":[1,1,1,0,0,0,0,0,1],"refined-mockups":[1,1,1,0,0,0,0,0,1],"application-design":[1,1,1,0,0,0,0,0,1],
+  "units-generation":[1,1,1,0,0,0,0,0,1],"delivery-planning":[1,1,1,0,0,0,0,0,1],
+  "functional-design":[1,1,1,0,0,1,0,0,1],"nfr-requirements":[1,1,1,0,0,0,1,1,1],"nfr-design":[1,1,1,0,0,0,1,0,1],
+  "infrastructure-design":[1,1,1,0,0,0,1,0,1],"code-generation":[1,1,1,1,1,1,0,1,1],"build-and-test":[1,1,1,1,1,1,0,1,1],
+  "ci-pipeline":[1,1,1,0,0,0,1,0,1],
+  "deployment-pipeline":[1,1,0,0,0,0,1,1,1],"environment-provisioning":[1,1,0,0,0,0,1,0,1],"deployment-execution":[1,1,0,0,0,0,1,1,1],
+  "observability-setup":[1,1,0,0,0,0,1,0,1],"incident-response":[1,1,0,0,0,0,0,0,1],"performance-validation":[1,1,0,0,0,0,0,0,1],
+  "feedback-optimization":[1,1,0,0,0,0,0,0,1]
+};
+
+const DEPTH = [
+  { name:"Minimal", desc:"핵심 필수만 · 1–2p 산출물 · 핵심 결정만, 선택 섹션 생략. (빠른 수정·패치·PoC)" },
+  { name:"Standard", desc:"균형 · 완전한 산출물 · 필수 섹션 전부 · 간결한 근거. (대부분의 기능/MVP)" },
+  { name:"Comprehensive", desc:"엔터프라이즈 전량 · 확장 산출물 · 선택 섹션 · 상세 정당화 · 컴플라이언스 cross-ref · 감사 문서. (규제/엔터프라이즈)" }
+];
+const TESTLV = [
+  { name:"Minimal — Nyquist", desc:"요구사항당 1 테스트 · 컴포넌트당 최소 1 happy-path unit · unit 테스트만 · 총 ~5–15개." },
+  { name:"Standard — per-component", desc:"컴포넌트당 5–8 테스트 · unit + integration · NFR 있을 때만 E2E/perf/security · ~75/20/5 피라미드." },
+  { name:"Comprehensive — full", desc:"컴포넌트당 10–15 테스트 · 전 유형(unit+integration+E2E+perf+security, NFR 존재 시)." }
+];
+
+const ORCH = [
+  { icon:"🎼", t:"Conductor 오케스트레이션", d:"stage 순서·전환은 오케스트레이션 계층이 <strong>결정적으로</strong> 결정. agent 는 서로를 호출하지 않으며(<code>disallowedTools: Task</code>), conductor 만 위임 — <strong>숨은 위임 없음</strong>." },
+  { icon:"🚦", t:"Verification Gate ×3", d:"phase 경계에서 자동 traceability 검사: <strong>VG1</strong>(Ideation→Inception) · <strong>VG2</strong>(Inception→Construction) · <strong>VG3</strong>(Construction→Operation). Initialization→Ideation 은 자동 진행(게이트 없음)." },
+  { icon:"✋", t:"승인 게이트", d:"실행되는 stage 마다 사람 승인 1회 (feature = 32 stage 중 29 게이트, poc = 8 중 5). Initialization 3 stage 는 auto-proceed." },
+  { icon:"⚡", t:"Bolt · Walking Skeleton", d:"Construction 은 Unit of Work 단위 <strong>Bolt</strong> 반복(4.1–4.5). Bolt 1 = walking skeleton(항상 게이트). 이후 ladder 프롬프트로 <em>Construction Autonomy Mode</em>(자율/게이트) 를 state 에 저장. 독립 Bolt 는 parallel batch 로 실행." },
+  { icon:"🔗", t:"DAG · requires_stage", d:"stage 간 의존은 <code>requires_stage</code> 엣지 (예: feasibility ⟸ intent-capture+market-research; code-generation ⟸ units-generation+4.1~4.4). <code>consumes/produces</code> 로 데이터 커플링 강제 — 굶주린 입력은 strict 모드에서 거부." },
+  { icon:"🔁", t:"Feedback Loop", d:"5.7 feedback-optimization → <strong>2.1 intent-capture</strong> 로 되돌아가는 라이프사이클 순환." },
+  { icon:"📡", t:"Sensors", d:"stage 별 자동 품질 검사: <code>required-sections</code> · <code>upstream-coverage</code>, Construction 설계/코드 stage 에는 <code>linter</code> + <code>type-check</code> 추가." },
+  { icon:"🧩", t:"3-Compartment", d:"모든 stage 는 C1 Generate(inputs/outputs) · C2 Verify(post-condition) · C3 Learn 구조. LLM 판정만 있는 stage 는 자율 halt 불가(사람 검증), executable 검증이 늘수록 자율성 확대." }
+];
+
+/* ============================================================
+   Render (read-only)
+   ============================================================ */
+let simpleMode = false;
+const $ = id => document.getElementById(id);
+
+function escapeHtml(s){ return String(s==null?"":s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function agentChipHtml(a){ if(!a) return ""; if(a==="orchestrator") return `<span class="agent-chip">⚙️ Engine</span>`; const ag=AGENTS[a]; return ag?`<span class="agent-chip" style="background:${ag.color};border-color:${ag.color}">${ag.icon} ${escapeHtml(ag.name)}</span>`:""; }
+
+function render(){
+  renderBoard();
+  renderAgentsPanel();
+  renderScopesPanel();
+  renderOrchPanel();
+  renderCompartmentPanel();
+}
+
+function renderBoard(){
+  const row = $("aidlcRow"); row.innerHTML="";
+  DATA.phases.forEach((ph, pIdx) => {
+    const section = document.createElement("div"); section.className="phase-section";
+    const header = document.createElement("div");
+    header.className = `phase-header phase-header-clickable ${ph.colorKey}`;
+    header.innerHTML = `
+      <div class="phase-num">${escapeHtml(ph.num)}</div>
+      <div>
+        <div class="phase-name">${escapeHtml(ph.name)}</div>
+        <div class="phase-tagline">${escapeHtml(ph.tagline)}</div>
+      </div>
+      <div class="phase-question">${escapeHtml(ph.question)}</div>`;
+    header.addEventListener("click", ()=>openPhaseModal(ph));
+    section.appendChild(header);
+
+    const stepRow = document.createElement("div"); stepRow.className="step-row";
+    ph.stages.forEach((st, idx) => {
+      const col = document.createElement("div"); col.className="step-col";
+      const sh = document.createElement("div"); sh.className=`step-header ${ph.colorKey}`;
+      const execCls = st.exec==="ALWAYS" ? "always" : "conditional";
+      const execTxt = st.exec==="ALWAYS" ? "ALWAYS" : "COND";
+      const modeTag = (st.mode==="subagent") ? `<span class="mode-tag">SUBAGENT</span>` : "";
+      const gated = ph.id !== "initialization";
+      const gateTag = gated
+        ? `<span class="gate-mark" title="승인 게이트 — 산출 후 사람의 명시적 승인 필요 (HITL)">👤 GATE</span>`
+        : `<span class="auto-mark" title="자동 진행 — 게이트 없음">⚙ AUTO</span>`;
+      sh.innerHTML = `
+        <div class="step-num">STAGE ${escapeHtml(st.num)}</div>
+        <div class="step-title">${escapeHtml(st.title)}</div>
+        <div class="step-badges">
+          <span class="step-badge ${execCls}">${execTxt}</span>${modeTag}${gateTag}
+        </div>
+        ${agentChipHtml(st.lead)}`;
+      sh.addEventListener("click", ()=>openStageModal(ph, st));
+      col.appendChild(sh);
+
+      const stack = document.createElement("div"); stack.className="activity-stack";
+      const items = simpleMode ? st.produces.slice(0,3) : st.produces;
+      items.forEach((art, aIdx) => {
+        const box = document.createElement("div"); box.className=`activity-box ${ph.colorKey}`;
+        box.innerHTML = `<span class="activity-doc" title="생성 산출물 (produces)">📄</span>${escapeHtml(art)}`;
+        box.addEventListener("click", ()=>openStageModal(ph, st));
+        stack.appendChild(box);
+        if(aIdx < items.length-1){ const arr=document.createElement("div"); arr.className=`activity-flow-arrow ${ph.colorKey}`; arr.textContent="↓"; stack.appendChild(arr); }
+      });
+      if(simpleMode && st.produces.length>3){ const more=document.createElement("div"); more.className=`activity-box ${ph.colorKey}`; more.style.opacity="0.7"; more.textContent=`+${st.produces.length-3} more…`; more.addEventListener("click",()=>openStageModal(ph,st)); stack.appendChild(more); }
+      col.appendChild(stack);
+      stepRow.appendChild(col);
+
+      if(idx < ph.stages.length-1){ const a=document.createElement("div"); a.className=`step-arrow-h ${ph.colorKey}`; a.textContent="→"; a.title=`${st.title} → ${ph.stages[idx+1].title}`; stepRow.appendChild(a); }
+    });
+    section.appendChild(stepRow);
+    row.appendChild(section);
+
+    if(pIdx < DATA.phases.length-1){ const pa=document.createElement("div"); pa.className="phase-flow-arrow"; pa.textContent="▼"; pa.title=`${ph.name} → ${DATA.phases[pIdx+1].name}${ph.gateAfter?` · ${ph.gateAfter}`:""}`; row.appendChild(pa); }
+  });
+}
+
+/* ---- modals ---- */
+const modalBackdrop=$("modalBackdrop"), modalTitle=$("modalTitle"), modalMeta=$("modalMeta"), modalBody=$("modalBody");
+function closeModal(){ modalBackdrop.classList.remove("open"); }
+$("modalClose").addEventListener("click", closeModal);
+modalBackdrop.addEventListener("click", e=>{ if(e.target===modalBackdrop) closeModal(); });
+document.addEventListener("keydown", e=>{ if(e.key==="Escape") closeModal(); });
+
+function listHtml(items){ return `<ul style="margin:0;padding-left:20px;">${items.map(i=>`<li><code style="font-size:12px;">${escapeHtml(i)}</code></li>`).join("")}</ul>`; }
+
+function openPhaseModal(ph){
+  modalTitle.textContent = `${ph.num} · ${ph.name}`;
+  modalMeta.innerHTML = `<em>${escapeHtml(ph.question)}</em> · <span style="color:var(--text-soft)">${escapeHtml(ph.tagline)}</span>`;
+  const gate = ph.autoproceed ? `<span class="meta-pill nogate">auto-proceed · 게이트 없음</span>` : `<span class="meta-pill gate">${escapeHtml(ph.gateAfter||"승인 게이트")}</span>`;
+  modalBody.innerHTML = `
+    <div class="modal-section"><h3>🏷️ Phase</h3>
+      <span class="aidlc-mapping-chip" style="background:${ph.color}">${escapeHtml(ph.name)}</span>
+      <span style="margin-left:8px;color:var(--text-soft);font-size:12px;">${escapeHtml(ph.tagline)}</span>
+    </div>
+    <div class="modal-section"><h3>📝 설명</h3><p>${escapeHtml(ph.description)}</p></div>
+    <div class="modal-section"><h3>🚦 Phase 전환</h3><div class="pill-row">${gate}</div></div>
+    <div class="modal-section"><h3>🔽 Stages (${ph.stages.length})</h3>
+      <ul>${ph.stages.map(s=>`<li><strong>${escapeHtml(s.num)}</strong> ${escapeHtml(s.title)} <span style="color:var(--text-soft);font-size:11px;">(${escapeHtml(s.slug)})</span> — <span class="meta-pill ${s.exec==='ALWAYS'?'always':'cond'}" style="font-size:10px;">${escapeHtml(s.exec)}</span></li>`).join("")}</ul>
+    </div>`;
+  modalBackdrop.classList.add("open");
+}
+
+function openStageModal(ph, st){
+  modalTitle.textContent = `${st.num} · ${st.title}`;
+  modalMeta.innerHTML = `<span style="color:${ph.color};font-weight:700;">${escapeHtml(ph.name)}</span> · slug <code>${escapeHtml(st.slug)}</code>`;
+  const lead = st.lead==="orchestrator" ? `⚙️ Engine (orchestrator)` : (AGENTS[st.lead]?`${AGENTS[st.lead].icon} ${AGENTS[st.lead].name}`:st.lead);
+  const support = (st.support||[]).map(s=>AGENTS[s]?`<span class="scope-tick">${AGENTS[s].icon} ${AGENTS[s].name}</span>`:"").join("");
+  const grid = GRID[st.slug]||[];
+  const scopeTicks = SCOPES.map((sc,i)=> grid[i] ? `<span class="scope-tick">${escapeHtml(sc.name)}</span>`:"").join("");
+  const execPill = st.exec==="ALWAYS" ? `<span class="meta-pill always">ALWAYS</span>` : `<span class="meta-pill cond">CONDITIONAL</span>`;
+  const modePill = st.mode==="subagent" ? `<span class="meta-pill sub">subagent (Task 경계)</span>` : (st.mode==="engine"?`<span class="meta-pill inline">engine (결정적)</span>`:`<span class="meta-pill inline">inline</span>`);
+  const gated = ph.id !== "initialization";
+  const gateHtml = gated
+    ? `<div class="pill-row"><span class="meta-pill gate">👤 승인 게이트 필요</span></div>
+       <p style="margin-top:8px;font-size:13px;color:var(--text-soft);">이 stage 는 산출 후 <strong>사람의 명시적 승인</strong>이 있어야 다음으로 진행합니다. self-correcting loop 가 halting(반복/토큰 한도)에 도달하거나 모호함이 있으면 <strong>사람에게 escalate</strong> 하며, C2 가 LLM 판정(inferential)만으로 이뤄지면 자율 halt 없이 <strong>사람 검증</strong>을 받습니다.</p>`
+    : `<div class="pill-row"><span class="meta-pill nogate">⚙ 자동 진행 · 게이트 없음</span></div>
+       <p style="margin-top:8px;font-size:13px;color:var(--text-soft);">Initialization stage 는 결정적 엔진이 수행하며 사람 승인 없이 자동 진행됩니다.</p>`;
+  modalBody.innerHTML = `
+    <div class="modal-section"><h3>🏷️ 소속 Phase</h3>
+      <span class="aidlc-mapping-chip" style="background:${ph.color}">${escapeHtml(ph.name)}</span>
+      <span style="margin-left:8px;color:var(--text-soft);font-size:12px;">${escapeHtml(ph.num)} · Stage ${escapeHtml(st.num)}</span>
+    </div>
+    <div class="modal-section"><h3>⚙️ 실행 속성</h3>
+      <div class="pill-row">${execPill} ${modePill}</div>
+      ${st.note?`<p style="margin-top:8px;font-size:13px;color:var(--text-soft);">${escapeHtml(st.note)}</p>`:""}
+    </div>
+    <div class="modal-section"><h3>✋ 사람 개입 (HITL)</h3>${gateHtml}</div>
+    <div class="modal-section"><h3>🧑‍💼 담당 Agent</h3>
+      <p style="margin:0 0 6px;"><strong>Lead:</strong> ${escapeHtml(lead)}${AGENTS[st.lead]?` <span style="color:var(--text-faint);font-size:11px;">(${AGENTS[st.lead].model})</span>`:""}</p>
+      ${support?`<p style="margin:0;"><strong style="font-size:12px;color:var(--text-soft);">Support:</strong> ${support}</p>`:`<p style="margin:0;color:var(--text-faint);font-size:12px;">support 없음</p>`}
+    </div>
+    <div class="modal-section"><h3>📦 생성 산출물 (produces)</h3>${listHtml(st.produces)}</div>
+    <div class="modal-section"><h3>🧩 3-Compartment 관점</h3>
+      <div class="comp-cards">
+        <div class="comp-mini c1"><div class="cm-tag">C1 · GENERATE</div><div class="cm-t">What</div><p>선언된 입력 → 위 produces 산출물</p></div>
+        <div class="comp-mini c2"><div class="cm-tag">C2 · VERIFY</div><div class="cm-t">Post-conditions</div><p>required-sections · upstream-coverage${(ph.colorKey==='construction')?' · linter · type-check':''} sensors</p></div>
+        <div class="comp-mini c3"><div class="cm-tag">C3 · LEARN</div><div class="cm-t">Runtime learning</div><p>사람 교정 → 후조건/guardrail 후보 승격</p></div>
+      </div>
+    </div>
+    <div class="modal-section"><h3>🎚️ 이 stage 를 실행하는 scope (${grid.filter(Boolean).length}/9)</h3>
+      <div class="pill-row">${scopeTicks||'<span style="color:var(--text-faint);font-size:12px;">—</span>'}</div>
+    </div>`;
+  modalBackdrop.classList.add("open");
+}
+
+/* ---- panels ---- */
+function renderAgentsPanel(){
+  const leadMap = {};
+  DATA.phases.forEach(ph=>ph.stages.forEach(st=>{ if(st.lead && st.lead!=="orchestrator"){ (leadMap[st.lead]=leadMap[st.lead]||[]).push(st.num+" "+st.title); } }));
+  const cards = Object.keys(AGENTS).map(k=>{
+    const a=AGENTS[k]; const leads=leadMap[k]||[];
+    const leadPills = leads.length?leads.map(l=>`<span class="lead-pill">${escapeHtml(l)}</span>`).join(""):'<span style="color:var(--text-faint);font-size:11px;">support 전용</span>';
+    return `<div class="agent-card" style="border-left-color:${a.color}">
+      <h4><span>${a.icon}</span> ${escapeHtml(a.name)} <span class="a-model">${a.model}</span></h4>
+      <p class="a-resp">${escapeHtml(a.resp)}</p>
+      <div class="a-leads"><b>Leads:</b><br>${leadPills}</div>
+    </div>`;
+  }).join("");
+  const review = REVIEW_AGENTS.map(r=>`<div class="review-card"><h5>${escapeHtml(r.name)}</h5><p>${escapeHtml(r.desc)}</p></div>`).join("");
+  $("panelAgents").innerHTML = `
+    <div class="panel">
+      <h2>🧑‍💼 11 Persona-Agent <span class="p-tag">MULTI-AGENT</span></h2>
+      <p class="p-sub">사람 팀의 전문가 역할을 모델링한 도메인 전문 에이전트. 각 stage 는 lead 1 + support N 으로 구성되며, agent 는 서로를 dispatch 하지 않고 <strong>conductor</strong> 만 조율합니다.</p>
+      <div class="agents-grid">${cards}</div>
+      <p class="p-sub" style="margin:18px 0 6px;"><strong>+ 3 오케스트레이션/리뷰 전용 agent</strong> (README 의 "11" 에는 제외 · core/agents 에는 총 14 파일)</p>
+      <div class="review-agents">${review}</div>
+    </div>`;
+}
+
+function renderScopesPanel(){
+  const items = SCOPES.map(sc=>`
+    <div class="scope-item">
+      <span class="s-count">${sc.exec}/32</span>
+      <div class="s-name">${escapeHtml(sc.name)}</div>
+      <div class="s-meta">depth: ${escapeHtml(sc.depth)} · test: ${escapeHtml(sc.test)}</div>
+      <div class="s-desc">${escapeHtml(sc.desc)}</div>
+      <div class="s-kw">keywords: <code>${escapeHtml(sc.kw)}</code></div>
+    </div>`).join("");
+  // grid table
+  let rows="";
+  DATA.phases.forEach(ph=>{
+    rows += `<tr class="phase-row"><th>${escapeHtml(ph.num)} · ${escapeHtml(ph.name)}</th>${SCOPES.map(()=>'<td></td>').join("")}</tr>`;
+    ph.stages.forEach(st=>{
+      const g=GRID[st.slug]||[];
+      rows += `<tr><th>${escapeHtml(st.num)} ${escapeHtml(st.slug)}</th>${g.map(v=>`<td class="${v?'e':'x'}">${v?'E':'·'}</td>`).join("")}</tr>`;
+    });
+  });
+  const head = `<tr><th style="text-align:left;">stage \\ scope</th>${SCOPES.map(s=>`<th>${escapeHtml(s.name)}</th>`).join("")}</tr>`;
+  $("panelScopes").innerHTML = `
+    <div class="panel">
+      <h2>🎚️ 9 Adaptive Scope <span class="p-tag">AUTO-COMPOSE</span></h2>
+      <p class="p-sub">freeform intent 에서 <strong>자동 감지</strong>되는 9 scope. 각 scope 는 32 stage 중 실행할 부분집합을 결정합니다(<code>/aidlc compose</code>). <strong>enterprise</strong> 는 32/32 기준 열, 나머지는 그 부분집합. depth(산출물 상세)와 test-strategy(테스트 양)는 독립 축입니다.</p>
+      <div class="scope-legend">${items}</div>
+      <h2 style="font-size:15px;margin:6px 0 10px;">🧮 EXECUTE(E) / SKIP(·) grid — stage × scope</h2>
+      <div class="grid-wrap"><table class="grid"><thead>${head}</thead><tbody>${rows}</tbody></table></div>
+      <p class="p-sub" style="margin-top:14px;">
+        <strong>Depth 3레벨:</strong> ${DEPTH.map(d=>`<b>${escapeHtml(d.name)}</b> — ${escapeHtml(d.desc)}`).join(" &nbsp;·&nbsp; ")}<br>
+        <strong style="display:inline-block;margin-top:8px;">Test 3레벨:</strong> ${TESTLV.map(t=>`<b>${escapeHtml(t.name)}</b> — ${escapeHtml(t.desc)}`).join(" &nbsp;·&nbsp; ")}
+      </p>
+    </div>`;
+}
+
+function renderOrchPanel(){
+  const cards = ORCH.map(o=>`<div class="orch-card"><h4><span>${o.icon}</span> ${escapeHtml(o.t)}</h4><p>${o.d}</p></div>`).join("");
+  $("panelOrch").innerHTML = `
+    <div class="panel">
+      <h2>🎼 Orchestration <span class="p-tag">CONDUCTOR</span></h2>
+      <p class="p-sub">stage 들을 적응형 워크플로우로 조합·순서화·모니터·적응시키는 제어 평면. 아래는 2.0 오케스트레이션의 핵심 동작입니다.</p>
+      <div class="orch-grid">${cards}</div>
+    </div>`;
+}
+
+function renderCompartmentPanel(){
+  $("panelCompartment").innerHTML = `
+    <div class="panel" style="background:linear-gradient(135deg,var(--v2-soft),#FAF7FF);border-color:#E0D4F7;">
+      <h2>🔎 더 알아보기</h2>
+      <p class="p-sub" style="margin:0;">
+        2.0 의 설계 철학(9 원칙 · Three-Compartment · Self-Correcting Loop · one core/many harness)은
+        <a href="aidlc-2.html" style="color:var(--v2-dark);font-weight:700;">🚀 AI-DLC 2.0 개요 페이지</a>에서,
+        사용자가 실제로 어떻게 쓰는지는 <a href="aidlc-2-flow.html" style="color:var(--v2-dark);font-weight:700;">🧭 2.0 사용자 흐름</a>에서 볼 수 있습니다.
+        1.0 의 3-phase/14-step 다이어그램은 <a href="index.html" style="color:var(--v2-dark);font-weight:700;">📊 1.0 워크플로우</a> 참고.
+      </p>
+    </div>`;
+}
+
+/* view toggle */
+$("btnViewMode").addEventListener("click", ()=>{
+  simpleMode = !simpleMode;
+  $("btnViewMode").textContent = simpleMode ? "◇ Simple" : "◆ Full";
+  renderBoard();
+});
+
+render();
+</script>
+</body>
+</html>

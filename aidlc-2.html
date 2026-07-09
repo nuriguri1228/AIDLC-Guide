@@ -1,0 +1,945 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI-DLC 2.0 — 무엇이 바뀌었나 · AIDLC Guide</title>
+<style>
+  :root {
+    --aidlc-inception: #4A90E2;
+    --aidlc-construction: #7ED321;
+    --aidlc-operations: #F5A623;
+    --sdlc-blue: #2C7BC4;
+    --sdlc-blue-dark: #1F5C92;
+    --sdlc-accent: #F5A623;
+    --v2: #7B4FE0;         /* 2.0 전용 accent (violet) */
+    --v2-dark: #5E37B8;
+    --v2-soft: #F3EEFD;
+    --text: #2A3142;
+    --text-soft: #5B6577;
+    --text-faint: #8A93A6;
+    --border: #D7E3F0;
+    --bg-card: #FFFFFF;
+    --bg-soft: #F5F8FC;
+    --ok: #2A8;
+    --warn: #C90;
+    --bad: #C44;
+  }
+
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    font-family: 'Segoe UI', 'Apple SD Gothic Neo', 'Malgun Gothic', '맑은 고딕', sans-serif;
+    color: var(--text);
+    background: linear-gradient(180deg, #FAFBFE 0%, #EEF3FA 100%);
+    min-height: 100vh;
+    line-height: 1.6;
+  }
+
+  header {
+    padding: 24px 32px 8px;
+    display: flex; align-items: center; justify-content: space-between;
+    flex-wrap: wrap; gap: 16px;
+  }
+  .title-block h1 {
+    margin: 0; font-size: 30px; color: var(--v2);
+    letter-spacing: 0.5px; font-weight: 800;
+  }
+  .title-block .subtitle { color: var(--text-soft); font-size: 14px; margin-top: 4px; }
+  .nav { display: flex; gap: 8px; flex-wrap: wrap; }
+  .nav a {
+    text-decoration: none; padding: 8px 16px; border-radius: 6px;
+    border: 1.5px solid var(--sdlc-blue); color: var(--sdlc-blue);
+    font-size: 13px; font-weight: 700; transition: all .15s ease;
+  }
+  .nav a:hover { background: var(--sdlc-blue); color: white; }
+  .nav a.active { background: var(--v2); border-color: var(--v2); color: white; }
+  .nav a.v2link { border-color: var(--v2); color: var(--v2); }
+  .nav a.v2link:hover { background: var(--v2); color: white; }
+
+  main { padding: 16px 32px 48px; max-width: 1180px; margin: 0 auto; }
+
+  /* ============ Hero ============ */
+  .hero {
+    background: linear-gradient(135deg, #7B4FE0 0%, #5E37B8 55%, #2C7BC4 130%);
+    color: white; border-radius: 16px;
+    padding: 32px 38px; margin-bottom: 28px;
+    box-shadow: 0 10px 30px rgba(94,55,184,0.28);
+    position: relative; overflow: hidden;
+  }
+  .hero .badge-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
+  .hero .badge {
+    background: rgba(255,255,255,0.18);
+    border: 1px solid rgba(255,255,255,0.42);
+    padding: 4px 12px; border-radius: 20px;
+    font-size: 11.5px; letter-spacing: 0.5px; font-weight: 700;
+  }
+  .hero h2 { margin: 0 0 10px; font-size: 28px; letter-spacing: 0.3px; }
+  .hero .lead { margin: 0 0 6px; font-size: 15px; line-height: 1.75; opacity: 0.97; }
+  .hero .lead strong { color: #FFE39A; }
+  .hero .oneliner {
+    margin-top: 16px; padding: 14px 18px;
+    background: rgba(255,255,255,0.12);
+    border-left: 4px solid #FFE39A;
+    border-radius: 8px; font-size: 14px; line-height: 1.7;
+  }
+
+  /* ============ TOC ============ */
+  .toc {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 22px;
+    margin-bottom: 28px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+  }
+  .toc h3 {
+    margin: 0 0 10px; font-size: 14px;
+    color: var(--v2); font-weight: 800; letter-spacing: 0.5px;
+  }
+  .toc ol {
+    margin: 0; padding-left: 22px; columns: 2; column-gap: 34px;
+    font-size: 13px; color: var(--text-soft);
+  }
+  .toc ol li { margin-bottom: 5px; break-inside: avoid; }
+  .toc ol li a { color: var(--text); text-decoration: none; font-weight: 600; }
+  .toc ol li a:hover { color: var(--v2); text-decoration: underline; }
+  @media (max-width: 720px){ .toc ol { columns: 1; } }
+
+  /* ============ Section heading ============ */
+  .section-head {
+    margin: 40px 0 18px;
+    padding: 14px 22px; border-radius: 12px; color: white;
+    display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+  }
+  .section-head.v2 { background: linear-gradient(135deg, #7B4FE0, #5E37B8); }
+  .section-head.blue { background: linear-gradient(135deg, #4A90E2, #2C7BC4); }
+  .section-head.green { background: linear-gradient(135deg, #7ED321, #5BA316); }
+  .section-head.amber { background: linear-gradient(135deg, #F5A623, #C2811A); }
+  .section-head h2 { margin: 0; font-size: 21px; font-weight: 800; letter-spacing: 0.4px; }
+  .section-head .sh-tag {
+    background: rgba(255,255,255,0.22);
+    border: 1px solid rgba(255,255,255,0.4);
+    padding: 3px 10px; border-radius: 12px;
+    font-size: 11px; letter-spacing: 1px; font-weight: 700;
+  }
+  .section-head .sh-sub { font-size: 13px; opacity: 0.95; }
+
+  .lead-p { color: var(--text-soft); font-size: 14.5px; line-height: 1.8; margin: 0 0 18px; }
+  .lead-p strong { color: var(--text); }
+  .lead-p code, .card code, td code, li code {
+    background: var(--bg-soft); padding: 1px 6px; border-radius: 4px;
+    font-size: 12.5px; color: var(--v2-dark);
+  }
+
+  /* ============ TL;DR at-a-glance ============ */
+  .glance {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+    gap: 16px; margin-bottom: 8px;
+  }
+  .glance .g-card {
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-top: 4px solid var(--v2); border-radius: 12px;
+    padding: 18px 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  }
+  .glance .g-card h4 { margin: 0 0 8px; font-size: 15px; color: var(--v2-dark); font-weight: 800; }
+  .glance .g-card p { margin: 0; font-size: 13px; color: var(--text-soft); line-height: 1.7; }
+  .glance .g-card .big { font-size: 26px; font-weight: 800; color: var(--text); display: block; }
+
+  /* ============ Generic card ============ */
+  .card {
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: 12px; padding: 22px 26px; margin-bottom: 18px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  }
+  .card p { font-size: 13.5px; color: var(--text-soft); line-height: 1.8; }
+  .card p strong { color: var(--text); }
+
+  /* ============ Principle cards ============ */
+  .principles { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; }
+  .p-card {
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-left: 5px solid var(--v2); border-radius: 12px;
+    padding: 18px 22px; box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  }
+  .p-card .p-num {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 26px; height: 26px; border-radius: 50%;
+    background: var(--v2); color: white; font-weight: 800; font-size: 13px;
+    margin-right: 8px; flex-shrink: 0;
+  }
+  .p-card h4 { margin: 0 0 8px; font-size: 15px; color: var(--text); font-weight: 800; display: flex; align-items: center; }
+  .p-card p { margin: 0; font-size: 13px; color: var(--text-soft); line-height: 1.72; }
+  .p-card .p-ex {
+    margin-top: 10px; padding: 9px 12px; background: var(--v2-soft);
+    border-radius: 8px; font-size: 12px; color: var(--v2-dark); line-height: 1.6;
+  }
+
+  /* ============ Compartment diagram ============ */
+  .compartments { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
+  .comp {
+    border-radius: 12px; padding: 20px 22px; color: white;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.10);
+  }
+  .comp.c1 { background: linear-gradient(135deg, #4A90E2, #2C7BC4); }
+  .comp.c2 { background: linear-gradient(135deg, #7ED321, #5BA316); }
+  .comp.c3 { background: linear-gradient(135deg, #F5A623, #C2811A); }
+  .comp .comp-tag { font-size: 11px; letter-spacing: 1px; font-weight: 700; opacity: 0.9; }
+  .comp h4 { margin: 4px 0 8px; font-size: 19px; font-weight: 800; }
+  .comp .comp-q { font-size: 13px; opacity: 0.95; margin: 0 0 10px; font-style: italic; }
+  .comp p { font-size: 12.5px; line-height: 1.7; margin: 0; opacity: 0.98; }
+  .flowline {
+    text-align: center; color: var(--text-faint); font-size: 13px;
+    margin: 14px 0 18px; font-weight: 700; letter-spacing: 1px;
+  }
+
+  /* ============ Loop steps ============ */
+  .loop { display: flex; flex-wrap: wrap; gap: 10px; align-items: stretch; }
+  .loop .step {
+    flex: 1; min-width: 150px;
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-top: 3px solid var(--v2); border-radius: 10px;
+    padding: 14px 16px; box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+  }
+  .loop .step .s-lbl { font-size: 11px; color: var(--v2); font-weight: 800; letter-spacing: 0.5px; }
+  .loop .step h5 { margin: 4px 0 6px; font-size: 14px; color: var(--text); font-weight: 800; }
+  .loop .step p { margin: 0; font-size: 12px; color: var(--text-soft); line-height: 1.6; }
+
+  /* ============ Verification two-column ============ */
+  .verif { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 720px){ .verif { grid-template-columns: 1fr; } }
+  .v-box { border-radius: 12px; padding: 18px 22px; border: 1px solid var(--border); background: var(--bg-card); }
+  .v-box.infer { border-left: 5px solid var(--aidlc-inception); }
+  .v-box.compute { border-left: 5px solid var(--aidlc-construction); }
+  .v-box h4 { margin: 0 0 6px; font-size: 15px; font-weight: 800; color: var(--text); }
+  .v-box .v-sub { font-size: 12px; color: var(--text-faint); margin-bottom: 10px; font-weight: 700; }
+  .v-box p { font-size: 12.8px; color: var(--text-soft); line-height: 1.72; margin: 0 0 8px; }
+  .v-box .halt {
+    display: inline-block; margin-top: 4px; padding: 4px 10px; border-radius: 12px;
+    font-size: 11.5px; font-weight: 700;
+  }
+  .v-box.infer .halt { background: #FDECEC; color: var(--bad); }
+  .v-box.compute .halt { background: #E8F7EC; color: var(--ok); }
+
+  /* ============ Structure list ============ */
+  .struct { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 14px; }
+  .s-item {
+    background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px;
+    padding: 16px 18px; box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+    display: flex; gap: 12px; align-items: flex-start;
+  }
+  .s-item .s-ico { font-size: 24px; flex-shrink: 0; }
+  .s-item h4 { margin: 0 0 4px; font-size: 14.5px; font-weight: 800; color: var(--v2-dark); }
+  .s-item p { margin: 0; font-size: 12.5px; color: var(--text-soft); line-height: 1.65; }
+
+  /* ============ Tables ============ */
+  .table-wrap { overflow-x: auto; margin-bottom: 8px; }
+  table.cmp { border-collapse: collapse; width: 100%; font-size: 13px; min-width: 640px; }
+  table.cmp th, table.cmp td { padding: 11px 14px; text-align: left; vertical-align: top; border-bottom: 1px solid var(--border); }
+  table.cmp thead th { background: var(--v2); color: white; font-weight: 700; letter-spacing: 0.3px; }
+  table.cmp thead th:first-child { border-top-left-radius: 8px; }
+  table.cmp thead th:last-child { border-top-right-radius: 8px; }
+  table.cmp tbody tr:nth-child(even) { background: var(--bg-soft); }
+  table.cmp td:first-child { font-weight: 700; color: var(--text); white-space: nowrap; }
+  table.cmp .col-v1 { color: var(--text-soft); }
+  table.cmp .col-v2 { color: var(--v2-dark); font-weight: 600; }
+  table.cmp .arrow { color: var(--v2); font-weight: 800; }
+
+  /* ============ Chips (phases / agents / scopes) ============ */
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 4px 0 4px; }
+  .chip {
+    background: var(--v2-soft); color: var(--v2-dark);
+    border: 1px solid #E0D4F7; border-radius: 20px;
+    padding: 6px 14px; font-size: 12.5px; font-weight: 700;
+  }
+  .chip .n { opacity: 0.6; margin-right: 5px; font-weight: 800; }
+  .chip.phase { background: #EAF2FC; color: var(--sdlc-blue); border-color: #CFE1F5; }
+
+  .kv { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px; margin-top: 4px; }
+  .kv .kv-item { background: var(--bg-soft); border: 1px solid var(--border); border-radius: 10px; padding: 12px 15px; }
+  .kv .kv-item .k { font-size: 11px; color: var(--text-faint); font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; }
+  .kv .kv-item .v { font-size: 13.5px; color: var(--text); font-weight: 700; margin-top: 3px; }
+  .kv .kv-item .v small { display: block; font-weight: 400; color: var(--text-soft); font-size: 12px; margin-top: 2px; }
+
+  /* ============ Roadmap ============ */
+  .roadmap { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; }
+  .rm-step {
+    background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px;
+    padding: 18px 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); position: relative;
+  }
+  .rm-step .rm-n {
+    position: absolute; top: -12px; left: 18px;
+    background: var(--v2); color: white; font-weight: 800; font-size: 12px;
+    padding: 3px 11px; border-radius: 12px;
+  }
+  .rm-step h4 { margin: 10px 0 6px; font-size: 14.5px; font-weight: 800; color: var(--text); }
+  .rm-step p { margin: 0; font-size: 12.5px; color: var(--text-soft); line-height: 1.65; }
+
+  /* ============ Guidelines grid ============ */
+  .guides { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 12px; }
+  .guide {
+    background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px;
+    padding: 14px 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.03);
+  }
+  .guide h5 { margin: 0 0 4px; font-size: 13.5px; font-weight: 800; color: var(--v2-dark); }
+  .guide p { margin: 0; font-size: 12.3px; color: var(--text-soft); line-height: 1.6; }
+
+  .callout {
+    background: linear-gradient(135deg, var(--v2-soft), #FAF7FF);
+    border: 1px solid #E0D4F7; border-left: 5px solid var(--v2);
+    border-radius: 12px; padding: 18px 22px; margin: 8px 0 18px;
+  }
+  .callout p { margin: 0; font-size: 13.5px; color: var(--text); line-height: 1.75; }
+  .callout p strong { color: var(--v2-dark); }
+
+  .note {
+    font-size: 12px; color: var(--text-faint); margin-top: 10px;
+    font-style: italic; line-height: 1.6;
+  }
+
+  /* ============ Footer ============ */
+  footer {
+    text-align: center; padding: 24px 32px;
+    color: var(--text-soft); font-size: 12px;
+    border-top: 1px solid var(--border); margin-top: 44px;
+  }
+  footer a { color: var(--v2); text-decoration: none; font-weight: 600; }
+  footer a:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="title-block">
+    <h1>🚀 AI-DLC 2.0</h1>
+    <div class="subtitle">1.0 대비 무엇이 바뀌었나 — AWS Labs <code style="background:none;color:inherit">aidlc-workflows</code> 2.0 공식 스펙 완전 정리</div>
+  </div>
+  <nav class="nav">
+    <a href="index.html">📊 워크플로우 다이어그램</a>
+    <a href="effects.html">✨ AI-DLC 효과</a>
+    <a href="scenarios.html">🎬 사용자 시나리오</a>
+    <a href="reverse-engineering.html">🔍 Reverse Engineering</a>
+    <a href="user-flow.html">🧭 사용자 흐름</a>
+    <a href="cases.html">🏢 실사례</a>
+    <a href="aidlc-2.html" class="active">🚀 AI-DLC 2.0</a>
+    <a href="aidlc-2-workflow.html" class="v2link">🗺️ 2.0 워크플로우</a>
+    <a href="aidlc-2-flow.html" class="v2link">🧭 2.0 흐름</a>
+  </nav>
+</header>
+
+<main>
+
+  <!-- ============ Hero ============ -->
+  <section class="hero">
+    <div class="badge-row">
+      <span class="badge">🆕 GA Preview</span>
+      <span class="badge">📄 AI-DLC Workflows 2.0 Specification</span>
+      <span class="badge">🧩 Skills 기반 재설계</span>
+    </div>
+    <h2>방법론은 그대로, 워크플로우 계층을 다시 짓다</h2>
+    <p class="lead">
+      AI-DLC 1.0 은 <strong>"SDLC 를 사람이 개입하는 단계(stage)의 연속으로 실행한다"</strong>는 가치를 증명했습니다.
+      2.0 은 그 <strong>방법론(methodology)은 유지</strong>하되, 그 위의 <strong>워크플로우 계층(workflow layer)을 완전히 재구축</strong>하여
+      <strong>점진적 자율 소프트웨어 개발(autonomous software delivery)</strong>을 향해 나아갑니다.
+    </p>
+    <p class="lead">
+      핵심은 하나 — <strong>기계로 검증 가능한(machine-checkable) 영역이 넓어질수록 사람의 개입은 줄어든다</strong>는 것.
+      1.0 이 "모든 단계에서 사람의 승인"에 의존했다면, 2.0 은 사람의 판단을 조금씩 <strong>기계가 실행 가능한 규칙(post-condition)으로 증류</strong>해
+      AI 가 스스로 검증·교정하는 범위를 점진적으로 넓힙니다.
+    </p>
+    <div class="oneliner">
+      💡 <strong>한 문장 요약:</strong> AI-DLC 2.0 = (1.0 의 방법론) + (Skill 단위로 자유 조합되는 building block) +
+      (Generate → Verify → Learn 3-구획 모델) + (스스로 멈출 줄 아는 self-correcting loop) + (하나의 core, 여러 harness).
+    </div>
+  </section>
+
+  <!-- ============ TOC ============ -->
+  <div class="toc">
+    <h3>📑 목차</h3>
+    <ol>
+      <li><a href="#glance">한눈에 보기 — 1.0 → 2.0</a></li>
+      <li><a href="#what">2.0 이란 무엇인가 · 왜 다시 지었나</a></li>
+      <li><a href="#principles">2.0 을 떠받치는 9가지 원칙</a></li>
+      <li><a href="#compartment">Three-Compartment 모델 (Generate·Verify·Learn)</a></li>
+      <li><a href="#loop">Self-Correcting Loop 과 검증의 두 종류</a></li>
+      <li><a href="#structure">새 구조 — 5개의 building block</a></li>
+      <li><a href="#orchestrator">Orchestrator(Conductor)의 5가지 역할</a></li>
+      <li><a href="#impl">2.0 구현체 (v2 릴리스) 실체</a></li>
+      <li><a href="#compare">1.0 vs 2.0 — 상세 비교표</a></li>
+      <li><a href="#roadmap">도입 로드맵 — 안전한 증분 자율성</a></li>
+      <li><a href="#guidelines">구현 가이드라인 8원칙</a></li>
+    </ol>
+  </div>
+
+  <!-- ===================================================== -->
+  <!-- ============ 1. 한눈에 보기 ============ -->
+  <!-- ===================================================== -->
+  <div class="section-head v2" id="glance">
+    <h2>🔭 한눈에 보기 — 1.0 → 2.0</h2>
+    <span class="sh-tag">TL;DR</span>
+    <span class="sh-sub">바쁘면 이것만</span>
+  </div>
+
+  <div class="glance">
+    <div class="g-card">
+      <h4>단계 → Skill</h4>
+      <p>1.0 의 <strong>정형화된(prescriptive) 단계</strong>가 너무 완고해 도입 마찰을 낳았습니다. 2.0 은
+      <strong>Skill</strong>이라는 AI-네이티브 building block 으로 잘게 쪼개 <span class="big">자유 조합</span>이 가능하게 만들었습니다.</p>
+    </div>
+    <div class="g-card">
+      <h4>3단계 → 5단계</h4>
+      <p>Inception·Construction·Operations 3-phase 에서
+      <span class="big">5 phase</span>
+      Initialization · Ideation · Inception · Construction · Operation 으로 확장 (구현체 기준 32 stage).</p>
+    </div>
+    <div class="g-card">
+      <h4>사람 승인 → 자기교정</h4>
+      <p>모든 단계 human-in-the-loop 에서, 기계 검증 가능한 <strong>post-condition</strong>으로
+      <span class="big">self-correcting</span> loop 를 돌리고 못 풀면 halting 후 사람에게 escalate.</p>
+    </div>
+    <div class="g-card">
+      <h4>steering rule → 멀티에이전트</h4>
+      <p>마크다운 steering rule 을 얹던 방식에서,
+      <span class="big">11 Persona-Agents</span>
+      + Orchestrator + Package Manager 로 플랫폼 네이티브 멀티에이전트 런타임을 정식 활용.</p>
+    </div>
+    <div class="g-card">
+      <h4>한 번 쓰고 버리던 교정 → 학습</h4>
+      <p>1.0 은 사람의 수정이 <strong>일회성</strong>이었지만, 2.0 은 반복 교정을 <strong>Compound Engineering</strong>
+      으로 규칙화 — 실전이 검증 라이브러리를 <span class="big">hydrate</span>.</p>
+    </div>
+    <div class="g-card">
+      <h4>도구 종속 → one core, many harness</h4>
+      <p>도구별 설정 파일 대신, <strong>tool-agnostic core</strong> 하나에서
+      Claude Code · Kiro · Codex CLI 등 각 <span class="big">harness</span>로 패키징.</p>
+    </div>
+  </div>
+
+  <!-- ===================================================== -->
+  <!-- ============ 2. 무엇인가 / 왜 ============ -->
+  <!-- ===================================================== -->
+  <div class="section-head blue" id="what">
+    <h2>🧭 2.0 이란 무엇인가 · 왜 다시 지었나</h2>
+    <span class="sh-tag">CONTEXT</span>
+    <span class="sh-sub">Spec §1 Context &amp; Purpose</span>
+  </div>
+
+  <p class="lead-p">
+    AI-DLC(AI-Driven Development Life Cycle)는 <strong>요구사항부터 배포까지</strong> 사람과 AI 에이전트가 소프트웨어 딜리버리에
+    어떻게 참여하는지를 구조화합니다. 1.0 은 "SDLC 를 사람이 개입하는 단계의 연속으로 실행"하는 것의 가치를 입증했습니다.
+    <strong>2.0 은 그 방법론을 유지한 채 워크플로우 계층을 다시 지어, 기계로 검증 가능한 영역이 넓어질수록 사람의 개입을 줄여가며
+    자율 소프트웨어 딜리버리로 진행</strong>합니다.
+  </p>
+
+  <div class="card">
+    <p><strong>재설계를 이끈 두 가지 힘 (Two forces)</strong></p>
+    <div class="struct" style="margin-top:6px;">
+      <div class="s-item">
+        <span class="s-ico">🧱</span>
+        <div>
+          <h4>① 고객이 원한 건 '더 잘게 쪼갠 조립 블록'</h4>
+          <p>실제 고객 사례에서, 팀마다 자기 딜리버리 흐름에 맞게 <strong>더 세분화되고(finer-grained) 조합 가능한(composable)
+          building block</strong>에 대한 수요가 드러났습니다. 예: 1.0 은 <code>Build &amp; Test</code>를 한 단계로 묶었지만,
+          거의 모든 고객에게 이건 리뷰·빌드·기능테스트·보안테스트 등 <strong>여러 활동</strong>이었습니다.</p>
+        </div>
+      </div>
+      <div class="s-item">
+        <span class="s-ico">⚙️</span>
+        <div>
+          <h4>② 에이전트 플랫폼이 성숙했다</h4>
+          <p>개별 역량을 패키징하는 <strong>Skills</strong>, 협업하는 전문가를 모델링하는 <strong>멀티에이전트 런타임</strong>이
+          등장해, 그 세분성과 검증 규칙을 steering rule 만이 아니라 <strong>네이티브로</strong> 표현할 수 있게 됐습니다.
+          여기에 halting·감사를 위한 <strong>결정적 lifecycle hook</strong>, 이식 가능한 도구/컨텍스트 전달을 위한
+          <strong>MCP</strong>가 도구별 부가 기능으로 얹힙니다.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="callout">
+    <p>🎯 <strong>2.0 의 지향점:</strong> "build me this app" 같은 <strong>단발 프롬프트로 intent → 배포까지 한 방에</strong> 가는 것은
+    현실적으로 불가능하다고 봅니다(원칙 6). 대신 <strong>단계적 분해(staged decomposition)</strong>로 각 단계의 post-condition 을
+    관리 가능하게 유지하고, 검증 가능한 규칙을 <strong>점진적으로 채워(hydrate)</strong> 자율성의 범위를 안전하게 넓혀갑니다.</p>
+  </div>
+
+  <!-- ===================================================== -->
+  <!-- ============ 3. 9가지 원칙 ============ -->
+  <!-- ===================================================== -->
+  <div class="section-head v2" id="principles">
+    <h2>📐 2.0 을 떠받치는 9가지 원칙</h2>
+    <span class="sh-tag">PRINCIPLES</span>
+    <span class="sh-sub">Spec §2 — 2.0 설계 철학의 핵심</span>
+  </div>
+
+  <p class="lead-p">이 9가지 원칙이 2.0 의 <strong>모든 설계 결정</strong>을 관통합니다. 1.0 과의 차이는 대부분 여기서 비롯됩니다.</p>
+
+  <div class="principles">
+    <div class="p-card">
+      <h4><span class="p-num">1</span>사람의 판단은 기계로 증류할 수 있다</h4>
+      <p>판단·검증·AI 조종에 드는 사람의 노력 상당 부분은, <strong>사람의 결정 패턴을 기계 실행 가능한 형태로 증류</strong>하면 줄일 수 있습니다.
+      이것이 자율 개발로 가는 전제이자 동력. "human-in-the-loop 를 완전히 없앨 수 있는가"에는 합의하지 않되,
+      <strong>모든 단계에서 필요한 사람의 노력을 계속 낮춘다</strong>는 데는 정렬합니다.</p>
+      <div class="p-ex">오늘 AI-DLC 는 모든 단계에서 사람에게 크게 의존 — 이를 '영구 상태'가 아니라 '최적화할 시작 조건'으로 봄.</div>
+    </div>
+    <div class="p-card">
+      <h4><span class="p-num">2</span>모든 intent 는 모호하게 시작한다 (그래도 괜찮다)</h4>
+      <p>모든 비즈니스 intent 는 어느 정도 모호합니다 — 명세 표현의 한계, unknown-unknown, 자연어 자체의 모호성 때문.
+      따라서 AI 는 <strong>가정하지 말고 먼저 명확화 질문(clarifying question)을 던지고</strong> 맥락을 모아 intent 를 최대한 풀어낸 뒤 문제를 풉니다.</p>
+      <div class="p-ex">"매출 대시보드 만들어줘" → 어떤 지표? 어떤 기간? 누구를 위해? → HITL 로 판단/검증 확보.</div>
+    </div>
+    <div class="p-card">
+      <h4><span class="p-num">3</span>AI 는 안전망을 갖춘 자기교정 solver 다</h4>
+      <p>입력·기대출력·건전하고 완전한 post-condition 이 주어지면 AI 는 <strong>반복 검증·교정으로 수렴</strong>할 수 있습니다.
+      단 세 조건 — 후조건은 AI 가 못 바꾸는 프로그램으로 검사 가능해야 하고, 성공 기준이 tractable 해야 하며, 반복이 충분히 저렴해야 함.
+      그리고 모든 loop 는 <strong>halting 조건(최대 반복 수 / 토큰 예산)</strong>을 반드시 포함 — 못 풀면 무한 반복 대신 <strong>사람에게 escalate</strong>.</p>
+      <div class="p-ex">Build &amp; Test, Infra Provisioning 은 자기수렴 가능. Requirements·Design Critique·UI Mockup 은 후조건이 채워질 때까지 사람이 검증.</div>
+    </div>
+    <div class="p-card">
+      <h4><span class="p-num">4</span>Three-Compartment 모델</h4>
+      <p>AI 의 작업을 세 구획으로 표현: <strong>C1 "무엇을"</strong>(입력·출력·필수 중간 산출물, 선언적) · <strong>C2 "맞는지 어떻게 아나"</strong>(post-condition = 검증 기준) · <strong>C3 "무엇을 배웠나"</strong>(런타임 학습 포착).
+      후조건이 없으면 AI 는 자기교정할 수 없고, 입출력 정의가 없으면 무슨 문제를 푸는지 모릅니다.</p>
+      <div class="p-ex">전체 후조건(건전성·완전성)은 처음부터 다 있지 않음 → 초기엔 사람 검증이 잦고, C2 를 채워갈수록 자율성이 커짐.</div>
+    </div>
+    <div class="p-card">
+      <h4><span class="p-num">5</span>모든 SDLC 단계가 이 구획 구조에 들어맞는다</h4>
+      <p>이 구획 모델은 코딩·테스트 같은 구현 단계에만 국한되지 않습니다. <strong>요구사항 명확화, 아키텍처 설계, 배포, 모니터링</strong> 등
+      창의적·분석적·기계적 성격을 불문하고 모든 단계를 <strong>"정의된 입력 → 기대 출력 (후조건이 관장)"의 변환</strong>으로 표현할 수 있습니다.</p>
+    </div>
+    <div class="p-card">
+      <h4><span class="p-num">6</span>단발 압축이 아니라 단계적 분해</h4>
+      <p>intent 에서 배포까지 한 번에 압축하는 건 비현실적 — 두 가지 폭발 때문입니다.
+      <strong>① 후조건 폭발</strong>(기능·품질·보안·컴플라이언스·성능·접근성을 한 곳에서 다 검증 = 명세 지옥),
+      <strong>② 조합 탐색 폭발</strong>(모든 제약 동시 적용 → 방대한 해공간, 끝나지 않는 loop).
+      그래서 <strong>Skill</strong>을 조합의 최소 단위로 도입하고, stage·phase 는 더 유연한 조직 개념으로 둡니다.</p>
+      <div class="p-ex">1.0 의 정형화된 단계 정의가 "너무 완고(too opinionated)"해 도입 마찰의 원인이었다는 반성에서 출발.</div>
+    </div>
+    <div class="p-card">
+      <h4><span class="p-num">7</span>빅뱅이 아니라 안전한 증분으로 자율화</h4>
+      <p>가드레일·컴플라이언스·보안정책·도메인 제약을 기계 실행 가능하게 증류하는 일은 본질적으로 <strong>점진적</strong>입니다.
+      ① <strong>가진 것부터 시작</strong>(코딩표준·명명규칙 등 이미 아는 후조건) → ② <strong>점진적 hydrate</strong>(가드레일을 계속 C2 로) →
+      ③ <strong>안전 증분 크기 확대</strong>(후조건 라이브러리가 성숙할수록 한 번에 자율 실행하는 범위가 커짐).</p>
+    </div>
+    <div class="p-card">
+      <h4><span class="p-num">8</span>확장성 (Extensibility)</h4>
+      <p>모든 고객의 가드레일·컴플라이언스·조직 표준을 미리 예측할 수 없으므로 확장성은 <strong>기초 설계 제약</strong>입니다.
+      세 가지를 지원 — <strong>Additive</strong>(baseline 위에 규칙 얹기) · <strong>Replacement</strong>(특정 규칙 교체·소유) ·
+      <strong>Composability</strong>(같은 3구획 구조로 새 stage 를 저작해 워크플로우에 삽입). 벤더 baseline 과 <strong>동일한 보장</strong>으로.</p>
+    </div>
+    <div class="p-card">
+      <h4><span class="p-num">9</span>실전에서 배운다 (Compound Engineering)</h4>
+      <p>Skill 은 저작될 때만이 아니라 <strong>쓰이면서 개선</strong>돼야 합니다. 사람의 수정·재실행·escape-hatch 수용 등
+      런타임 상호작용을 관찰해 <strong>후조건/가드레일 후보</strong>로 승격 제안(사람 승인 후 활성). 오늘 한 번 고치고 잊히는 교정이,
+      2.0 에선 검증 라이브러리를 채우는 <strong>피드백 루프</strong>가 됩니다.</p>
+      <div class="p-ex">특정 섹션을 계속 다시 쓰면 → 그 패턴을 새 post-condition 으로 제안. 특정 설계를 반복 override 하면 → guardrail 제안.</div>
+    </div>
+  </div>
+
+  <!-- ===================================================== -->
+  <!-- ============ 4. Three-Compartment ============ -->
+  <!-- ===================================================== -->
+  <div class="section-head green" id="compartment">
+    <h2>🧩 Three-Compartment 모델 — Generate · Verify · Learn</h2>
+    <span class="sh-tag">CORE</span>
+    <span class="sh-sub">Spec §2 P4 / §3 — 2.0 의 심장부</span>
+  </div>
+
+  <p class="lead-p">
+    2.0 에서 <strong>모든 stage 정의는 이 3-구획 구조</strong>를 따릅니다. 이것이 "AI 가 스스로 검증·교정"을 가능하게 하는 뼈대입니다.
+    각 구획은 <strong>Generate(생성) → Verify(검증) → Learn(학습)</strong>에 대응합니다.
+  </p>
+
+  <div class="compartments">
+    <div class="comp c1">
+      <div class="comp-tag">COMPARTMENT 1 · GENERATE</div>
+      <h4>무엇을 (The "What")</h4>
+      <p class="comp-q">"무엇이 들어가고 무엇이 나오는가"</p>
+      <p>입력·출력, 그리고 건너뛰면 품질이 나빠지는 것으로 밝혀진 <strong>필수 중간 산출물</strong>을 선언.
+      예: User Stories(입력) → Domain Model(출력). Bounded Context 설계로 가는 길의 event·aggregate·경계 식별을
+      명령형 지시가 아니라 <strong>명시적 추가 출력(선언적)</strong>으로 둔다.</p>
+    </div>
+    <div class="comp c2">
+      <div class="comp-tag">COMPARTMENT 2 · VERIFY</div>
+      <h4>맞는지 어떻게 아나</h4>
+      <p class="comp-q">"How Do We Know It's Right"</p>
+      <p>AI 가 자기 결과를 self-check 하는 <strong>post-condition(후조건)</strong> — 올바른 출력이 만족해야 할 규칙·제약·품질 검사.
+      후조건이 <strong>없으면 자기교정도 없다.</strong> 처음엔 불완전하므로 사람 검증이 잦고, 채워질수록 자율 halting 이 가능.</p>
+    </div>
+    <div class="comp c3">
+      <div class="comp-tag">COMPARTMENT 3 · LEARN</div>
+      <h4>무엇을 배웠나</h4>
+      <p class="comp-q">"What Did We Learn"</p>
+      <p>런타임 학습 포착 — 관찰된 어떤 신호가 <strong>규칙·예시·후조건 후보</strong>가 되는지, 그것을 어떻게 C2 나
+      공용 guardrail 라이브러리로 <strong>승격(promotion)</strong>할지를 정의. 원칙 9(Compound Engineering)의 기계 장치.</p>
+    </div>
+  </div>
+  <p class="note">※ 스펙 원문은 이 구조를 대부분 "Three-Compartment Construct"로 부르며, 초기 버전에는 §2 P5 제목에 "Two-Compartment"라는 표기가 남아 있으나 본문 설명은 3구획 기준입니다.</p>
+
+  <!-- ===================================================== -->
+  <!-- ============ 5. Self-Correcting Loop ============ -->
+  <!-- ===================================================== -->
+  <div class="section-head amber" id="loop">
+    <h2>🔁 Self-Correcting Loop 과 검증의 두 종류</h2>
+    <span class="sh-tag">VERIFY</span>
+    <span class="sh-sub">Spec §3 Generate-Verify-Learn</span>
+  </div>
+
+  <p class="lead-p">자기교정 loop 의 실제 흐름 — <strong>명확화 → 계획 → 실행 → 자기검증 반복 → (수렴 or halting) → 필요시 escalate.</strong></p>
+
+  <div class="loop">
+    <div class="step">
+      <div class="s-lbl">STEP 1</div>
+      <h5>명확화 판단</h5>
+      <p>이 stage 실행에 사람의 추가 설명이 필요한지 AI 가 스스로 평가하고, 모호하면 사람에게 clarify 요청.</p>
+    </div>
+    <div class="step">
+      <div class="s-lbl">STEP 2</div>
+      <h5>계획 생성 · 실행</h5>
+      <p>plan 을 세우고 그에 따라 task 를 실행해 출력을 생성(Generate).</p>
+    </div>
+    <div class="step">
+      <div class="s-lbl">STEP 3</div>
+      <h5>자기검증 반복</h5>
+      <p>C2 후조건이 충족될 때까지 self-verification loop 를 반복(Verify).</p>
+    </div>
+    <div class="step">
+      <div class="s-lbl">STEP 4</div>
+      <h5>halting / escalate</h5>
+      <p>반복·토큰 한도 도달 시 무한 반복 대신 중단하고, 못 풀었으면 사람에게 escalate.</p>
+    </div>
+  </div>
+
+  <p class="lead-p" style="margin-top:22px;"><strong>C2 후조건은 두 종류</strong> — 이 구분이 "언제 AI 가 혼자 멈춰도 되는가"를 결정합니다.</p>
+
+  <div class="verif">
+    <div class="v-box infer">
+      <h4>🧠 Inferential Verification (추론적 검증)</h4>
+      <div class="v-sub">LLM instruction 으로 표현 · 비(非) binary</div>
+      <p>정오(pass/fail)가 딱 떨어지지 않는 후조건에 적합. 대부분의 <strong>코드 리뷰 규칙</strong>처럼 뉘앙스를 살펴야 하는 품질 heuristic.</p>
+      <p>단, 같은 모델이 생성하고 자기가 자연어 후조건 충족 여부를 판단하면 <strong>"글자만 만족"할 위험</strong>이 있습니다.
+      그래서 C2 가 LLM 판정만으로 이뤄진 stage 는 <strong>스스로 halt 하지 않고 사람 검증</strong>을 받습니다.</p>
+      <span class="halt">⚠️ 자율 halt 불가 → 사람 검증 필수</span>
+    </div>
+    <div class="v-box compute">
+      <h4>⚙️ Computational Verification (계산적 검증)</h4>
+      <div class="v-sub">Executable(스크립트·툴·커스텀 코드)로 표현 · 결정적</div>
+      <p>모호함·확률적 판단에 무관용, <strong>결정적으로 강제</strong>해야 하는 후조건에 적합.
+      예: "프로덕션에서 CloudFormation 스택을 삭제하는 코드 경로 없음", "인증 없이 노출되는 API 엔드포인트 없음" 같은 no-go-zone.</p>
+      <p>이런 규칙은 LLM 해석이 아니라 <strong>커스텀 린터·정적분석</strong>으로 검증. 결정적으로 검증되므로 이 비중이 커질수록
+      사람 개입 없이 <strong>자율 halt 가능한 stage 가 늘어납니다.</strong></p>
+      <span class="halt">✅ 자율 halt 가능 → 자율성 확대의 열쇠</span>
+    </div>
+  </div>
+
+  <!-- ===================================================== -->
+  <!-- ============ 6. 새 구조 5 building block ============ -->
+  <!-- ===================================================== -->
+  <div class="section-head v2" id="structure">
+    <h2>🏗️ 새 구조 — 5개의 building block</h2>
+    <span class="sh-tag">STRUCTURE</span>
+    <span class="sh-sub">Spec §3 — DRY · 관심사 분리 · 도구 네이티브 최대 활용</span>
+  </div>
+
+  <p class="lead-p">2.0 은 세 가지 best practice(<strong>DRY, 관심사 분리, 도구별 네이티브 기능의 최대 활용</strong>)를 기반으로
+  다음 5개 구성요소로 재조직됩니다.</p>
+
+  <div class="struct">
+    <div class="s-item">
+      <span class="s-ico">🤝</span>
+      <div><h4>① Persona-Agent 라이브러리</h4>
+      <p>사람 팀이 전문가로 구성되듯, 협업 역학을 모델링하는 AI-네이티브 에이전트들. 각자 집중된 전문성을 가지고
+      공유 목표를 향해 멀티에이전트 워크플로우로 협업.</p></div>
+    </div>
+    <div class="s-item">
+      <span class="s-ico">📚</span>
+      <div><h4>② Stage 라이브러리</h4>
+      <p>각 stage 는 "어떤 작업을 해야 하고, 끝났을 때 어떤 산출물이 존재해야 하는가"를 정의. (3-구획 구조로 저작)</p></div>
+    </div>
+    <div class="s-item">
+      <span class="s-ico">🧠</span>
+      <div><h4>③ Knowledge 라이브러리</h4>
+      <p>에이전트가 <strong>자기 출력을 생성·자기교정</strong>할 때 사용하는 지식. (구현체에선 방법론 지식 / 팀 지식의 2-tier 로 분리)</p></div>
+    </div>
+    <div class="s-item">
+      <span class="s-ico">🎼</span>
+      <div><h4>④ Orchestrator 정의</h4>
+      <p>AI 를 사용해 stage 들을 <strong>적응형(adaptive) 워크플로우로 조합</strong>하고 실행을 추적·관리. (다음 섹션 상세)</p></div>
+    </div>
+    <div class="s-item">
+      <span class="s-ico">📦</span>
+      <div><h4>⑤ Package Manager</h4>
+      <p>위 정의들을 <strong>도구별 아티팩트</strong>(Kiro·Claude Code subagent/skill 등)로 패키징 — 각 플랫폼 고유 장점을 살려서.</p></div>
+    </div>
+  </div>
+
+  <div class="callout" style="margin-top:16px;">
+    <p>📦 <strong>Package Manager 의 DRY 원칙:</strong> 각 stage 는 <strong>단일 정본(canonical) 정의 파일</strong>로 유지되고,
+    도구별 구현은 내용을 복사하지 않고 <strong>파일명 참조</strong>로 가리킵니다. 공유 정의는
+    <em>stage 구조 · C1/C2 계약 · orchestrator hint · cross-stage 후조건 라이브러리</em>를 다루되,
+    <em>Claude Code 의 skill-scoped hook, Cursor 의 다중파일 편집, Copilot 의 PR-native loop, Kiro 의 spec-kit diff</em> 같은
+    <strong>도구 고유 기능은 각 emitter 가 그 위에 얹습니다.</strong> → "최소공통분모"로 깎이지 않으면서 이식성 유지.</p>
+  </div>
+
+  <!-- ===================================================== -->
+  <!-- ============ 7. Orchestrator ============ -->
+  <!-- ===================================================== -->
+  <div class="section-head blue" id="orchestrator">
+    <h2>🎼 Orchestrator(Conductor)의 5가지 역할</h2>
+    <span class="sh-tag">ORCHESTRATION</span>
+    <span class="sh-sub">Spec §4 — 워크플로우의 제어 평면</span>
+  </div>
+
+  <p class="lead-p">Orchestrator 는 Skill(stage)들을 <strong>일관된 end-to-end 개발 흐름으로 조합·순서화·모니터·적응</strong>시킵니다.
+  각 stage 의 선언 메타데이터(C1 입출력, stage 목적, orchestrator hint)를 근거로 워크플로우를 조립합니다.</p>
+
+  <div class="principles">
+    <div class="p-card"><h4><span class="p-num">a</span>Goal Ownership</h4>
+      <p>end-to-end 목표를 <strong>스스로 소유</strong>하고 선언된 성과 전달에 책임을 짐. 개별 stage 에 목표 추적을 위임하지 않고
+      macro view 를 유지, 전체 출력이 원래 intent 를 만족하는지 보장.</p></div>
+    <div class="p-card"><h4><span class="p-num">b</span>Workflow Composition</h4>
+      <p>discrete stage 들을 <strong>적응형 워크플로우로 조립</strong>. intent 성격(greenfield vs 버그픽스/리팩터), 가용 컨텍스트
+      (문서 이미 충분하면 해당 stage 생략·축약), 런타임 신호, 고객 저작 stage(hint)에 따라 결정. <strong>고정 파이프라인이 아니라
+      가변(mutable) plan</strong>을 유지하며 실행 중 적응.</p></div>
+    <div class="p-card"><h4><span class="p-num">c</span>Routing · Observability · Control</h4>
+      <p>운영 제어 평면. 올바른 입력으로 stage 트리거, 실행 상태 추적, <strong>halting 조건 강제</strong>, 수렴 실패 시 escalation 관리
+      (일시정지→사람 노출→해결 후 재개), 그리고 <strong>모든 결정의 감사 추적(audit trail)</strong> 유지 — 어떤 stage 가 왜, 어떤 순서로 활성됐는지.</p></div>
+    <div class="p-card"><h4><span class="p-num">d</span>Abstraction Boundary</h4>
+      <p>각 stage 를 <strong>블랙박스</strong>로 취급. 내부 동작에 간섭하지 않고 완료 시 선언된 후조건 충족만 검증. → 모듈성 보존,
+      stage 들이 독립적으로 진화 가능.</p></div>
+    <div class="p-card"><h4><span class="p-num">e</span>Cross-Stage Invariants</h4>
+      <p>모든 후조건이 단일 stage 소유는 아님. 명명 규칙·보안 정책·문서 표준처럼 <strong>워크플로우 전체를 가로지르는 불변식</strong>을
+      적절한 체크포인트에서 평가하고 전역 제약으로 강제.</p></div>
+  </div>
+
+  <!-- ===================================================== -->
+  <!-- ============ 8. 구현체 실체 ============ -->
+  <!-- ===================================================== -->
+  <div class="section-head green" id="impl">
+    <h2>🛠️ 2.0 구현체 (v2 릴리스) 실체</h2>
+    <span class="sh-tag">IMPLEMENTATION</span>
+    <span class="sh-sub">awslabs/aidlc-workflows @ v2 — GA Preview</span>
+  </div>
+
+  <p class="lead-p">스펙(설계 철학)이 실제 릴리스에서 어떻게 구체화됐는지 — <strong>11개 도메인 전문가 에이전트가 5 phase · 32 stage
+  워크플로우를 돌며, 모든 결정 지점에 사람 승인 게이트</strong>가 있습니다. 핵심 원칙은 <strong>"one core, many harnesses"</strong> —
+  방법론을 harness-neutral <code>core/</code> 에 한 번 정의하고 각 환경이 여기서 배포본을 생성합니다.</p>
+
+  <div class="card">
+    <p><strong>5 Phases</strong> — 1.0 의 3-phase 에서 앞단(Initialization·Ideation)이 추가돼 확장</p>
+    <div class="chips">
+      <span class="chip phase"><span class="n">1</span>Initialization</span>
+      <span class="chip phase"><span class="n">2</span>Ideation</span>
+      <span class="chip phase"><span class="n">3</span>Inception</span>
+      <span class="chip phase"><span class="n">4</span>Construction</span>
+      <span class="chip phase"><span class="n">5</span>Operation</span>
+    </div>
+    <p style="margin-top:14px;"><strong>11 Persona-Agents</strong> — 사람 팀의 전문가 역할을 모델링</p>
+    <div class="chips">
+      <span class="chip">Product</span><span class="chip">Design</span><span class="chip">Delivery</span>
+      <span class="chip">Architect</span><span class="chip">AWS Platform</span><span class="chip">Compliance</span>
+      <span class="chip">DevSecOps</span><span class="chip">Developer</span><span class="chip">Quality</span>
+      <span class="chip">Pipeline Deploy</span><span class="chip">Operations</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <p><strong>핵심 스펙 요약</strong></p>
+    <div class="kv">
+      <div class="kv-item"><div class="k">Stages</div><div class="v">32 stage<small>phase 별 명확한 owner · 승인 게이트</small></div></div>
+      <div class="kv-item"><div class="k">Adaptive Scopes</div><div class="v">9개 (enterprise ↔ workshop)<small>freeform intent 에서 자동 감지 · <code>/aidlc compose</code></small></div></div>
+      <div class="kv-item"><div class="k">Depth Control</div><div class="v">3단계<small>Minimal / Standard / Comprehensive (산출물 상세도)</small></div></div>
+      <div class="kv-item"><div class="k">Test Strategy</div><div class="v">3단계<small>Minimal / Standard / Comprehensive (독립 설정)</small></div></div>
+      <div class="kv-item"><div class="k">Knowledge</div><div class="v">2-tier<small>방법론 지식(프레임워크 제공) / 팀 지식(사용자 관리)</small></div></div>
+      <div class="kv-item"><div class="k">Audit Trail</div><div class="v">68-event 구조적 로깅<small>엔터프라이즈 추적성</small></div></div>
+      <div class="kv-item"><div class="k">Approval Gates</div><div class="v">모든 stage 전환<small>사람이 통제 (non-bootstrap stage)</small></div></div>
+      <div class="kv-item"><div class="k">Session</div><div class="v">resume / redo / jump / fresh<small>체크포인트 재개·특정 stage 이동</small></div></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <p><strong>지원 Harness &amp; 요구사항</strong></p>
+    <div class="table-wrap">
+      <table class="cmp">
+        <thead><tr><th>환경</th><th>호출</th><th>설치</th></tr></thead>
+        <tbody>
+          <tr><td>Claude Code</td><td><code>/aidlc</code></td><td><code>.claude/</code> + <code>aidlc/</code> 복사</td></tr>
+          <tr><td>Kiro IDE</td><td><code>/aidlc</code></td><td><code>.kiro/</code> + <code>aidlc/</code> 복사</td></tr>
+          <tr><td>Kiro CLI (≥2.6)</td><td><code>/aidlc</code></td><td><code>.kiro/</code> + <code>aidlc/</code> 복사</td></tr>
+          <tr><td>Codex CLI (≥0.139.0)</td><td><code>$aidlc</code></td><td><code>.codex/</code> + <code>.agents/</code> + <code>aidlc/</code> 복사</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p style="margin-top:12px;">🔧 <strong>전제조건:</strong> <code>bun</code> 런타임(전 harness 필수) · <strong>AWS Bedrock</strong> 모델 접근 ·
+    최적 성능을 위해 <strong>Claude Opus 4.8</strong> 권장. <span class="note" style="display:inline">약한 모델에선 conductor 가 선택적 stage 스텝
+    (reviewer pass, learnings 의례)을 건너뛰거나 승인 게이트를 서두를 수 있음.</span></p>
+  </div>
+
+  <div class="callout">
+    <p>⚠️ <strong>GA Preview 상태:</strong> 인터페이스·stage 정의·에이전트 구성·설치 모델이 여전히 진화 중이며 릴리스 간
+    <strong>breaking change</strong> 가 있을 수 있습니다. 생성 결과는 반드시 검토하고, 프로덕션 의존성은 known-good 버전으로 pin 하세요.
+    생성형 AI 는 실수할 수 있으므로 출력과 비용을 검토하는 것이 권장됩니다.</p>
+  </div>
+
+  <!-- ===================================================== -->
+  <!-- ============ 9. 비교표 ============ -->
+  <!-- ===================================================== -->
+  <div class="section-head v2" id="compare">
+    <h2>⚖️ 1.0 vs 2.0 — 상세 비교표</h2>
+    <span class="sh-tag">COMPARE</span>
+    <span class="sh-sub">무엇이, 어떻게 바뀌었나</span>
+  </div>
+
+  <div class="table-wrap">
+    <table class="cmp">
+      <thead>
+        <tr><th style="width:15%">관점</th><th style="width:40%">AI-DLC 1.0</th><th style="width:45%">AI-DLC 2.0</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>기본 지향</td>
+          <td class="col-v1">SDLC 를 사람 개입 단계의 연속으로 실행 (가치 증명)</td>
+          <td class="col-v2"><span class="arrow">→</span> 방법론 유지 + 워크플로우 재구축, <strong>점진적 자율 딜리버리</strong>로 진행</td>
+        </tr>
+        <tr>
+          <td>조립 단위</td>
+          <td class="col-v1">정형화된(prescriptive) 단계 — "너무 완고"해 도입 마찰. <code>Build &amp; Test</code>가 한 단계</td>
+          <td class="col-v2"><span class="arrow">→</span> <strong>Skill</strong>(AI-네이티브 building block)로 잘게 쪼개 <strong>자유 조합</strong>. stage·phase 는 유연한 조직 개념</td>
+        </tr>
+        <tr>
+          <td>Phase 수</td>
+          <td class="col-v1">3 phase — Inception / Construction / Operations</td>
+          <td class="col-v2"><span class="arrow">→</span> <strong>5 phase</strong> — Initialization / Ideation / Inception / Construction / Operation (구현체 32 stage)</td>
+        </tr>
+        <tr>
+          <td>검증 모델</td>
+          <td class="col-v1">모든 단계 human-in-the-loop, 질문(MCQ) 파일 기반 결정</td>
+          <td class="col-v2"><span class="arrow">→</span> <strong>3-구획(Generate·Verify·Learn)</strong> + 기계 검증 post-condition + self-correcting loop</td>
+        </tr>
+        <tr>
+          <td>검증의 종류</td>
+          <td class="col-v1">사실상 사람이 판단</td>
+          <td class="col-v2"><span class="arrow">→</span> <strong>Inferential</strong>(LLM, 비binary, 자율 halt 불가) vs <strong>Computational</strong>(executable, 결정적, 자율 halt 가능)</td>
+        </tr>
+        <tr>
+          <td>자율성</td>
+          <td class="col-v1">단계마다 사람이 승인</td>
+          <td class="col-v2"><span class="arrow">→</span> <strong>halting 조건</strong>(반복/토큰 한도) 내 자율 실행, 못 풀면 escalate — 안전한 증분으로 확대</td>
+        </tr>
+        <tr>
+          <td>워크플로우 조합</td>
+          <td class="col-v1">고정된 정형 워크플로우</td>
+          <td class="col-v2"><span class="arrow">→</span> <strong>Orchestrator 가 가변 plan 을 적응 조합</strong>, 9개 adaptive scope 자동 감지</td>
+        </tr>
+        <tr>
+          <td>학습</td>
+          <td class="col-v1">사람의 교정은 <strong>일회성</strong>으로 적용되고 잊힘</td>
+          <td class="col-v2"><span class="arrow">→</span> <strong>Compound Engineering</strong> — 교정이 후조건/guardrail 후보로 승격(사람 승인)</td>
+        </tr>
+        <tr>
+          <td>확장 방식</td>
+          <td class="col-v1"><code>extensions/</code> 마크다운으로 규칙 layering</td>
+          <td class="col-v2"><span class="arrow">→</span> <strong>Additive / Replacement / Composability</strong> — baseline 과 동일한 보장</td>
+        </tr>
+        <tr>
+          <td>에이전트</td>
+          <td class="col-v1">steering rule(마크다운)을 에이전트에 얹음</td>
+          <td class="col-v2"><span class="arrow">→</span> <strong>11 Persona-Agent</strong> 멀티에이전트 런타임 + Orchestrator, hook·MCP 네이티브 활용</td>
+        </tr>
+        <tr>
+          <td>배포/이식</td>
+          <td class="col-v1">도구별 설정 파일(steering·rule·memory)</td>
+          <td class="col-v2"><span class="arrow">→</span> <strong>one core, many harnesses</strong> — 정본 정의를 Package Manager 가 harness 별로 생성 (DRY)</td>
+        </tr>
+        <tr>
+          <td>산출물 추적</td>
+          <td class="col-v1"><code>aidlc-docs/</code> 디렉터리 수집</td>
+          <td class="col-v2"><span class="arrow">→</span> stage 별 입출력 선언(traceability) + <strong>68-event 감사 로그</strong></td>
+        </tr>
+        <tr>
+          <td>상태</td>
+          <td class="col-v1">공개 릴리스 (main)</td>
+          <td class="col-v2"><span class="arrow">→</span> <strong>GA Preview</strong> (v2, 활발한 개발 · breaking change 가능)</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="note">※ Sprints → <strong>Bolts</strong>(주 단위가 아닌 시간·일 단위), Epics → <strong>Units of Work</strong> 같은 용어 전환은 AI-DLC 전반의 특징으로 2.0 에서도 유지됩니다.</p>
+
+  <!-- ===================================================== -->
+  <!-- ============ 10. 로드맵 ============ -->
+  <!-- ===================================================== -->
+  <div class="section-head amber" id="roadmap">
+    <h2>🛣️ 도입 로드맵 — 안전한 증분 자율성</h2>
+    <span class="sh-tag">ADOPTION</span>
+    <span class="sh-sub">Spec §2 P7 — 빅뱅이 아니라 점진적으로</span>
+  </div>
+
+  <p class="lead-p">완전 자율은 하루아침에 오지 않습니다. 조직의 가드레일·컴플라이언스·보안정책·도메인 제약을 기계 실행 가능하게
+  증류하는 일은 본질적으로 점진적입니다. 2.0 은 이를 <strong>블로커가 아니라 기대되는 도입 경로</strong>로 받아들입니다.</p>
+
+  <div class="roadmap">
+    <div class="rm-step">
+      <span class="rm-n">STEP 1</span>
+      <h4>가진 것부터 시작</h4>
+      <p>이미 알고 코드화할 수 있는 후조건(코딩표준·명명규칙·기본 보안규칙)부터 정의. AI 는 그 경계 안에서 자율 실행하고,
+      나머지는 사람에게 escalate.</p>
+    </div>
+    <div class="rm-step">
+      <span class="rm-n">STEP 2</span>
+      <h4>점진적 hydrate</h4>
+      <p>시간이 지나며 가드레일·컴플라이언스·도메인 규칙을 점차 C2 정의로 증류. 추가할 때마다 AI 가 자율 검증·자기교정할 수
+      있는 경계가 넓어지고 그 단계의 사람 개입 필요가 줄어듦.</p>
+    </div>
+    <div class="rm-step">
+      <span class="rm-n">STEP 3</span>
+      <h4>안전 증분 크기 확대</h4>
+      <p>후조건 라이브러리가 성숙할수록 한 번에 안전하게 자율 실행하는 범위가 커짐. 예전엔 매 스텝 사람 판단이 필요하던 것이,
+      이제 여러 stage 를 자율로 통과.</p>
+    </div>
+  </div>
+
+  <!-- ===================================================== -->
+  <!-- ============ 11. 구현 가이드라인 ============ -->
+  <!-- ===================================================== -->
+  <div class="section-head blue" id="guidelines">
+    <h2>📋 구현 가이드라인 8원칙</h2>
+    <span class="sh-tag">GUIDELINES</span>
+    <span class="sh-sub">Spec §6 Implementation Guidelines</span>
+  </div>
+
+  <div class="guides">
+    <div class="guide"><h5>1. 결정적 라우팅</h5><p>stage 순서와 워크플로우 전환은 orchestration 계층이 결정.</p></div>
+    <div class="guide"><h5>2. 에이전트 특화</h5><p>도메인 판단은 적절한 전문가 persona 에 위임.</p></div>
+    <div class="guide"><h5>3. 산출물 추적성</h5><p>각 stage 가 무엇을 소비·생산하는지 선언.</p></div>
+    <div class="guide"><h5>4. 사람 승인</h5><p>non-bootstrap stage 는 명시적 승인 필요.</p></div>
+    <div class="guide"><h5>5. 도구 소유 상태</h5><p>상태·감사 전환은 기계적으로 처리.</p></div>
+    <div class="guide"><h5>6. 자문적 검증</h5><p>검증은 품질 결정과 감사 가능성을 뒷받침.</p></div>
+    <div class="guide"><h5>7. 통제된 학습</h5><p>새 규칙은 조용히가 아니라 <strong>의도적으로</strong> 승인·편입.</p></div>
+    <div class="guide"><h5>8. 숨은 위임 금지</h5><p>에이전트는 재귀적으로 다른 에이전트를 생성하지 않음 — <strong>conductor 가 조율</strong>.</p></div>
+  </div>
+
+  <div class="callout" style="margin-top:22px;">
+    <p>🧵 <strong>정리하자면</strong> — AI-DLC 2.0 은 1.0 의 <em>"구조화된 방법론 + 인간 통제"</em>라는 핵심 가치를 버리지 않습니다.
+    대신 그 위에 <strong>Skill 단위의 조합성, 기계 검증 가능한 후조건, 스스로 멈출 줄 아는 자기교정 loop, 실전에서 배우는 학습 루프,
+    그리고 하나의 core 에서 여러 도구로 퍼지는 배포 모델</strong>을 얹어, <strong>"사람이 통제하되 점점 덜 개입하는"</strong> 자율 개발로
+    한 걸음씩 나아가도록 다시 설계된 버전입니다.</p>
+  </div>
+
+</main>
+
+<footer>
+  <p>
+    데이터 출처: <a href="https://github.com/awslabs/aidlc-workflows/blob/v2/assets/AI-DLC-Workflows-2.0-Specification.pdf" target="_blank">AI-DLC Workflows 2.0 Specification</a> ·
+    <a href="https://github.com/awslabs/aidlc-workflows/tree/v2" target="_blank">awslabs/aidlc-workflows @ v2</a> (GA Preview) ·
+    <a href="https://github.com/awslabs/aidlc-workflows" target="_blank">1.0 README (main)</a>
+  </p>
+  <p style="margin-top:8px;">
+    <a href="index.html">📊 다이어그램</a> ·
+    <a href="effects.html">✨ 효과</a> ·
+    <a href="scenarios.html">🎬 시나리오</a> ·
+    <a href="user-flow.html">🧭 사용자 흐름</a> ·
+    <a href="cases.html">🏢 실사례</a>
+  </p>
+</footer>
+
+</body>
+</html>

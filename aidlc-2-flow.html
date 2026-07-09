@@ -1,0 +1,1341 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI-DLC 2.0 사용자 흐름 · AIDLC Guide</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+/* ===== base styles reused verbatim from user-flow.html ===== */
+  :root {
+    --aidlc-inception: #4A90E2;
+    --aidlc-construction: #7ED321;
+    --aidlc-operations: #F5A623;
+    --sdlc-blue: #2C7BC4;
+    --sdlc-blue-dark: #1F5C92;
+    --sdlc-accent: #F5A623;
+    --text: #2A3142;
+    --text-soft: #5B6577;
+    --text-faint: #8A93A6;
+    --border: #D7E3F0;
+    --bg-card: #FFFFFF;
+    --bg-soft: #F5F8FC;
+    --ok: #2A8;
+    --warn: #C90;
+    --bad: #C44;
+  }
+
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    font-family: 'Segoe UI', 'Apple SD Gothic Neo', 'Malgun Gothic', '맑은 고딕', sans-serif;
+    color: var(--text);
+    background: linear-gradient(180deg, #FAFBFE 0%, #EEF3FA 100%);
+    min-height: 100vh;
+    line-height: 1.6;
+  }
+
+  header {
+    padding: 24px 32px 8px;
+    display: flex; align-items: center; justify-content: space-between;
+    flex-wrap: wrap; gap: 16px;
+  }
+  .title-block h1 {
+    margin: 0; font-size: 30px; color: var(--sdlc-blue);
+    letter-spacing: 0.5px; font-weight: 800;
+  }
+  .title-block .subtitle { color: var(--text-soft); font-size: 14px; margin-top: 4px; }
+  .nav { display: flex; gap: 8px; flex-wrap: wrap; }
+  .nav a {
+    text-decoration: none; padding: 8px 16px; border-radius: 6px;
+    border: 1.5px solid var(--sdlc-blue); color: var(--sdlc-blue);
+    font-size: 13px; font-weight: 700; transition: all .15s ease;
+  }
+  .nav a:hover { background: var(--sdlc-blue); color: white; }
+  .nav a.active { background: var(--sdlc-accent); border-color: var(--sdlc-accent); color: white; }
+
+  main { padding: 16px 32px 48px; max-width: 1280px; margin: 0 auto; }
+
+  /* ============ Hero ============ */
+  .hero {
+    background: linear-gradient(135deg, #2C7BC4 0%, #1F5C92 100%);
+    color: white; border-radius: 16px;
+    padding: 30px 36px; margin-bottom: 28px;
+    box-shadow: 0 8px 24px rgba(44,123,196,0.25);
+  }
+  .hero h2 { margin: 0 0 8px; font-size: 26px; letter-spacing: 0.5px; }
+  .hero p { margin: 0 0 8px; font-size: 14.5px; line-height: 1.7; opacity: 0.95; }
+  .hero p strong { color: #FFE8B3; }
+  .hero code {
+    background: rgba(255,255,255,0.16);
+    padding: 1px 7px; border-radius: 4px; font-size: 12.5px;
+  }
+
+  /* ============ TOC ============ */
+  .toc {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 22px;
+    margin-bottom: 28px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+  }
+  .toc h3 {
+    margin: 0 0 10px; font-size: 14px;
+    color: var(--sdlc-blue); font-weight: 800;
+    letter-spacing: 0.5px;
+  }
+  .toc ol {
+    margin: 0; padding-left: 22px;
+    columns: 2; column-gap: 32px;
+    font-size: 13px; color: var(--text-soft);
+  }
+  .toc ol li { margin-bottom: 4px; break-inside: avoid; }
+  .toc ol li a { color: var(--text); text-decoration: none; font-weight: 600; }
+  .toc ol li a:hover { color: var(--sdlc-blue); text-decoration: underline; }
+
+  /* ============ Overview diagram card ============ */
+  .diagram {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 18px 8px;
+    margin-bottom: 28px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  }
+  .diagram h3 {
+    margin: 0 0 8px; font-size: 15px;
+    color: var(--sdlc-blue); font-weight: 800;
+  }
+  .diagram .desc {
+    color: var(--text-soft); font-size: 12.5px;
+    margin: 0 0 10px; line-height: 1.6;
+  }
+  .mermaid {
+    background: #FAFBFE;
+    border-radius: 8px;
+    padding: 12px;
+    text-align: center;
+    overflow-x: auto;
+  }
+
+  /* ============ Phase section ============ */
+  .phase {
+    margin: 38px 0 8px;
+    padding: 12px 22px;
+    border-radius: 12px;
+    color: white;
+    display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+  }
+  .phase.p1 { background: linear-gradient(135deg, #4A90E2, #2C7BC4); }
+  .phase.p2 { background: linear-gradient(135deg, #7ED321, #5BA316); }
+  .phase.p3 { background: linear-gradient(135deg, #F5A623, #C2811A); }
+  .phase h2 { margin: 0; font-size: 22px; font-weight: 800; letter-spacing: 0.5px; }
+  .phase .ph-tag {
+    background: rgba(255,255,255,0.22);
+    border: 1px solid rgba(255,255,255,0.4);
+    padding: 3px 10px; border-radius: 12px;
+    font-size: 11px; letter-spacing: 1px; font-weight: 700;
+  }
+  .phase .ph-sub { font-size: 13px; opacity: 0.95; }
+
+  /* ============ Step block ============ */
+  .step {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px 22px;
+    margin-bottom: 14px;
+    border-left: 5px solid var(--sdlc-blue);
+    display: flex; flex-direction: column; gap: 10px;
+  }
+  .step.p1 { border-left-color: var(--aidlc-inception); }
+  .step.p2 { border-left-color: var(--aidlc-construction); }
+  .step.p3 { border-left-color: var(--aidlc-operations); }
+
+  .step .sh {
+    display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap;
+  }
+  .step .sn {
+    font-size: 11px; letter-spacing: 1.2px;
+    color: var(--text-faint); font-weight: 800;
+  }
+  .step .sh h3 {
+    margin: 0; font-size: 17px; font-weight: 800; color: var(--text);
+  }
+  .step .badge {
+    font-size: 10px; padding: 2px 9px;
+    border-radius: 10px; font-weight: 700; letter-spacing: 0.5px;
+  }
+  .badge.always { background: #E5F6EE; color: var(--ok); }
+  .badge.cond   { background: #FFF4D9; color: #8A6A0A; }
+  .badge.brown  { background: #F1E4D6; color: #7A4A20; }
+  .badge.unit   { background: #E8F1FB; color: var(--sdlc-blue); }
+  .badge.place  { background: #EEE; color: #555; }
+
+  .step .summary {
+    color: var(--text-soft); font-size: 13.5px; line-height: 1.65;
+  }
+  .step .summary strong { color: var(--text); }
+  .step .summary code {
+    background: var(--bg-soft); padding: 1px 6px;
+    border-radius: 4px; font-size: 12px;
+  }
+
+  .step .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 10px;
+  }
+  .step .box {
+    background: var(--bg-soft);
+    border-radius: 8px;
+    padding: 10px 12px;
+  }
+  .step .box .lb {
+    font-size: 10px; color: var(--text-faint);
+    letter-spacing: 1px; font-weight: 700;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+  .step .box ul {
+    margin: 0; padding-left: 18px;
+    font-size: 12.5px; color: var(--text); line-height: 1.55;
+  }
+  .step .box ul li { margin-bottom: 2px; }
+  .step .box ul li code {
+    background: white; padding: 1px 5px;
+    border-radius: 3px; font-size: 11.5px; color: var(--sdlc-blue);
+  }
+  .step .box p {
+    margin: 0; font-size: 12.5px; color: var(--text); line-height: 1.55;
+  }
+  .step .box.user { background: #FFF7E8; }
+  .step .box.user .lb { color: #8A5A0A; }
+  .step .box.skip { background: #FDEDED; }
+  .step .box.skip .lb { color: var(--bad); }
+
+  /* ============ Prompt example ============ */
+  .prompt {
+    background: #1E2433; color: #DDE3F0;
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-family: 'JetBrains Mono', 'Consolas', 'Menlo', monospace;
+    font-size: 12px;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    word-break: break-word;
+    overflow-x: auto;
+  }
+  .prompt .pf {
+    color: #F5A623; font-weight: 700;
+  }
+  .prompt .pa { color: #7ED321; }
+
+  /* ============ Per-unit loop banner ============ */
+  .loop-banner {
+    background: linear-gradient(135deg, #E5F6EE 0%, #C9ECDB 100%);
+    border: 1.5px dashed #2A8;
+    border-radius: 10px;
+    padding: 12px 18px;
+    margin: 10px 0 14px;
+    font-size: 13px; color: #176B3A;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .loop-banner strong { color: #0F4F2B; }
+
+  /* ============ Cross-cutting concerns ============ */
+  .crosscut {
+    margin-top: 40px;
+    background: linear-gradient(135deg, #FFF7E8 0%, #FFEFD0 100%);
+    border: 1.5px solid #E8C97A;
+    border-radius: 14px;
+    padding: 28px 32px;
+  }
+  .crosscut h2 {
+    margin: 0 0 8px; font-size: 22px;
+    color: #8A5A0A; font-weight: 800;
+  }
+  .crosscut .lead {
+    font-size: 13.5px; color: #5B4520; margin: 0 0 18px; line-height: 1.7;
+  }
+  .crosscut .cgrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 12px;
+  }
+  .crosscut .cc {
+    background: white;
+    border: 1px solid #E8C97A;
+    border-left: 4px solid #B5751A;
+    border-radius: 10px;
+    padding: 14px 16px;
+  }
+  .crosscut .cc h4 {
+    margin: 0 0 6px; font-size: 14px;
+    color: var(--text); font-weight: 800;
+  }
+  .crosscut .cc p {
+    margin: 0; font-size: 12.5px;
+    color: var(--text-soft); line-height: 1.6;
+  }
+  .crosscut .cc p strong { color: var(--text); }
+  .crosscut .cc p code {
+    background: var(--bg-soft); padding: 1px 5px;
+    border-radius: 4px; font-size: 11.5px;
+  }
+
+  /* ============ User-operable knobs ============ */
+  .knobs {
+    margin-top: 36px;
+    background: linear-gradient(135deg, #E8F1FB 0%, #D7E3F0 100%);
+    border: 1.5px solid #B8CCE0;
+    border-radius: 14px;
+    padding: 28px 32px;
+  }
+  .knobs h2 {
+    margin: 0 0 6px; font-size: 22px;
+    color: #1F5C92; font-weight: 800;
+  }
+  .knobs .lead {
+    font-size: 13.5px; color: #2C5680;
+    margin: 0 0 20px; line-height: 1.7;
+  }
+  .knobs .lead strong { color: #1F5C92; }
+  .knobs .lead code {
+    background: rgba(31,92,146,0.08);
+    padding: 1px 6px; border-radius: 4px; font-size: 12.5px;
+  }
+  .knobs .kgrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+    gap: 16px;
+  }
+  .knobs .knob {
+    background: white;
+    border: 1px solid #B8CCE0;
+    border-radius: 12px;
+    padding: 18px 20px;
+    display: flex; flex-direction: column; gap: 12px;
+  }
+  .knobs .knob h4 {
+    margin: 0; font-size: 16px;
+    color: #1F5C92; font-weight: 800;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .knobs .knob h4 .ib {
+    background: #2C7BC4; color: white;
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 28px; height: 28px;
+    border-radius: 8px; font-size: 15px;
+  }
+  .knobs .k-row {
+    border-left: 3px solid #B8CCE0;
+    padding-left: 12px;
+  }
+  .knobs .k-row .lb {
+    font-size: 10px; color: #2C7BC4;
+    letter-spacing: 1.2px; font-weight: 800;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+  .knobs .k-row p {
+    margin: 0; font-size: 12.5px;
+    color: var(--text); line-height: 1.6;
+  }
+  .knobs .k-row p strong { color: var(--text); font-weight: 700; }
+  .knobs .k-row p code {
+    background: var(--bg-soft); padding: 1px 5px;
+    border-radius: 4px; font-size: 11.5px;
+  }
+  .knobs .ex {
+    background: #1E2433; color: #DDE3F0;
+    border-radius: 6px;
+    padding: 10px 12px;
+    font-family: 'JetBrains Mono', 'Consolas', 'Menlo', monospace;
+    font-size: 11.5px;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    word-break: break-word;
+    margin-top: 6px;
+  }
+  .knobs .ex .pf { color: #F5A623; font-weight: 700; }
+  .knobs .ex .pa { color: #7ED321; }
+  .knobs .note {
+    background: #FFF7E8;
+    border: 1px solid #E8C97A;
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 12px;
+    color: #6A4F1A; line-height: 1.6;
+    margin-top: 4px;
+  }
+  .knobs .note strong { color: #8A5A0A; }
+
+  /* ============ After-completion ============ */
+  .after {
+    margin-top: 30px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 22px 24px;
+  }
+  .after h2 {
+    margin: 0 0 6px; font-size: 19px;
+    color: var(--sdlc-blue); font-weight: 800;
+  }
+  .after .lead {
+    color: var(--text-soft); font-size: 13px;
+    margin: 0 0 16px; line-height: 1.65;
+  }
+  .after .flow3 {
+    display: grid;
+    grid-template-columns: 1fr 24px 1fr 24px 1fr;
+    gap: 0; align-items: stretch;
+  }
+  .after .fs {
+    background: var(--bg-soft);
+    border-left: 3px solid var(--sdlc-blue);
+    border-radius: 0 8px 8px 0;
+    padding: 12px 14px;
+    display: flex; flex-direction: column; gap: 4px;
+  }
+  .after .fs .fn {
+    font-size: 10px; color: var(--text-faint);
+    letter-spacing: 1px; font-weight: 800;
+  }
+  .after .fs .ft {
+    font-size: 13.5px; font-weight: 800; color: var(--text);
+  }
+  .after .fs .fd {
+    font-size: 12px; color: var(--text-soft); line-height: 1.55;
+  }
+  .after .ar {
+    text-align: center; align-self: center;
+    font-size: 20px; color: var(--sdlc-blue); font-weight: 800;
+  }
+
+  /* ============ Footer ============ */
+  footer {
+    padding: 18px 32px 32px;
+    text-align: center; color: var(--text-soft); font-size: 12px;
+    max-width: 1280px; margin: 0 auto;
+  }
+  footer a { color: var(--sdlc-blue); text-decoration: none; }
+  footer a:hover { text-decoration: underline; }
+
+  @media (max-width: 760px) {
+    .toc ol { columns: 1; }
+    .after .flow3 { grid-template-columns: 1fr; }
+    .after .ar { transform: rotate(90deg); }
+    main { padding: 12px 16px 32px; }
+  }
+
+/* ===== 2.0 additions ===== */
+:root { --v2:#7B4FE0; --v2-dark:#5E37B8; --aidlc-initialization:#17A2B8; --aidlc-ideation:#7B4FE0; }
+.nav a.v2link { border-color:var(--v2); color:var(--v2); }
+.nav a.v2link:hover { background:var(--v2); color:#fff; }
+.nav a.active { background:var(--v2); border-color:var(--v2); color:#fff; }
+.hero { background:linear-gradient(135deg,#7B4FE0 0%, #5E37B8 55%, #2C7BC4 130%); }
+.phase.p1 { background:linear-gradient(135deg,#17A2B8,#0E7C8C); }
+.phase.p2 { background:linear-gradient(135deg,#7B4FE0,#5E37B8); }
+.phase.p3 { background:linear-gradient(135deg,#4A90E2,#2C7BC4); }
+.phase.p4 { background:linear-gradient(135deg,#7ED321,#5BA316); }
+.phase.p5 { background:linear-gradient(135deg,#F5A623,#C2811A); }
+.step.p1 { border-left-color:#17A2B8; }
+.step.p2 { border-left-color:#7B4FE0; }
+.step.p3 { border-left-color:#4A90E2; }
+.step.p4 { border-left-color:#7ED321; }
+.step.p5 { border-left-color:#F5A623; }
+.badge.sub  { background:#2A3142; color:#fff; }
+.badge.bolt { background:#EDE7FB; color:#5E37B8; }
+.badge.once { background:#E8F1FB; color:#1F5C92; }
+.toc h3 { color:var(--v2-dark); }
+.toc ol li a:hover { color:var(--v2); }
+.toc ol { columns:2; column-gap:34px; }
+@media(max-width:720px){ .toc ol { columns:1; } }
+.diagram h3 { color:var(--v2-dark); }
+.knobs .lead strong { color:var(--v2-dark); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="title-block">
+    <h1>🧭 AI-DLC 2.0 사용자 흐름</h1>
+    <div class="subtitle">2.0 을 처음부터 끝까지 — 5 Phase · 32 Stage 단계별 상세 (v2 기준)</div>
+  </div>
+  <nav class="nav">
+    <a href="index.html">📊 1.0 다이어그램</a>
+    <a href="aidlc-2.html">🚀 AI-DLC 2.0</a>
+    <a href="aidlc-2-workflow.html">🗺️ 2.0 워크플로우</a>
+    <a href="aidlc-2-flow.html" class="active">🧭 2.0 사용자 흐름</a>
+    <a href="user-flow.html" class="v2link">🧭 1.0 흐름</a>
+    <a href="cases.html">🏢 실사례</a>
+  </nav>
+</header>
+
+<main>
+
+  <!-- ============ Hero ============ -->
+  <section class="hero">
+    <h2>한 페이지로 보는 실전 AI-DLC 2.0 흐름</h2>
+    <p>
+      사용자가 AI-DLC 2.0 을 <strong>0 부터 끝까지</strong> 쓸 때 어떤 순서로 무엇을 입력하고,
+      어떤 <strong>Persona-Agent</strong> 가 무엇을 산출하며, 어디서 사람의 결정(승인 게이트)이 필요한지를
+      <strong>5 Phase · 32 Stage</strong> 단위로 정리합니다.
+    </p>
+    <p>
+      각 stage 는 <code>ALWAYS</code> / <code>CONDITIONAL</code> 배지로 실행 조건을,
+      <code>SUBAGENT</code> / <code>PER-BOLT</code> / <code>ONCE</code> 로 실행 방식을 표시합니다.
+      뼈대는 <strong>awslabs/aidlc-workflows @ v2</strong> 의 컴파일된 stage-graph 기준.
+    </p>
+  </section>
+
+  <!-- ============ TOC ============ -->
+  <div class="toc">
+    <h3>📑 목차</h3>
+    <ol>
+      <li><a href="#prep">Step 0 — 사전 준비 (harness 설치 · intent)</a></li>
+      <li><a href="#trigger">Step 0.5 — /aidlc 트리거 · scope 자동 compose</a></li>
+      <li><a href="#workspace-scaffold">Phase 1 — Initialization (3 stage)</a></li>
+      <li><a href="#intent-capture">Phase 2 — Ideation (7 stage · VG1)</a></li>
+      <li><a href="#reverse-engineering">Phase 3 — Inception (8 stage · VG2)</a></li>
+      <li><a href="#functional-design">Phase 4 — Construction (7 stage · Bolt · VG3)</a></li>
+      <li><a href="#deployment-pipeline">Phase 5 — Operation (7 stage · feedback loop)</a></li>
+      <li><a href="#cross">Cross-cutting — conductor · gate · self-correcting loop</a></li>
+      <li><a href="#knobs">🎛️ 사용자 조작 knob — scope · depth · test · autonomy</a></li>
+      <li><a href="#after">완료 후 — feedback loop 로 다음 사이클</a></li>
+    </ol>
+  </div>
+
+  <!-- ============ Overview diagram ============ -->
+  <div class="diagram">
+    <h3>🗺️ 전체 흐름 한눈에</h3>
+    <p class="desc">
+      5 Phase 는 <strong>순차 실행</strong>되며 phase 경계마다 <strong>Verification Gate</strong>(traceability 검사)가 있습니다.
+      Construction 은 Unit of Work 단위 <strong>Bolt loop</strong> 이고, Operation 의 마지막 stage 는 다시 Ideation 으로 <strong>feedback loop</strong> 를 형성합니다.
+      실제 실행 stage 는 감지된 <strong>scope</strong>(9종)에 따라 자동 결정됩니다.
+    </p>
+    <div class="mermaid">
+flowchart TD
+  Start([freeform intent + /aidlc])
+  Start --> INIT
+
+  subgraph INIT["🔵 1 INITIALIZATION (auto)"]
+    direction LR
+    WS["1.1 workspace-scaffold"] --> WD2["1.2 workspace-detection"] --> SI["1.3 state-init"]
+  end
+
+  subgraph IDEA["🟣 2 IDEATION"]
+    direction LR
+    IC["2.1 intent-capture<br/><b>ALWAYS</b>"] --> SD["2.4 scope-definition<br/><b>ALWAYS</b>"] --> AH["2.7 approval-handoff<br/><b>ALWAYS</b>"]
+  end
+
+  subgraph INC["🔷 3 INCEPTION"]
+    direction LR
+    RA2["3.3 requirements<br/><b>ALWAYS</b>"] --> UG2["3.7 units-generation<br/><b>ALWAYS</b>"] --> DP2["3.8 delivery-planning<br/><b>ALWAYS</b>"]
+  end
+
+  subgraph CON["🟢 4 CONSTRUCTION (Bolt loop)"]
+    direction LR
+    FD2["4.1 functional-design"] --> CG2["4.5 code-generation<br/><b>ALWAYS</b>"] --> BT2["4.6 build-and-test<br/><b>ALWAYS</b>"]
+  end
+
+  subgraph OPS["🟡 5 OPERATION"]
+    direction LR
+    DPL["5.1 deployment"] --> OBS["5.4 observability"] --> FO["5.7 feedback-optimization"]
+  end
+
+  INIT --> IDEA
+  IDEA -->|VG1| INC
+  INC -->|VG2| CON
+  CON -->|VG3| OPS
+  CG2 -.next Bolt.-> FD2
+  FO -.feedback loop.-> IC
+
+  classDef always fill:#7ED321,stroke:#5BA316,color:#fff,font-weight:bold
+  classDef init fill:#17A2B8,stroke:#0E7C8C,color:#fff
+  classDef edge fill:#7B4FE0,stroke:#5E37B8,color:#fff,font-weight:bold
+  class WS,WD2,SI init
+  class Start edge
+    </div>
+  </div>
+
+  <!-- ===================================================== -->
+  <!-- ============ STEP 0 : 사전 준비 =================== -->
+  <!-- ===================================================== -->
+  <div class="phase p1" id="prep">
+    <h2>STEP 0 · 사전 준비</h2>
+    <span class="ph-tag">BEFORE AI-DLC 2.0</span>
+    <span class="ph-sub">harness 설치 + 만들고 싶은 것(intent) 한 줄</span>
+  </div>
+
+  <div class="step p1">
+    <div class="sh">
+      <span class="sn">STEP 0.1</span>
+      <h3>🛠️ Harness 설치</h3>
+      <span class="badge always">REQUIRED</span>
+    </div>
+    <div class="summary">
+      2.0 는 <strong>"one core, many harnesses"</strong> — 하나의 core 를 도구별로 패키징합니다.
+      <code>bun</code> 런타임과 <strong>AWS Bedrock</strong> 접근이 필요하며, 최적 성능을 위해 <strong>Claude Opus 4.8</strong> 이 권장됩니다.
+      사용하는 도구의 디렉토리를 프로젝트에 복사하면 됩니다.
+    </div>
+    <div class="grid">
+      <div class="box">
+        <div class="lb">harness 별 설치 · 호출</div>
+        <ul>
+          <li>Claude Code — <code>.claude/</code> + <code>aidlc/</code> → <code>/aidlc</code></li>
+          <li>Kiro IDE / CLI(≥2.6) — <code>.kiro/</code> + <code>aidlc/</code> → <code>/aidlc</code></li>
+          <li>Codex CLI(≥0.139) — <code>.codex/</code>+<code>.agents/</code>+<code>aidlc/</code> → <code>$aidlc</code></li>
+        </ul>
+      </div>
+      <div class="box user">
+        <div class="lb">검증</div>
+        <p>새 세션에서 <code>/aidlc</code>(또는 <code>$aidlc</code>) 가 인식되면 정상. <strong>GA Preview</strong> 이므로 known-good 버전 pin 권장.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="step p1">
+    <div class="sh">
+      <span class="sn">STEP 0.2</span>
+      <h3>📝 intent 준비 — 무엇을, 왜</h3>
+      <span class="badge cond">권장</span>
+    </div>
+    <div class="summary">
+      1.0 처럼 <code>vision.md</code> 를 미리 완성할 필요는 없습니다. 2.0 은 <strong>2.1 Intent Capture</strong> stage 가
+      대화형 명확화 질문으로 의도를 정제하기 때문입니다(원칙 2). 다만 <strong>한 문단의 freeform intent</strong> 와
+      (있다면) 팀 표준·제약을 <code>knowledge/</code> 에 미리 넣어 두면 훨씬 효율적입니다.
+    </div>
+    <div class="grid">
+      <div class="box">
+        <div class="lb">준비하면 좋은 것</div>
+        <ul>
+          <li>만들 것 1문단 (무엇 · 누구를 위해 · 왜)</li>
+          <li>알려진 제약 / no-go-zone</li>
+          <li>팀 코딩표준·보안규칙 → <code>knowledge/</code> (C2 후조건으로 hydrate)</li>
+        </ul>
+      </div>
+      <div class="box user">
+        <div class="lb">High-leverage tip</div>
+        <p>기계 검증 가능한 규칙(린터·정적분석)을 <code>knowledge/</code> 에 많이 넣을수록 AI 가 <strong>자율 halt</strong> 하는 stage 가 늘어 사람 개입이 줄어듭니다.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================================================== -->
+  <!-- ============ TRIGGER ============================== -->
+  <!-- ===================================================== -->
+  <div class="step p1" id="trigger">
+    <div class="sh">
+      <span class="sn">STEP 0.5</span>
+      <h3>🚀 /aidlc 트리거 · scope 자동 compose</h3>
+      <span class="badge always">START</span>
+    </div>
+    <div class="summary">
+      freeform intent 와 함께 <code>/aidlc</code> 를 호출하면, 오케스트레이터가 intent 에서 <strong>9 scope</strong> 중 하나를 자동 감지하거나
+      <strong>Composer</strong> 가 EXECUTE/SKIP 그리드를 제안합니다. 사용자가 그리드를 승인하면 32 stage 중 <strong>실행할 부분집합</strong>이 확정되고
+      Initialization 이 자동으로 시작됩니다.
+    </div>
+    <div class="prompt"><span class="pf">User &gt;</span> /aidlc
+Build a K-beauty recommendation assistant on Amazon Bedrock.
+Standard depth, ship an MVP first.
+
+<span class="pf">AI  &gt;</span> Detected scope: <span class="pa">mvp</span> (22/32 stages).
+Proposed EXECUTE/SKIP grid: [ ... ]
+Depth: Standard · Test: Standard.
+Approve to begin, or /aidlc compose to tailor.</div>
+    <div class="grid" style="margin-top:14px;">
+      <div class="box">
+        <div class="lb">scope 자동 감지 예</div>
+        <ul>
+          <li><code>mvp</code>, <code>poc</code>, <code>bugfix</code>, <code>refactor</code></li>
+          <li><code>infra</code>, <code>security-patch</code>, <code>workshop</code></li>
+          <li>키워드 없으면 <code>feature</code>(32/32) fallback</li>
+        </ul>
+      </div>
+      <div class="box user">
+        <div class="lb">사용자 액션</div>
+        <p>제안된 grid 검토 후 승인. 다르면 <code>/aidlc compose</code> 로 stage 를 직접 조정하거나 <code>--depth</code>/<code>--test-strategy</code> override.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="phase p1">
+    <h2>🔵 PHASE 1 · INITIALIZATION</h2>
+    <span class="ph-tag">BOOTSTRAP</span>
+    <span class="ph-sub">작업공간 준비 · 상태 초기화 — 3 stage · 자동 진행 (게이트 없음)</span>
+  </div>
+
+  <div class="step p1" id="workspace-scaffold">
+    <div class="sh">
+      <span class="sn">STAGE 1.1</span>
+      <h3>Workspace Scaffold</h3>
+      <span class="badge always">ALWAYS</span><span class="badge sub">ENGINE</span>
+    </div>
+    <div class="summary">단일 결정적 도구 호출(<code>aidlc-utility init</code>)로 실행되는 부트스트랩. per-intent <strong>record 트리</strong>(stage 산출물 디렉토리 + verification 디렉토리)와 space-level <code>knowledge/</code> 디렉토리를 생성합니다.</div>
+    <div class="grid">
+      <div class="box"><div class="lb">산출</div><ul><li>stage 산출물 디렉토리 트리</li><li>verification 디렉토리</li><li>space-level <code>knowledge/</code></li></ul></div>
+      <div class="box user"><div class="lb">사용자 액션</div><p>없음 — 엔진이 자동 수행. 3 stage 는 게이트 없이 자동 진행됩니다.</p></div>
+    </div>
+  </div>
+
+  <div class="step p1" id="workspace-detection">
+    <div class="sh">
+      <span class="sn">STAGE 1.2</span>
+      <h3>Workspace Detection</h3>
+      <span class="badge always">ALWAYS</span><span class="badge sub">ENGINE</span>
+    </div>
+    <div class="summary">현재 작업공간이 <strong>greenfield(백지)</strong>인지 <strong>brownfield(기존 코드)</strong>인지 판별하고 기술 스택을 감지합니다. 이 분류가 이후 reverse-engineering 실행 여부를 좌우합니다.</div>
+    <div class="grid">
+      <div class="box"><div class="lb">산출</div><ul><li>workspace 분류 (green / brownfield)</li><li>tech-stack 감지 결과</li></ul></div>
+      <div class="box user"><div class="lb">사용자 액션</div><p>없음 — 자동. (분류가 틀렸다면 이후 stage 에서 정정 가능)</p></div>
+    </div>
+  </div>
+
+  <div class="step p1" id="state-init">
+    <div class="sh">
+      <span class="sn">STAGE 1.3</span>
+      <h3>State Initialization</h3>
+      <span class="badge always">ALWAYS</span><span class="badge sub">ENGINE</span>
+    </div>
+    <div class="summary">엔진이 라우팅을 해석해 <code>aidlc-state.md</code> 를 초기화합니다. 세션이 중단돼도 이 파일로 정확히 이어서 재개할 수 있습니다.</div>
+    <div class="grid">
+      <div class="box"><div class="lb">산출</div><ul><li><code>aidlc-state.md</code> (라우팅 결정 · resume 기준점)</li></ul></div>
+      <div class="box user"><div class="lb">사용자 액션</div><p>없음 — 완료 후 Ideation 으로 자동 진행.</p></div>
+    </div>
+  </div>
+
+  <div class="phase p2">
+    <h2>🟣 PHASE 2 · IDEATION</h2>
+    <span class="ph-tag">WHAT & WHY</span>
+    <span class="ph-sub">의도 · 시장 · 타당성 · 스코프 — 7 stage · 끝나면 Verification Gate 1</span>
+  </div>
+
+  <div class="step p2" id="intent-capture">
+    <div class="sh">
+      <span class="sn">STAGE 2.1</span>
+      <h3>Intent Capture & Framing</h3>
+      <span class="badge always">ALWAYS</span>
+    </div>
+    <div class="summary">모호한 비즈니스 의도를 <strong>명확화 질문</strong>으로 포착·프레이밍합니다(원칙 2 — 모든 intent 는 모호하게 시작). 1.0 처럼 vision.md 를 사전에 완성할 필요 없이, 이 stage 가 대화로 의도를 정제합니다.</div>
+    <div class="grid">
+      <div class="box"><div class="lb">담당</div><p>Lead 🎯 Product · Support 🏛️ Architect</p></div>
+      <div class="box"><div class="lb">산출</div><ul><li><code>intent-statement</code></li><li><code>stakeholder-map</code></li><li><code>intent-capture-questions</code></li></ul></div>
+      <div class="box user"><div class="lb">사용자 액션</div><p>AI 가 발행한 <code>intent-capture-questions.md</code> 에 답하고, 정제된 intent-statement 를 승인.</p></div>
+    </div>
+  </div>
+
+  <div class="step p2" id="market-research">
+    <div class="sh">
+      <span class="sn">STAGE 2.2</span>
+      <h3>Market Research</h3>
+      <span class="badge cond">CONDITIONAL</span>
+    </div>
+    <div class="summary">경쟁 분석·시장 트렌드·빌드 vs 바이를 조사합니다. PoC·bugfix 등 가벼운 scope 에서는 자동 SKIP.</div>
+    <div class="grid">
+      <div class="box"><div class="lb">담당</div><p>Lead 🎯 Product</p></div>
+      <div class="box"><div class="lb">산출</div><ul><li><code>competitive-analysis</code></li><li><code>market-trends</code></li><li><code>build-vs-buy</code></li></ul></div>
+      <div class="box skip"><div class="lb">SKIP 조건</div><p>enterprise·feature scope 에서만 실행. mvp 이하에서는 생략.</p></div>
+    </div>
+  </div>
+
+  <div class="step p2" id="feasibility">
+    <div class="sh">
+      <span class="sn">STAGE 2.3</span>
+      <h3>Feasibility & Constraints</h3>
+      <span class="badge cond">CONDITIONAL</span>
+    </div>
+    <div class="summary">타당성·제약을 평가하고 RAID 로그를 만듭니다. <strong>requires:</strong> intent-capture + market-research (두 산출물이 준비돼야 실행).</div>
+    <div class="grid">
+      <div class="box"><div class="lb">담당</div><p>Lead 🏛️ Architect · Support ☁️ AWS Platform, ⚖️ Compliance</p></div>
+      <div class="box"><div class="lb">산출</div><ul><li><code>feasibility-assessment</code></li><li><code>constraint-register</code></li><li><code>raid-log</code></li></ul></div>
+      <div class="box user"><div class="lb">사용자 액션</div><p>제약·리스크 검토 및 승인.</p></div>
+    </div>
+  </div>
+
+  <div class="step p2" id="scope-definition">
+    <div class="sh">
+      <span class="sn">STAGE 2.4</span>
+      <h3>Scope Definition</h3>
+      <span class="badge always">ALWAYS</span>
+    </div>
+    <div class="summary">이번에 <strong>무엇을 넣고 뺄지</strong>를 확정하고 intent backlog 를 정리합니다.</div>
+    <div class="grid">
+      <div class="box"><div class="lb">담당</div><p>Lead 🎯 Product · Support 📦 Delivery</p></div>
+      <div class="box"><div class="lb">산출</div><ul><li><code>scope-document</code></li><li><code>intent-backlog</code></li></ul></div>
+      <div class="box user"><div class="lb">사용자 액션</div><p>scope-document 승인 — 이후 어떤 stage 가 실행될지 결정하는 핵심 게이트.</p></div>
+    </div>
+  </div>
+
+  <div class="step p2" id="team-formation">
+    <div class="sh">
+      <span class="sn">STAGE 2.5</span>
+      <h3>Team Formation</h3>
+      <span class="badge cond">CONDITIONAL</span>
+    </div>
+    <div class="summary">팀 역량·스킬 매트릭스·mob 구성을 평가합니다.</div>
+    <div class="grid">
+      <div class="box"><div class="lb">담당</div><p>Lead 📦 Delivery</p></div>
+      <div class="box"><div class="lb">산출</div><ul><li><code>team-assessment</code></li><li><code>skill-matrix</code></li><li><code>mob-composition</code></li></ul></div>
+      <div class="box skip"><div class="lb">SKIP 조건</div><p>enterprise·feature 에서만. 작은 scope 에서는 생략.</p></div>
+    </div>
+  </div>
+
+  <div class="step p2" id="rough-mockups">
+    <div class="sh">
+      <span class="sn">STAGE 2.6</span>
+      <h3>Rough Mockups</h3>
+      <span class="badge cond">CONDITIONAL</span>
+    </div>
+    <div class="summary">초기 와이어프레임·유저플로우를 만듭니다. 1.0 은 mockup 위치가 고정적이었지만 2.0 은 scope 별로 유연 (여기서 하거나 Inception 의 refined-mockups 로 미룸).</div>
+    <div class="grid">
+      <div class="box"><div class="lb">담당</div><p>Lead 🎨 Design · Support 🎯 Product</p></div>
+      <div class="box"><div class="lb">산출</div><ul><li><code>wireframes</code></li><li><code>user-flow</code></li></ul></div>
+      <div class="box skip"><div class="lb">SKIP 조건</div><p>UI 가 있는 scope 에서만. 백엔드/인프라 scope 에서는 생략.</p></div>
+    </div>
+  </div>
+
+  <div class="step p2" id="approval-handoff">
+    <div class="sh">
+      <span class="sn">STAGE 2.7</span>
+      <h3>Approval & Handoff</h3>
+      <span class="badge always">ALWAYS</span>
+    </div>
+    <div class="summary">이니셔티브 브리프·결정 로그로 Inception 에 핸드오프합니다. 이 stage 뒤에 <strong>Verification Gate 1</strong>(traceability 검사)이 실행됩니다.</div>
+    <div class="grid">
+      <div class="box"><div class="lb">담당</div><p>Lead 📦 Delivery · Support 🎯 Product</p></div>
+      <div class="box"><div class="lb">산출</div><ul><li><code>initiative-brief</code></li><li><code>decision-log</code></li></ul></div>
+      <div class="box user"><div class="lb">사용자 액션</div><p>이니셔티브 브리프 승인 → VG1 통과 후 Inception 진입.</p></div>
+    </div>
+  </div>
+
+  <div class="phase p3">
+    <h2>🔷 PHASE 3 · INCEPTION</h2>
+    <span class="ph-tag">STRUCTURE</span>
+    <span class="ph-sub">요구사항 · 설계 · Unit 분해 · Bolt 계획 — 8 stage · 끝나면 VG2</span>
+  </div>
+
+  <div class="step p3" id="reverse-engineering">
+    <div class="sh">
+      <span class="sn">STAGE 3.1</span>
+      <h3>Reverse Engineering</h3>
+      <span class="badge cond">CONDITIONAL</span><span class="badge brown">BROWNFIELD</span><span class="badge sub">SUBAGENT</span>
+    </div>
+    <div class="summary">brownfield 전용. 기존 코드를 분석해 <strong>codekb 9 산출물</strong>을 생성합니다. <code>subagent</code>(Task 경계) 로 dispatch 되는 두 stage 중 하나입니다.</div>
+    <div class="grid">
+      <div class="box"><div class="lb">담당</div><p>Lead 💻 Developer · Support 🏛️ Architect · mode <code>subagent</code></p></div>
+      <div class="box"><div class="lb">산출 (9 codekb)</div><ul><li>business-overview · architecture · code-structure</li><li>api-documentation · component-inventory</li><li>technology-stack · dependencies</li><li>code-quality-assessment · reverse-engineering-timestamp</li></ul></div>
+      <div class="box skip"><div class="lb">SKIP 조건</div><p>greenfield 이거나 infra scope 이면 생략.</p></div>
+    </div>
+  </div>
+
+  <div class="step p3" id="practices-discovery">
+    <div class="sh">
+      <span class="sn">STAGE 3.2</span>
+      <h3>Practices Discovery</h3>
+      <span class="badge cond">CONDITIONAL</span>
+    </div>
+    <div class="summary">팀의 실천 규칙을 발견하고, 사용자가 확인하면 <code>aidlc-team.md</code> / <code>aidlc-project.md</code> 로 <strong>승격</strong>합니다 (원칙 9 · Compound Engineering 의 실체).</div>
+    <div class="grid">
+      <div class="box"><div class="lb">담당</div><p>Lead 🚀 Pipeline Deploy · Support 🧪 Quality, 💻 Developer, 🛡️ DevSecOps</p></div>
+      <div class="box"><div class="lb">산출</div><ul><li><code>team-practices</code></li><li><code>discovered-rules</code></li><li><code>evidence</code></li></ul></div>
+      <div class="box user"><div class="lb">사용자 액션</div><p>발견된 규칙 확인(affirm) → 후조건/guardrail 라이브러리로 승격.</p></div>
+    </div>
+  </div>
+
+  <div class="step p3" id="requirements-analysis">
+    <div class="sh">
+      <span class="sn">STAGE 3.3</span>
+      <h3>Requirements Analysis</h3>
+      <span class="badge always">ALWAYS</span>
+    </div>
+    <div class="summary">Product 페르소나로 요구사항을 수집·명확화합니다. depth 레벨에 따라 산출 상세도가 조정됩니다.</div>
+    <div class="grid">
+      <div class="box"><div class="lb">담당</div><p>Lead 🎯 Product</p></div>
+      <div class="box"><div class="lb">산출</div><ul><li><code>requirements</code></li><li><code>requirements-analysis-questions</code></li></ul></div>
+      <div class="box user"><div class="lb">사용자 액션</div><p>clarifying questions 에 답하고 requirements 승인.</p></div>
+    </div>
+  </div>
+
+  <div class="step p3" id="user-stories">
+    <div class="sh">
+      <span class="sn">STAGE 3.4</span>
+      <h3>User Stories</h3>
+      <span class="badge cond">CONDITIONAL</span>
+    </div>
+    <div class="summary">유저 스토리·페르소나를 작성합니다.</div>
+    <div class="grid">
+      <div class="box"><div class="lb">담당</div><p>Lead 🎯 Product · Support 🎨 Design</p></div>
+      <div class="box"><div class="lb">산출</div><ul><li><code>stories</code></li><li><code>personas</code></li><li><code>user-stories-assessment</code></li></ul></div>
+      <div class="box skip"><div class="lb">SKIP 조건</div><p>bugfix·refactor·poc 등에서는 생략.</p></div>
+    </div>
+  </div>
+
+  <div class="step p3" id="refined-mockups">
+    <div class="sh">
+      <span class="sn">STAGE 3.5</span>
+      <h3>Refined Mockups</h3>
+      <span class="badge cond">CONDITIONAL</span>
+    </div>
+    <div class="summary">정제 목업·인터랙션 스펙·접근성 체크리스트를 만듭니다.</div>
+    <div class="grid">
+      <div class="box"><div class="lb">담당</div><p>Lead 🎨 Design · Support 🎯 Product</p></div>
+      <div class="box"><div class="lb">산출</div><ul><li>mockups · interaction-spec</li><li>design-system-mapping</li><li>accessibility-checklist</li></ul></div>
+      <div class="box skip"><div class="lb">SKIP 조건</div><p>UI scope 에서만 실행.</p></div>
+    </div>
+  </div>
+
+  <div class="step p3" id="application-design">
+    <div class="sh">
+      <span class="sn">STAGE 3.6</span>
+      <h3>Application Design</h3>
+      <span class="badge cond">CONDITIONAL</span>
+    </div>
+    <div class="summary">컴포넌트·서비스·의존성과 설계 결정을 정의합니다.</div>
+    <div class="grid">
+      <div class="box"><div class="lb">담당</div><p>Lead 🏛️ Architect · Support ☁️ AWS Platform, 🎨 Design</p></div>
+      <div class="box"><div class="lb">산출</div><ul><li>components · component-methods</li><li>services · component-dependency</li><li>decisions</li></ul></div>
+      <div class="box user"><div class="lb">사용자 액션</div><p>설계 검토 및 승인.</p></div>
+    </div>
+  </div>
+
+  <div class="step p3" id="units-generation">
+    <div class="sh">
+      <span class="sn">STAGE 3.7</span>
+      <h3>Units Generation</h3>
+      <span class="badge always">ALWAYS</span>
+    </div>
+    <div class="summary">Construction Bolt 가 소비하는 <strong>Unit of Work 의존성 DAG</strong>를 생성합니다. 3.8 delivery-planning 과 <strong>항상 함께</strong> 실행/생략됩니다.</div>
+    <div class="grid">
+      <div class="box"><div class="lb">담당</div><p>Lead 🏛️ Architect · Support 📦 Delivery</p></div>
+      <div class="box"><div class="lb">산출</div><ul><li><code>unit-of-work</code></li><li><code>unit-of-work-dependency</code> (Bolt DAG)</li><li><code>unit-of-work-story-map</code></li></ul></div>
+      <div class="box user"><div class="lb">사용자 액션</div><p>Unit 분해 검토 — Construction 병렬화의 기준.</p></div>
+    </div>
+  </div>
+
+  <div class="step p3" id="delivery-planning">
+    <div class="sh">
+      <span class="sn">STAGE 3.8</span>
+      <h3>Delivery Planning</h3>
+      <span class="badge always">ALWAYS</span>
+    </div>
+    <div class="summary">Bolt 순서·팀 배치·리스크를 계획합니다. <code>bolt-plan.md</code> 가 Construction 을 구동합니다. 뒤에 <strong>VG2</strong>.</div>
+    <div class="grid">
+      <div class="box"><div class="lb">담당</div><p>Lead 📦 Delivery · Support 🏛️ Architect</p></div>
+      <div class="box"><div class="lb">산출</div><ul><li><code>bolt-plan</code> (Construction 구동)</li><li>team-allocation · external-dependency-map</li><li>risk-and-sequencing-rationale</li></ul></div>
+      <div class="box user"><div class="lb">사용자 액션</div><p>Bolt 계획 승인 → VG2 통과 후 Construction 진입.</p></div>
+    </div>
+  </div>
+
+  <div class="phase p4">
+    <h2>🟢 PHASE 4 · CONSTRUCTION</h2>
+    <span class="ph-tag">BUILD (BOLT LOOP)</span>
+    <span class="ph-sub">Bolt 단위 설계·구현·테스트 — 7 stage · 끝나면 VG3</span>
+  </div>
+
+  <div class="step p4" id="functional-design">
+    <div class="sh">
+      <span class="sn">STAGE 4.1</span>
+      <h3>Functional Design</h3>
+      <span class="badge cond">CONDITIONAL</span><span class="badge bolt">PER-BOLT</span>
+    </div>
+    <div class="summary"><strong>Bolt(Unit of Work)마다 반복</strong>. 비즈니스 로직 모델·규칙·도메인 엔티티를 설계합니다.</div>
+    <div class="grid">
+      <div class="box"><div class="lb">담당</div><p>Lead 🏛️ Architect · Support 💻 Developer</p></div>
+      <div class="box"><div class="lb">산출</div><ul><li>business-logic-model · business-rules</li><li>domain-entities</li><li>(cond) frontend-components</li></ul></div>
+      <div class="box user"><div class="lb">사용자 액션</div><p>Bolt 1(walking skeleton)은 항상 게이트 — 이후 자율/게이트 모드 선택.</p></div>
+    </div>
+  </div>
+
+  <div class="step p4" id="nfr-requirements">
+    <div class="sh">
+      <span class="sn">STAGE 4.2</span>
+      <h3>NFR Requirements</h3>
+      <span class="badge cond">CONDITIONAL</span><span class="badge bolt">PER-BOLT</span>
+    </div>
+    <div class="summary">per-Bolt. 성능·보안·확장성·신뢰성 요구사항과 기술스택 결정을 정합니다.</div>
+    <div class="grid">
+      <div class="box"><div class="lb">담당</div><p>Lead 🏛️ Architect · Support 🛡️ DevSecOps, ⚖️ Compliance, 🧪 Quality</p></div>
+      <div class="box"><div class="lb">산출</div><ul><li>performance/security/scalability/reliability-requirements</li><li>tech-stack-decisions</li></ul></div>
+      <div class="box user"><div class="lb">사용자 액션</div><p>NFR 목표치 검토.</p></div>
+    </div>
+  </div>
+
+  <div class="step p4" id="nfr-design">
+    <div class="sh">
+      <span class="sn">STAGE 4.3</span>
+      <h3>NFR Design</h3>
+      <span class="badge cond">CONDITIONAL</span><span class="badge bolt">PER-BOLT</span>
+    </div>
+    <div class="summary">per-Bolt. 비기능 설계와 논리 컴포넌트를 만듭니다.</div>
+    <div class="grid">
+      <div class="box"><div class="lb">담당</div><p>Lead 🏛️ Architect · Support ☁️ AWS Platform</p></div>
+      <div class="box"><div class="lb">산출</div><ul><li>performance/security/scalability/reliability-design</li><li>logical-components</li></ul></div>
+      <div class="box user"><div class="lb">사용자 액션</div><p>설계 검토.</p></div>
+    </div>
+  </div>
+
+  <div class="step p4" id="infrastructure-design">
+    <div class="sh">
+      <span class="sn">STAGE 4.4</span>
+      <h3>Infrastructure Design</h3>
+      <span class="badge cond">CONDITIONAL</span><span class="badge bolt">PER-BOLT</span>
+    </div>
+    <div class="summary">per-Bolt. 배포 아키텍처·인프라 서비스·모니터링·CICD 를 설계합니다.</div>
+    <div class="grid">
+      <div class="box"><div class="lb">담당</div><p>Lead ☁️ AWS Platform · Support 🛡️ DevSecOps, ⚖️ Compliance</p></div>
+      <div class="box"><div class="lb">산출</div><ul><li>deployment-architecture · infrastructure-services</li><li>monitoring-design · cicd-pipeline</li><li>(cond) shared-infrastructure</li></ul></div>
+      <div class="box user"><div class="lb">사용자 액션</div><p>인프라 설계 검토.</p></div>
+    </div>
+  </div>
+
+  <div class="step p4" id="code-generation">
+    <div class="sh">
+      <span class="sn">STAGE 4.5</span>
+      <h3>Code Generation</h3>
+      <span class="badge always">ALWAYS</span><span class="badge bolt">PER-BOLT</span><span class="badge sub">SUBAGENT</span>
+    </div>
+    <div class="summary">per-Bolt · <code>subagent</code>. <strong>requires:</strong> units-generation + 4.1~4.4. 실제 코드를 생성하고 <strong>자기교정 loop</strong>(halting 조건 내)로 수렴합니다.</div>
+    <div class="grid">
+      <div class="box"><div class="lb">담당</div><p>Lead 💻 Developer · mode <code>subagent</code></p></div>
+      <div class="box"><div class="lb">산출</div><ul><li>application code</li><li>code-generation-plan</li><li>code-summary</li></ul></div>
+      <div class="box user"><div class="lb">사용자 액션</div><p>walking skeleton(Bolt 1) 결과 검토 후 나머지 Bolt 자율 실행 여부 결정.</p></div>
+    </div>
+  </div>
+
+  <div class="step p4" id="build-and-test">
+    <div class="sh">
+      <span class="sn">STAGE 4.6</span>
+      <h3>Build and Test</h3>
+      <span class="badge always">ALWAYS</span><span class="badge once">ONCE</span>
+    </div>
+    <div class="summary"><strong>마지막 1회</strong>(Bolt loop 이후 전체에 대해). test-strategy 레벨(Minimal/Standard/Comprehensive)에 따라 커버리지가 결정됩니다.</div>
+    <div class="grid">
+      <div class="box"><div class="lb">담당</div><p>Lead 🧪 Quality · Support 🛡️ DevSecOps</p></div>
+      <div class="box"><div class="lb">산출</div><ul><li>build-instructions</li><li>unit/integration/performance/security-test-instructions</li><li>build-and-test-summary · build-test-results</li></ul></div>
+      <div class="box user"><div class="lb">사용자 액션</div><p>테스트 결과 검토.</p></div>
+    </div>
+  </div>
+
+  <div class="step p4" id="ci-pipeline">
+    <div class="sh">
+      <span class="sn">STAGE 4.7</span>
+      <h3>CI Pipeline</h3>
+      <span class="badge cond">CONDITIONAL</span><span class="badge once">ONCE</span>
+    </div>
+    <div class="summary">마지막 1회. CI 설정·품질 게이트를 구성합니다. 뒤에 <strong>VG3</strong>.</div>
+    <div class="grid">
+      <div class="box"><div class="lb">담당</div><p>Lead 🚀 Pipeline Deploy</p></div>
+      <div class="box"><div class="lb">산출</div><ul><li>ci-config</li><li>quality-gates</li></ul></div>
+      <div class="box user"><div class="lb">사용자 액션</div><p>CI 구성 승인 → VG3 통과 후 Operation 진입.</p></div>
+    </div>
+  </div>
+
+  <div class="phase p5">
+    <h2>🟡 PHASE 5 · OPERATION</h2>
+    <span class="ph-tag">RUN & IMPROVE</span>
+    <span class="ph-sub">배포 · 관측성 · 인시던트 · 최적화 — 7 stage · feedback loop → 2.1</span>
+  </div>
+
+  <div class="step p5" id="deployment-pipeline">
+    <div class="sh">
+      <span class="sn">STAGE 5.1</span>
+      <h3>Deployment Pipeline</h3>
+      <span class="badge cond">CONDITIONAL</span>
+    </div>
+    <div class="summary">CD 설정·배포 전략·롤백 런북을 만듭니다.</div>
+    <div class="grid">
+      <div class="box"><div class="lb">담당</div><p>Lead 🚀 Pipeline Deploy</p></div>
+      <div class="box"><div class="lb">산출</div><ul><li>cd-config</li><li>deployment-strategy</li><li>rollback-runbook</li></ul></div>
+      <div class="box user"><div class="lb">사용자 액션</div><p>배포 전략 승인.</p></div>
+    </div>
+  </div>
+
+  <div class="step p5" id="environment-provisioning">
+    <div class="sh">
+      <span class="sn">STAGE 5.2</span>
+      <h3>Environment Provisioning</h3>
+      <span class="badge cond">CONDITIONAL</span>
+    </div>
+    <div class="summary">환경을 프로비저닝하고 검증 리포트를 생성합니다.</div>
+    <div class="grid">
+      <div class="box"><div class="lb">담당</div><p>Lead ☁️ AWS Platform · Support 🛡️ DevSecOps, ⚖️ Compliance</p></div>
+      <div class="box"><div class="lb">산출</div><ul><li>environment-inventory</li><li>validation-report</li></ul></div>
+      <div class="box user"><div class="lb">사용자 액션</div><p>환경 검증 결과 확인.</p></div>
+    </div>
+  </div>
+
+  <div class="step p5" id="deployment-execution">
+    <div class="sh">
+      <span class="sn">STAGE 5.3</span>
+      <h3>Deployment Execution</h3>
+      <span class="badge cond">CONDITIONAL</span>
+    </div>
+    <div class="summary">실제 배포를 실행하고 스모크 테스트·헬스체크를 수행합니다.</div>
+    <div class="grid">
+      <div class="box"><div class="lb">담당</div><p>Lead 🚀 Pipeline Deploy · Support 💻 Developer</p></div>
+      <div class="box"><div class="lb">산출</div><ul><li>deployment-log</li><li>smoke-test-results</li><li>health-check-report</li></ul></div>
+      <div class="box user"><div class="lb">사용자 액션</div><p>배포 승인 및 결과 확인.</p></div>
+    </div>
+  </div>
+
+  <div class="step p5" id="observability-setup">
+    <div class="sh">
+      <span class="sn">STAGE 5.4</span>
+      <h3>Observability Setup</h3>
+      <span class="badge cond">CONDITIONAL</span>
+    </div>
+    <div class="summary">대시보드·알람·SLO·로그·트레이싱·이상탐지를 구성합니다 (6 config).</div>
+    <div class="grid">
+      <div class="box"><div class="lb">담당</div><p>Lead 📡 Operations</p></div>
+      <div class="box"><div class="lb">산출</div><ul><li>dashboards · alarms · slo-config</li><li>log-queries · tracing-config · anomaly-config</li></ul></div>
+      <div class="box user"><div class="lb">사용자 액션</div><p>SLO·알람 임계값 검토.</p></div>
+    </div>
+  </div>
+
+  <div class="step p5" id="incident-response">
+    <div class="sh">
+      <span class="sn">STAGE 5.5</span>
+      <h3>Incident Response</h3>
+      <span class="badge cond">CONDITIONAL</span>
+    </div>
+    <div class="summary">런북·인시던트 플랜·에스컬레이션 매트릭스를 만듭니다.</div>
+    <div class="grid">
+      <div class="box"><div class="lb">담당</div><p>Lead 📡 Operations</p></div>
+      <div class="box"><div class="lb">산출</div><ul><li>runbooks</li><li>incident-plan</li><li>escalation-matrix</li></ul></div>
+      <div class="box user"><div class="lb">사용자 액션</div><p>에스컬레이션 정책 확인.</p></div>
+    </div>
+  </div>
+
+  <div class="step p5" id="performance-validation">
+    <div class="sh">
+      <span class="sn">STAGE 5.6</span>
+      <h3>Performance Validation</h3>
+      <span class="badge cond">CONDITIONAL</span>
+    </div>
+    <div class="summary">부하 테스트를 수행하고 NFR 검증 매트릭스로 목표 달성을 확인합니다.</div>
+    <div class="grid">
+      <div class="box"><div class="lb">담당</div><p>Lead 🧪 Quality</p></div>
+      <div class="box"><div class="lb">산출</div><ul><li>load-test-plan</li><li>load-test-results</li><li>nfr-validation-matrix</li></ul></div>
+      <div class="box user"><div class="lb">사용자 액션</div><p>성능 결과 검토.</p></div>
+    </div>
+  </div>
+
+  <div class="step p5" id="feedback-optimization">
+    <div class="sh">
+      <span class="sn">STAGE 5.7</span>
+      <h3>Feedback & Optimization</h3>
+      <span class="badge cond">CONDITIONAL</span>
+    </div>
+    <div class="summary">SLO·비용·drift 를 분석해 개선점을 도출하고, <strong>다시 2.1 Intent Capture 로 feedback loop</strong> 를 형성합니다.</div>
+    <div class="grid">
+      <div class="box"><div class="lb">담당</div><p>Lead 📡 Operations · Support ☁️ AWS Platform</p></div>
+      <div class="box"><div class="lb">산출</div><ul><li>slo-report · cost-analysis</li><li>drift-report · feedback-loop</li></ul></div>
+      <div class="box user"><div class="lb">사용자 액션</div><p>개선 항목을 새 intent 로 → 라이프사이클 순환.</p></div>
+    </div>
+  </div>
+  <!-- ===================================================== -->
+  <!-- ============ CROSS-CUTTING ======================== -->
+  <!-- ===================================================== -->
+  <section class="crosscut" id="cross">
+    <h2>🧷 모든 stage 에 걸친 cross-cutting 동작</h2>
+    <p class="lead">
+      아래 항목들은 특정 stage 가 아니라 <strong>모든 stage 사이사이</strong>에서 일관되게 동작합니다.
+      2.0 의 <strong>점진적 자율성</strong>·추적성·중단 안정성을 보장하는 메커니즘입니다.
+    </p>
+    <div class="cgrid">
+      <div class="cc">
+        <h4>✋ Human-in-the-loop (여전히 핵심)</h4>
+        <p>2.0 은 HITL 을 <strong>없애지 않습니다</strong> — 실행되는 non-bootstrap stage 마다 <strong>사람 승인 게이트</strong>가 있습니다
+        (feature = 32 중 29 게이트, poc = 8 중 5). Initialization 3 stage 만 auto-proceed. 방향은 "제거"가 아니라
+        검증을 기계화해 <strong>개입을 점진적으로 줄이는</strong> 것입니다.</p>
+      </div>
+      <div class="cc">
+        <h4>🚦 Verification Gate ×3</h4>
+        <p>phase 경계에서 자동 traceability 검사: <strong>VG1</strong>(Ideation→Inception) · <strong>VG2</strong>(Inception→Construction) ·
+        <strong>VG3</strong>(Construction→Operation). Initialization→Ideation 은 게이트 없이 자동 진행.</p>
+      </div>
+      <div class="cc">
+        <h4>🔁 Self-Correcting Loop + Halting</h4>
+        <p>각 stage 는 <strong>생성 → 자기검증(C2 후조건) 반복</strong>. <code>halting</code>(최대 반복/토큰 예산)에 도달하거나
+        모호함이 있으면 무한 반복 대신 <strong>사람에게 escalate</strong>. LLM 판정만 있는 stage 는 자율 halt 불가 → 사람 검증.</p>
+      </div>
+      <div class="cc">
+        <h4>📝 68-event 감사 로그</h4>
+        <p>stage 활성·산출·승인·rule 적용 등 모든 결정이 <strong>구조적으로 로깅</strong>됩니다. 어떤 stage 가 왜, 어떤 순서로
+        실행됐는지 전부 추적 — 엔터프라이즈 감사 요건 충족.</p>
+      </div>
+      <div class="cc">
+        <h4>💾 Session 관리</h4>
+        <p><code>aidlc-state.md</code> 기반으로 <strong>resume(체크포인트 재개) · redo(재실행) · jump(특정 stage 이동) · fresh(새로 시작)</strong>.
+        세션이 끊겨도 마지막 미완료 stage 부터 정확히 이어집니다.</p>
+      </div>
+      <div class="cc">
+        <h4>🧩 3-Compartment (Generate·Verify·Learn)</h4>
+        <p>모든 stage 는 <strong>C1</strong>(입력→출력) · <strong>C2</strong>(post-condition) · <strong>C3</strong>(런타임 학습) 구조.
+        sensors(<code>required-sections</code>·<code>upstream-coverage</code>, 코드 stage 는 <code>linter</code>+<code>type-check</code>)가 자동 품질 검사.</p>
+      </div>
+      <div class="cc">
+        <h4>🌱 Compound Engineering (학습)</h4>
+        <p>사람의 교정·override·escape-hatch 수용이 <strong>후조건/guardrail 후보</strong>로 제안되고, 승인 시 활성 규칙으로 승격.
+        Practices Discovery(3.2)가 대표 지점 — 실전이 검증 라이브러리를 hydrate.</p>
+      </div>
+      <div class="cc">
+        <h4>🚫 숨은 위임 없음</h4>
+        <p>모든 agent 는 <code>disallowedTools: Task</code> — <strong>agent 는 서로를 dispatch 하지 않습니다</strong>.
+        오직 <strong>conductor</strong> 만 stage 를 위임·조율. 실행 순서는 결정적 라우팅.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================================================== -->
+  <!-- ============ USER-OPERABLE KNOBS ================== -->
+  <!-- ===================================================== -->
+  <section class="knobs" id="knobs">
+    <h2>🎛️ 사용자가 실제로 조작할 수 있는 부분</h2>
+    <p class="lead">
+      2.0 에서 사용자가 워크플로우 모양을 직접 조정하는 knob 은 크게 넷 — <strong>scope · depth · test-strategy · Construction Autonomy</strong>.
+      앞의 셋은 <strong>"무엇을 얼마나"</strong>, 마지막은 <strong>"AI 를 얼마나 풀어줄지"</strong> 를 정합니다.
+    </p>
+
+    <div class="kgrid">
+
+      <!-- Scope -->
+      <div class="knob">
+        <h4><span class="ib">🎚️</span> Scope — 어떤 stage 를 실행할지</h4>
+        <div class="k-row">
+          <div class="lb">자동 — intent 에서 감지</div>
+          <p>freeform intent 의 키워드로 <strong>9 scope</strong> 중 자동 감지 (mvp/poc/bugfix/refactor/infra/security-patch/workshop),
+          없으면 <code>feature</code>(32/32) fallback. enterprise 는 의도적으로 선택.</p>
+        </div>
+        <div class="k-row">
+          <div class="lb">조정 — /aidlc compose</div>
+          <p>제안된 EXECUTE/SKIP 그리드가 맞지 않으면 <code>/aidlc compose</code> 로 <strong>Composer</strong> 가 stage 를 재구성.
+          키워드 + 5단어 넘는 설명이 함께면 compose 제안이 자동 발동.</p>
+          <div class="ex"><span class="pf">User &gt;</span> /aidlc compose
+Keep everything but skip market-research
+and add security-patch's NFR stages.</div>
+        </div>
+        <div class="note"><strong>💡 Tip:</strong> scope 는 "어떤 stage 를 돌릴지"만 정합니다. 각 산출물의 상세도는 <strong>depth</strong>가 따로 결정.</div>
+      </div>
+
+      <!-- Depth -->
+      <div class="knob">
+        <h4><span class="ib">📏</span> Depth — 산출물 상세도</h4>
+        <div class="k-row">
+          <div class="lb">3 레벨 (독립 축)</div>
+          <p><strong>Minimal</strong>(핵심만, 1–2p) · <strong>Standard</strong>(완전한 산출물) · <strong>Comprehensive</strong>(엔터프라이즈 전량 + 컴플라이언스 cross-ref).
+          scope 기본값을 따르되 독립적으로 override 가능.</p>
+        </div>
+        <div class="k-row">
+          <div class="lb">조정 방법</div>
+          <p><code>--depth &lt;level&gt;</code> flag, scope 확정 시점, 또는 <strong>아무 승인 게이트에서나</strong> 변경.</p>
+          <div class="ex"><span class="pf">User &gt;</span> /aidlc --depth comprehensive
+<span class="pf">User &gt;</span> (게이트에서) 이 설계는 minimal 로 줄여줘</div>
+        </div>
+        <div class="note"><strong>⚠️ 주의:</strong> depth ≠ scope. depth=minimal 이어도 ALWAYS stage 는 모두 실행됩니다.</div>
+      </div>
+
+      <!-- Test strategy -->
+      <div class="knob">
+        <h4><span class="ib">🧪</span> Test Strategy — 테스트 양</h4>
+        <div class="k-row">
+          <div class="lb">3 레벨 (depth 와 별개)</div>
+          <p><strong>Minimal(Nyquist)</strong> — 요구사항당 1 테스트, unit 만, ~5–15개 ·
+          <strong>Standard(per-component)</strong> — 컴포넌트당 5–8, unit+integration ·
+          <strong>Comprehensive(full)</strong> — 컴포넌트당 10–15, 전 유형.</p>
+        </div>
+        <div class="k-row">
+          <div class="lb">조정 방법</div>
+          <p><code>--test-strategy &lt;level&gt;</code>, mid-workflow, 또는 게이트에서. depth 를 따르지만 scope 가 override 가능
+          (예: <code>workshop</code> = Standard depth + Minimal test).</p>
+          <div class="ex"><span class="pf">User &gt;</span> /aidlc --test-strategy comprehensive</div>
+        </div>
+        <div class="note"><strong>💡 Tip:</strong> Computational 검증(executable)이 많을수록 AI 가 <code>build-and-test</code> 를 자율 halt 하기 쉬워집니다.</div>
+      </div>
+
+      <!-- Autonomy -->
+      <div class="knob">
+        <h4><span class="ib">⚡</span> Construction Autonomy — Bolt 를 얼마나 풀어줄지</h4>
+        <div class="k-row">
+          <div class="lb">Bolt 1 = Walking Skeleton</div>
+          <p>Construction 의 첫 Bolt 는 <strong>항상 게이트·인터랙티브</strong>. 뼈대가 도는지 사람이 확인합니다.</p>
+        </div>
+        <div class="k-row">
+          <div class="lb">한 번의 ladder 프롬프트</div>
+          <p>walking skeleton 이 통과하면 AI 가 한 번 묻습니다 — <strong>"이후 Bolt 를 자율로 진행할까, 매 Bolt 게이트할까?"</strong>.
+          답은 <em>Construction Autonomy Mode</em> 로 state 에 저장돼 나머지 Bolt 에 적용.</p>
+          <div class="ex"><span class="pf">AI  &gt;</span> Walking skeleton shipped &amp; approved.
+Remaining 6 Bolts:
+  <span class="pa">[A] proceed autonomously</span>
+  [B] gate every Bolt
+<span class="pf">User &gt;</span> A</div>
+        </div>
+        <div class="note"><strong>⚡ 병렬:</strong> 같은 선행조건을 공유하는 독립 Bolt 들은 <strong>parallel batch</strong> 로 한 번의 게이트 아래 동시 실행됩니다.</div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ===================================================== -->
+  <!-- ============ AFTER COMPLETION ===================== -->
+  <!-- ===================================================== -->
+  <section class="after" id="after">
+    <h2>🔁 완료 후 — feedback loop 로 다음 사이클</h2>
+    <p class="lead">
+      1.0 이 "변경 시 사용자가 3-step 을 명시 트리거"였다면, 2.0 은 Operation 의 마지막 stage 가
+      이를 <strong>라이프사이클 순환</strong>으로 구조화합니다. 운영 신호가 다음 개발 의도로 되먹임됩니다.
+    </p>
+    <div class="flow3">
+      <div class="fs">
+        <span class="fn">5.4–5.6</span>
+        <span class="ft">관측 · 검증</span>
+        <span class="fd">observability · incident · performance-validation 이 SLO·부하·이상 신호를 수집.</span>
+      </div>
+      <div class="ar">→</div>
+      <div class="fs">
+        <span class="fn">5.7</span>
+        <span class="ft">Feedback &amp; Optimization</span>
+        <span class="fd">slo-report · cost-analysis · drift-report 로 개선점 도출, <code>feedback-loop</code> 산출.</span>
+      </div>
+      <div class="ar">→</div>
+      <div class="fs">
+        <span class="fn">2.1</span>
+        <span class="ft">다시 Intent Capture</span>
+        <span class="fd">도출된 개선을 새 intent 로 → 다음 사이클 시작. C3 학습은 후조건 라이브러리를 hydrate.</span>
+      </div>
+    </div>
+    <p style="margin:14px 0 0; font-size:12.5px; color:var(--text-soft); line-height:1.6;">
+      💡 매 사이클마다 <strong>Compound Engineering</strong> 으로 검증 규칙이 쌓여, 다음 사이클에서 AI 가 자율로 통과하는 범위가 넓어집니다 —
+      이것이 2.0 이 말하는 <strong>"안전한 증분 자율화"</strong> 입니다.
+    </p>
+  </section>
+
+</main>
+
+<footer>
+  <p>
+    데이터 출처: AWS Labs
+    <a href="https://github.com/awslabs/aidlc-workflows/tree/v2" target="_blank">aidlc-workflows @ v2</a>
+    (GA Preview) · 컴파일된 stage-graph.json / core/aidlc-common/stages / core/scopes 기준 ·
+    <a href="aidlc-2.html">🚀 2.0 개요</a> ·
+    <a href="aidlc-2-workflow.html">🗺️ 2.0 워크플로우</a> ·
+    <a href="index.html">📊 1.0 다이어그램</a> ·
+    <a href="user-flow.html">🧭 1.0 흐름</a>
+  </p>
+</footer>
+
+<script>
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: 'default',
+    flowchart: { useMaxWidth: true, htmlLabels: true, curve: 'basis' },
+    securityLevel: 'loose'
+  });
+</script>
+
+</body>
+</html>
