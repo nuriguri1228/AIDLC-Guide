@@ -1,39 +1,39 @@
 # AIDLC Guide
 
-AWS Labs [aidlc-workflows](https://github.com/awslabs/aidlc-workflows) (AI Development Life Cycle) 의 3-phase / 14-step 구조를 시각화한 single-page 웹 가이드입니다.
+AWS Labs [aidlc-workflows](https://github.com/awslabs/aidlc-workflows) (AI-Driven Development Life Cycle) 를 **v1(1.0)** 과 **v2(2.0)** 로 나누어 시각화·정리하고, 국내외 도입 사례를 모은 한국어 웹 가이드입니다.
+
+- **v2** — upstream `main` (2.x GA) 기준, 현재 **v2.10.0** (2026-09-24) 반영: 5 Phase · 33 Stage · 14 Agent · 11 워크플로우 프로필 · 7 Harness
+- **v1** — upstream `v1` 브랜치(유지보수, 최종 v1.0.1) 기준: 3 Phase · 14 Stage
 
 ## 🌐 Live
 
 GitHub Pages: **https://nuriguri1228.github.io/AIDLC-Guide/**
 
-## ✨ 기능
+## 📄 페이지
 
-- **Phase → Step → Activity 3단 시각화** — Inception 7 step / Construction 6 step / Operations 1 step (placeholder)
-- **단계 배지** — 각 step 박스에 `항상/조건부/비활성` + `Greenfield/Brownfield/공통` 마크
-- **상세 단계 마크** — 활동 박스에 📄 (산출물 생성) / 👤 (Human-in-the-loop) 표시
-- **산출물 viewer** — 모달 안의 `.md` 파일명 클릭 시 AWS Labs golden samples 또는 AIDLC 컨벤션에 맞춘 sample 파일이 markdown viewer 에 렌더링
-- **AIDLC 컨벤션 정확 반영** — `awslabs/aidlc-workflows` 의 `aidlc-rules/aws-aidlc-rule-details/` 룰 파일에서 step / activity / inputs / outputs / ruleFile 을 직접 추출
+| 구분 | 파일 | 내용 |
+|---|---|---|
+| 홈 | `index.html` | 버전 선택 · v1/v2 비교 · 사례 미리보기 · 최근 업데이트 |
+| v1 | `v1-workflow.html` | Phase → Step → Activity 다이어그램 + 산출물 sample viewer (편집·Export/Import) |
+| v1 | `v1-user-flow.html` | 처음부터 끝까지 14 stage 사용자 흐름 |
+| v1 | `v1-reverse-engineering.html` | Brownfield Reverse Engineering 상세 |
+| v1 | `v1-effects.html` · `v1-scenarios.html` | 효과 · 적용 시나리오 |
+| v2 | `v2-overview.html` | 2.0 스펙(9원칙 · 3-구획 모델) · 구현체 · 릴리스 · 1.0 비교 |
+| v2 | `v2-workflow.html` | 33 stage × 11 프로필 워크플로우 다이어그램 |
+| v2 | `v2-flow.html` | 설치(`aidlc` CLI)부터 Operation 까지 사용자 흐름 |
+| 공통 | `cases.html` | 국내외 도입 사례 17건 (필터 · 발표 자료 viewer) |
+
+공통 상단 내비게이션과 셸 스타일은 `assets/site.js` · `assets/site.css` 한 곳에서 관리합니다 (각 페이지는 `<body data-page="...">` 로 식별).
+예전 파일명(`aidlc-2*.html`, `effects.html` 등)은 새 경로로 리다이렉트됩니다.
 
 ## 📂 구조
 
 ```
 .
-├── index.html                # Main SPA (자가-내장 CSS/JS)
-├── samples/                  # 95 개 산출물 sample md 파일
-│   ├── aidlc-state.md
-│   ├── audit.md
-│   ├── inception/
-│   │   ├── requirements/     # requirements + verification/clarification questions
-│   │   ├── plans/            # execution / story / design / unit-of-work / code-gen plans
-│   │   ├── user-stories/     # stories.md, personas.md
-│   │   ├── application-design/  # components / methods / services / dependency / unit-of-work
-│   │   └── reverse-engineering/ # business-overview / architecture / api / code-structure 등
-│   ├── construction/
-│   │   ├── plans/            # per-unit plan 파일들
-│   │   ├── user-management/  # 예시 unit (functional / nfr / infra design 산출물)
-│   │   ├── build-and-test/   # build / unit / integration / performance / contract / security / e2e test
-│   │   └── shared-infrastructure.md
-│   └── operations/operations.md
+├── index.html · v1-*.html · v2-*.html · cases.html
+├── assets/                   # 공통 내비게이션(site.js) · 셸 스타일(site.css)
+├── decks/                    # 사례 발표 자료 (pptx)
+├── samples/                  # v1 산출물 sample md 파일 (95개)
 └── docs/                     # 페이지 설계 spec (개발 메모)
 ```
 

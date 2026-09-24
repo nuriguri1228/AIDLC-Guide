@@ -2,488 +2,352 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<title>AI-DLC 실사례 — AIDLC Guide</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI-DLC 도입 사례 — AIDLC Guide</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<link rel="stylesheet" href="assets/site.css?v=20260925">
 <style>
-  :root {
-    --aidlc-inception: #4A90E2;
-    --aidlc-construction: #7ED321;
-    --aidlc-operations: #F5A623;
-    --sdlc-blue: #2C7BC4;
-    --sdlc-blue-dark: #1F5C92;
-    --sdlc-accent: #F5A623;
-    --text: #2A3142;
-    --text-soft: #5B6577;
-    --text-faint: #8A93A6;
-    --border: #D7E3F0;
-    --bg-card: #FFFFFF;
-    --bg-soft: #F5F8FC;
-    --ok: #2A8;
-    --warn: #C90;
-    --bad: #C44;
-  }
+  :root { --ink:#1D2433; --soft:#5B6577; --faint:#8A93A6; --line:#E3E8F0; --v1:#2C7BC4; --v2:#7B4FE0; }
+  * { box-sizing:border-box; }
+  body { margin:0; color:var(--ink); background:#F7F9FC; line-height:1.65; }
+  main { max-width:1180px; margin:0 auto; padding:0 32px 64px; }
 
-  * { box-sizing: border-box; }
-  html, body {
-    margin: 0; padding: 0;
-    font-family: 'Segoe UI', 'Apple SD Gothic Neo', 'Malgun Gothic', '맑은 고딕', sans-serif;
-    color: var(--text);
-    background: linear-gradient(180deg, #FAFBFE 0%, #EEF3FA 100%);
-    min-height: 100vh;
-    line-height: 1.6;
-  }
+  .page-head { padding:44px 0 8px; }
+  .page-head h1 { margin:0 0 8px; font-size:34px; letter-spacing:-.9px; }
+  .page-head p { margin:0; color:var(--soft); font-size:15.5px; max-width:780px; }
 
-  header {
-    padding: 24px 32px 8px;
-    display: flex; align-items: center; justify-content: space-between;
-    flex-wrap: wrap; gap: 16px;
-  }
-  .title-block h1 {
-    margin: 0; font-size: 30px; color: var(--sdlc-blue);
-    letter-spacing: 0.5px; font-weight: 800;
-  }
-  .title-block .subtitle { color: var(--text-soft); font-size: 14px; margin-top: 4px; }
-  .nav { display: flex; gap: 8px; flex-wrap: wrap; }
-  .nav a {
-    text-decoration: none; padding: 8px 16px; border-radius: 6px;
-    border: 1.5px solid var(--sdlc-blue); color: var(--sdlc-blue);
-    font-size: 13px; font-weight: 700; transition: all .15s ease;
-  }
-  .nav a:hover { background: var(--sdlc-blue); color: white; }
-  .nav a.active { background: var(--sdlc-accent); border-color: var(--sdlc-accent); color: white; }
+  .patterns { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin:26px 0 8px; }
+  .patterns div { background:#fff; border:1px solid var(--line); border-radius:12px; padding:14px 16px; font-size:13.5px; color:var(--soft); }
+  .patterns b { display:block; color:var(--ink); font-size:14.5px; margin-bottom:2px; }
 
-  main { padding: 16px 32px 48px; max-width: 1280px; margin: 0 auto; }
+  .toolbar { display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin:26px 0 18px; }
+  .chip { border:1px solid var(--line); background:#fff; color:var(--soft); font:inherit; font-size:13.5px; font-weight:600;
+    padding:7px 14px; border-radius:999px; cursor:pointer; }
+  .chip:hover { color:var(--ink); border-color:#C9D3E3; }
+  .chip[aria-pressed="true"] { background:var(--ink); border-color:var(--ink); color:#fff; }
+  .chip .n { opacity:.6; margin-left:5px; font-weight:500; }
+  .toolbar .count { margin-left:auto; color:var(--faint); font-size:13px; }
 
-  /* ============ Hero ============ */
-  .hero {
-    background: linear-gradient(135deg, #2C7BC4 0%, #1F5C92 100%);
-    color: white; border-radius: 16px;
-    padding: 30px 36px; margin-bottom: 28px;
-    box-shadow: 0 8px 24px rgba(44,123,196,0.25);
-  }
-  .hero h2 { margin: 0 0 8px; font-size: 26px; letter-spacing: 0.5px; }
-  .hero p { margin: 0 0 8px; font-size: 14.5px; line-height: 1.7; opacity: 0.95; }
-  .hero p strong { color: #FFE8B3; }
+  .grid { display:grid; grid-template-columns:1fr 1fr; gap:18px; }
+  .case { background:#fff; border:1px solid var(--line); border-radius:16px; padding:22px 22px 18px; display:flex; flex-direction:column; scroll-margin-top:120px; }
+  .case[hidden] { display:none; }
+  .case:target { border-color:var(--v2); box-shadow:0 0 0 3px #EDE5FD; }
+  .meta { display:flex; flex-wrap:wrap; align-items:center; gap:6px; margin-bottom:10px; font-size:12px; }
+  .co { font-weight:800; font-size:13.5px; color:var(--ink); margin-right:4px; }
+  .pill { padding:2px 8px; border-radius:6px; background:#F4F6FA; color:var(--soft); font-weight:600; }
+  .pill.kr { background:#EAF3FC; color:var(--v1); }
+  .pill.gl { background:#F3EEFD; color:var(--v2); }
+  .date { color:var(--faint); margin-left:auto; font-weight:600; }
+  .case h3 { margin:0 0 8px; font-size:17.5px; line-height:1.45; letter-spacing:-.3px; }
+  .case p { margin:0 0 12px; font-size:14px; color:var(--soft); }
+  .case p b { color:var(--ink); font-weight:700; }
+  .kpis { display:flex; flex-wrap:wrap; gap:6px; margin:0 0 14px; padding:0; list-style:none; }
+  .kpis li { font-size:12.5px; font-weight:700; color:#8A4B00; background:#FFF4E3; border:1px solid #FBE0B8; padding:3px 9px; border-radius:6px; }
+  .actions { margin-top:auto; display:flex; flex-wrap:wrap; gap:8px; padding-top:4px; }
+  .actions a, .actions button { font:inherit; font-size:13px; font-weight:700; text-decoration:none; padding:7px 13px; border-radius:8px;
+    border:1px solid var(--line); background:#fff; color:var(--ink); cursor:pointer; }
+  .actions a:hover, .actions button:hover { border-color:#C9D3E3; background:#F7F9FC; }
+  .actions .primary { background:var(--ink); border-color:var(--ink); color:#fff; }
+  .actions .primary:hover { background:#333C50; }
+  .deck { margin-top:14px; border:1px solid var(--line); border-radius:10px; overflow:hidden; background:#F7F9FC; }
+  .deck[hidden] { display:none; }
+  .deck iframe { display:block; width:100%; aspect-ratio:16/10.5; min-height:320px; border:0; background:#fff; }
+  .deck .ph { padding:28px 20px; text-align:center; color:var(--soft); font-size:13.5px; }
+  .deck .ph a { color:var(--v2); font-weight:700; }
 
-  /* ============ Section heading ============ */
-  .section-head {
-    margin: 38px 0 16px;
-    padding: 14px 22px;
-    border-radius: 12px;
-    color: white;
-    display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
-  }
-  .section-head.external { background: linear-gradient(135deg, #4A90E2, #2C7BC4); }
-  .section-head.internal { background: linear-gradient(135deg, #7ED321, #5BA316); }
-  .section-head h2 { margin: 0; font-size: 22px; font-weight: 800; letter-spacing: 0.5px; }
-  .section-head .sh-tag {
-    background: rgba(255,255,255,0.22);
-    border: 1px solid rgba(255,255,255,0.4);
-    padding: 3px 10px; border-radius: 12px;
-    font-size: 11px; letter-spacing: 1px; font-weight: 700;
-  }
-  .section-head .sh-sub { font-size: 13px; opacity: 0.95; }
+  h2.sec { font-size:22px; letter-spacing:-.4px; margin:52px 0 6px; }
+  p.sec-sub { margin:0 0 18px; color:var(--soft); font-size:14.5px; }
+  .note { background:#fff; border:1px dashed #C9D3E3; border-radius:14px; padding:22px; color:var(--soft); font-size:14px; }
+  .src { font-size:12.5px; color:var(--faint); margin-top:28px; }
+  .src a { color:var(--soft); }
 
-  /* ============ Case card ============ */
-  .case-card {
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    border-left: 5px solid var(--sdlc-blue);
-    border-radius: 12px;
-    padding: 22px 26px;
-    margin-bottom: 22px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-  }
-  .case-card .case-head {
-    display: flex; align-items: center; gap: 12px;
-    flex-wrap: wrap; margin-bottom: 12px;
-  }
-  .case-card .case-no {
-    background: var(--sdlc-blue); color: white;
-    width: 32px; height: 32px; border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    font-weight: 800; font-size: 14px; flex-shrink: 0;
-  }
-  .case-card .case-company {
-    background: #EEF3FA;
-    color: var(--sdlc-blue);
-    padding: 4px 11px; border-radius: 12px;
-    font-size: 12px; font-weight: 800;
-    letter-spacing: 0.5px;
-  }
-  .case-card h3 {
-    margin: 0; font-size: 18px; font-weight: 800; color: var(--text);
-    flex: 1; min-width: 200px;
-  }
-  .case-card .case-summary {
-    color: var(--text-soft); font-size: 13.5px; line-height: 1.75;
-    margin: 0 0 16px;
-  }
-  .case-card .case-summary strong { color: var(--text); }
-  .case-card .case-summary code {
-    background: var(--bg-soft); padding: 1px 6px;
-    border-radius: 4px; font-size: 12px;
-  }
+  footer.home-foot { max-width:1180px; margin:0 auto; padding:24px 32px 40px; border-top:1px solid var(--line); color:var(--faint); font-size:12.5px; }
+  footer.home-foot a { color:var(--soft); }
 
-  .case-actions {
-    display: flex; gap: 10px; flex-wrap: wrap;
-    margin-bottom: 14px;
+  @media (max-width:980px) { .patterns { grid-template-columns:1fr 1fr; } }
+  @media (max-width:860px) { .grid { grid-template-columns:1fr; } }
+  @media (max-width:760px) {
+    main { padding:0 16px 48px; }
+    .page-head { padding:28px 0 4px; }
+    .page-head h1 { font-size:26px; }
+    .patterns { grid-template-columns:1fr 1fr; gap:8px; }
+    .patterns div { padding:11px 12px; font-size:12.5px; line-height:1.55; }
+    .patterns b { font-size:13.5px; }
+    .toolbar .count { width:100%; margin-left:0; }
+    .date { margin-left:0; width:100%; }
+    footer.home-foot { padding:20px 16px 32px; }
   }
-  .case-actions a {
-    text-decoration: none;
-    background: var(--sdlc-accent);
-    color: white;
-    padding: 8px 16px;
-    border-radius: 6px;
-    font-size: 13px;
-    font-weight: 700;
-    transition: all .15s ease;
-    display: inline-flex; align-items: center; gap: 6px;
-  }
-  .case-actions a:hover {
-    background: #C2811A;
-    transform: translateY(-1px);
-  }
-  .case-actions a.secondary {
-    background: white;
-    color: var(--sdlc-blue);
-    border: 1.5px solid var(--sdlc-blue);
-  }
-  .case-actions a.secondary:hover {
-    background: var(--sdlc-blue);
-    color: white;
-  }
-
-  /* ============ Deck viewer ============ */
-  .case-deck {
-    background: var(--bg-soft);
-    border: 1px dashed var(--border);
-    border-radius: 10px;
-    overflow: hidden;
-    margin-top: 8px;
-  }
-  .case-deck iframe {
-    display: block;
-    width: 100%;
-    height: 600px;
-    border: 0;
-    background: white;
-  }
-  .ppt-placeholder {
-    padding: 40px 24px;
-    text-align: center;
-    color: var(--text-faint);
-    font-size: 13.5px;
-    line-height: 1.7;
-  }
-  .ppt-placeholder .ppt-icon {
-    font-size: 36px; display: block; margin-bottom: 8px;
-  }
-  .ppt-placeholder code {
-    background: white;
-    padding: 2px 7px;
-    border-radius: 4px;
-    color: var(--sdlc-blue);
-    font-size: 12px;
-    border: 1px solid var(--border);
-  }
-
-  /* ============ Internal "coming soon" ============ */
-  .coming-soon {
-    background: var(--bg-card);
-    border: 2px dashed var(--border);
-    border-radius: 12px;
-    padding: 60px 30px;
-    text-align: center;
-    color: var(--text-soft);
-  }
-  .coming-soon .cs-icon {
-    font-size: 48px; display: block; margin-bottom: 12px;
-  }
-  .coming-soon h3 {
-    margin: 0 0 8px; font-size: 20px; color: var(--text);
-    font-weight: 800;
-  }
-  .coming-soon p {
-    margin: 0; font-size: 14px; line-height: 1.7;
-  }
-
-  /* ============ TOC ============ */
-  .toc {
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 16px 22px;
-    margin-bottom: 28px;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.03);
-  }
-  .toc h3 {
-    margin: 0 0 10px; font-size: 14px;
-    color: var(--sdlc-blue); font-weight: 800;
-    letter-spacing: 0.5px;
-  }
-  .toc ol {
-    margin: 0; padding-left: 22px;
-    font-size: 13px; color: var(--text-soft);
-  }
-  .toc ol li { margin-bottom: 4px; }
-  .toc ol li a { color: var(--text); text-decoration: none; font-weight: 600; }
-  .toc ol li a:hover { color: var(--sdlc-blue); text-decoration: underline; }
-
-  /* ============ Footer ============ */
-  footer {
-    text-align: center;
-    padding: 24px 32px;
-    color: var(--text-soft);
-    font-size: 12px;
-    border-top: 1px solid var(--border);
-    margin-top: 40px;
-  }
-  footer a { color: var(--sdlc-blue); text-decoration: none; font-weight: 600; }
-  footer a:hover { text-decoration: underline; }
 </style>
 </head>
-<body>
-
-<header>
-  <div class="title-block">
-    <h1>🏢 AI-DLC 실사례</h1>
-    <div class="subtitle">실제 기업이 AI-DLC 를 어떻게 도입하고 적용했는지 — 외부 사례 + 내부 사례</div>
-  </div>
-  <nav class="nav">
-    <a href="index.html">📊 워크플로우 다이어그램</a>
-    <a href="effects.html">✨ AI-DLC 효과</a>
-    <a href="scenarios.html">🎬 사용자 시나리오</a>
-    <a href="reverse-engineering.html">🔍 Reverse Engineering</a>
-    <a href="user-flow.html">🧭 사용자 흐름</a>
-    <a href="cases.html" class="active">🏢 실사례</a>
-    <a href="aidlc-2.html">🚀 AI-DLC 2.0</a>
-    <a href="aidlc-2-workflow.html">🗺️ 2.0 워크플로우</a>
-    <a href="aidlc-2-flow.html">🧭 2.0 흐름</a>
-  </nav>
-</header>
-
+<body data-page="cases">
 <main>
 
-  <!-- ============ Hero ============ -->
-  <section class="hero">
-    <h2>실전에서 AI-DLC 는 어떻게 작동하는가</h2>
-    <p>
-      AWS Summit Seoul 등에서 공개된 <strong>국내 기업의 AI-DLC 도입 사례</strong>를 정리합니다.
-      각 사례마다 <strong>핵심 요약 · 라이브 스트리밍 링크 · 발표 자료 (PPT)</strong> 를 함께 제공합니다.
-    </p>
-    <p>
-      💡 PPT 파일이 추가되면 자동으로 페이지 내에서 viewer 로 렌더링됩니다.
-      (Microsoft Office Online Viewer · GitHub Pages 호스팅 기준)
-    </p>
+  <section class="page-head">
+    <h1>AI-DLC 도입 사례</h1>
+    <p>AWS Summit 발표, AWS 기술 블로그, 언론 보도 등 공개 자료에서 확인한 국내외 AI-DLC 도입 사례입니다. 수치는 각 출처에 적힌 값만 옮겼고(설문·체감치는 그렇게 표기), 모든 사례에 원문 링크를 달았습니다.</p>
   </section>
 
-  <!-- ============ TOC ============ -->
-  <div class="toc">
-    <h3>📑 목차</h3>
-    <ol>
-      <li><a href="#external">외부 사례 — 국내 기업의 AI-DLC 도입</a>
-        <ol>
-          <li><a href="#case-samsung">[삼성전자] 에이전틱 AI 전략 — 개발혁신과 AIOps 여정</a></li>
-          <li><a href="#case-woongjin">[웅진씽크빅] 교육자용 AI 에이전트 구축기</a></li>
-          <li><a href="#case-babitalk">[바비톡] AX 여정 — 에이전틱 AI 로 K-beauty 를 바꾸다</a></li>
-          <li><a href="#case-lg">[LG전자] 큰 규모 코드베이스에서 AI-DLC 도입</a></li>
-        </ol>
-      </li>
-      <li><a href="#internal">내부 사례 — 준비 중</a></li>
-    </ol>
+  <div class="patterns" aria-label="사례에서 보이는 공통 패턴">
+    <div><b>2~3일 Unicorn Gym</b>실제 업무 과제를 들고 와 Inception → Construction 을 한 번에 경험하는 형식이 가장 흔합니다.</div>
+    <div><b>Kiro · Claude Code</b>대부분 Kiro 를 쓰고, 2026년 중반부터 Claude Code 병행 사례가 늘었습니다.</div>
+    <div><b>코드 작성 → 판단·결정</b>사람의 역할이 요구사항 합의·설계 승인으로 옮겨간다는 소감이 반복됩니다.</div>
+    <div><b>프로토타입 ≠ 완성</b>여러 사례가 "완성까지는 보완 루프가 필요", "통합·보안 검증은 범위 밖"이라고 밝힙니다.</div>
   </div>
 
-  <!-- ===================================================== -->
-  <!-- ============ 외부 사례 =================== -->
-  <!-- ===================================================== -->
-  <div class="section-head external" id="external">
-    <h2>🌐 외부 사례</h2>
-    <span class="sh-tag">EXTERNAL</span>
-    <span class="sh-sub">AWS Summit Seoul 2026 발표 사례 모음</span>
+  <div class="toolbar" role="group" aria-label="사례 필터">
+    <button class="chip" data-filter="all" aria-pressed="true">전체</button>
+    <button class="chip" data-filter="kr" aria-pressed="false">국내</button>
+    <button class="chip" data-filter="gl" aria-pressed="false">해외</button>
+    <button class="chip" data-filter="gym" aria-pressed="false">Unicorn Gym</button>
+    <button class="chip" data-filter="deck" aria-pressed="false">발표 자료 있음</button>
+    <span class="count" id="count" aria-live="polite"></span>
   </div>
 
-  <!-- ============ Case 1: 삼성전자 ============ -->
-  <div class="case-card" id="case-samsung">
-    <div class="case-head">
-      <div class="case-no">1</div>
-      <span class="case-company">삼성전자</span>
+  <div class="grid" id="cases">
+
+    <article class="case" id="case-kr-challenge" data-tags="kr">
+      <div class="meta"><span class="co">현대해상 · LG유플러스 · SK AX</span><span class="pill kr">국내</span><span class="pill">보험 · 통신 · IT서비스</span><span class="date">2026.07 · AWS Summit Seoul AI-DLC Challenge</span></div>
+      <h3>"개발 방식이 달라졌다" — AI-DLC Challenge 참가 기업 경험담</h3>
+      <p>AWS Summit Seoul 2026 AI-DLC Challenge 참가 팀들이 기자간담회에서 경험을 공유했습니다. <b>현대해상</b>은 부서 간 중복 업무를 분석하는 그래프 DB 기반 업무 인텔리전스 플랫폼 'Hi-Universe'를 요구사항 정의부터 개발 완료까지 약 6시간 만에 만들었고, <b>LG유플러스</b>는 화자를 구분하는 차량용 AI 에이전트 'Family Profile Copilot', <b>SK AX</b>는 최대 200쪽 RFP 에서 요구사항·리스크·WBS 를 뽑는 'RFP Insight AI'를 구축했습니다. 참가자들은 AI-DLC 를 단순한 코딩 가속기가 아닌 <b>프로젝트 전체 품질을 높이는 방법론</b>으로 평가했습니다.</p>
+      <ul class="kpis"><li>요구사항→개발 완료 약 6시간 (현대해상)</li></ul>
+      <div class="actions">
+        <a class="primary" href="https://zdnet.co.kr/view/?no=20260716115241" target="_blank" rel="noopener">기사 원문</a>
+      </div>
+    </article>
+
+    <article class="case" id="case-oliveyoung" data-tags="kr">
+      <div class="meta"><span class="co">CJ올리브영</span><span class="pill kr">국내</span><span class="pill">리테일 · 이커머스</span><span class="date">2026.05 · AWS 기술 블로그</span></div>
+      <h3>CJ올리브영의 AI 협업 개발 프로세스 구축, AI-DLC 실전 도입 사례</h3>
+      <p>2026년 3월 CTO 를 포함한 기술 조직 약 30명이 3일간 Unicorn Gym 을 진행했습니다. 후보 24개 과제 중 5개(Greenfield 4 · Brownfield 1)를 골라 Inception 부터 Construction 까지 <b>Kiro</b> 로 수행했고, 5개 과제 모두 3일 만에 프로토타입 수준에 도달했습니다.</p>
+      <ul class="kpis"><li>일반 대비 5배 이상 빠른 속도</li><li>반복 작업 최대 30배 단축</li><li>운영 지연 요인 40% 사전 차단 기회</li></ul>
+      <div class="actions">
+        <a class="primary" href="https://aws.amazon.com/ko/blogs/tech/cj-oliveyoung-aidlc-tech-blog/" target="_blank" rel="noopener">블로그 원문</a>
+      </div>
+    </article>
+
+    <article class="case" id="case-armiq" data-tags="kr">
+      <div class="meta"><span class="co">ARMIQ</span><span class="pill kr">국내</span><span class="pill">SAP 데이터 솔루션 · ISV</span><span class="date">2026.05 · AWS 기술 블로그</span></div>
+      <h3>AI-DLC 를 팀 프로젝트에 적용하기 — Subagent 와 Custom Skill 로 확장</h3>
+      <p>제한된 인력으로 두 프로젝트를 병행하기 위해 AI-DLC 를 도입하고, <b>Kiro Subagent 와 Custom Skill</b> 로 확장했습니다. 4인 팀을 wave 단위로 나눠 unit 을 병렬 개발했으며, 신규 ACMS 프로젝트는 4주 만에 5개 unit · 31개 user story · 55개 API(기능 요구사항 95% 커버)를 설계·구현했습니다.</p>
+      <ul class="kpis"><li>AETL V4 처리량 +103%~119%</li><li>4주 · 55개 API</li></ul>
+      <div class="actions">
+        <a class="primary" href="https://aws.amazon.com/ko/blogs/tech/aidlc-armiq-subagent-customskills/" target="_blank" rel="noopener">블로그 원문</a>
+      </div>
+    </article>
+
+    <article class="case" id="case-raplabs" data-tags="kr">
+      <div class="meta"><span class="co">라포랩스</span><span class="pill kr">국내</span><span class="pill">커머스 플랫폼</span><span class="date">2026.04 · AWS 기술 블로그</span></div>
+      <h3>AI-DLC 기반 사내 배포 플랫폼 Raploy 구축</h3>
+      <p>AX 팀이 비개발자도 프로덕션 배포를 할 수 있는 사내 배포 플랫폼 Raploy 의 뼈대를 <b>3일 워크숍</b>에서 만들고, 약 한 달 보완 후 2026년 3월 중순 사내 출시했습니다. Construction 에서 3개 unit · 307개 테스트 케이스를 다뤘고 unit 2·3 은 병렬 개발했습니다. 핵심 교훈: <b>"AI-DLC는 빠르게 시작할 수 있지만 100% 완성을 위해서는 보완 루프가 반드시 필요"</b>.</p>
+      <ul class="kpis"><li>3일 뼈대 → 약 1개월 후 출시</li><li>테스트 케이스 307개</li></ul>
+      <div class="actions">
+        <a class="primary" href="https://aws.amazon.com/ko/blogs/tech/build-production-apps-in-2-weeks-with-aws-ai-dlc/" target="_blank" rel="noopener">블로그 원문</a>
+      </div>
+    </article>
+
+    <article class="case" id="case-samsung" data-tags="kr deck">
+      <div class="meta"><span class="co">삼성전자</span><span class="pill kr">국내</span><span class="pill">전자 · 플랫폼</span><span class="date">2026 · AWS Summit Seoul</span></div>
       <h3>삼성전자의 에이전틱 AI 전략 — 개발혁신과 AIOps 여정</h3>
-    </div>
-    <p class="case-summary">
-      삼성전자는 <strong>21억 사용자 Samsung Account</strong> 와 50여 개 주요 서비스 위에서 에이전틱 AI 를
-      개발과 운영 전 영역으로 확산시키는 대표적 사례입니다.
-      개발은 <strong>AI-DLC</strong> 로 <strong>'의도와 실행을 분리'</strong> 하고
-      <code>Knowledge Base</code> · <code>Human-in-the-Loop</code> 거버넌스를 결합해
-      <strong>리드타임 70% 단축</strong>을 실증했고,
-      운영은 중앙 SRE 가 <code>AIOps</code> · <code>SecOps</code> · <code>FinOps</code> 분과에 AI 에이전트를 배치해
-      <strong>변경영향도 분석 · ARB · 이상 탐지 · WAF 대응</strong> 을 자동화했습니다.
-      <code>Kiro</code> · <code>Amazon Quick</code> · <code>Bedrock AgentCore</code> 를
-      <strong>Supervisor–Domain–Task 계층</strong> 으로 표준화한
-      <strong>4단계 성숙도 로드맵</strong> 위에서 <strong>Toil 0% · Human First</strong> 를 지향하는 여정을 공유합니다.
-    </p>
-    <div class="case-actions">
-      <a href="https://summitseoul.awslivestream.com/sel-ind225/live/" target="_blank">
-        🎬 라이브 스트리밍 보기
-      </a>
-    </div>
-    <div class="case-deck" data-ppt="decks/case-samsung.pptx" data-ppt-title="삼성전자 AI-DLC 발표 자료"></div>
-  </div>
+      <p><b>21억 사용자 Samsung Account</b>와 50여 개 서비스에 에이전틱 AI 를 개발·운영 전반으로 확산했습니다. 개발은 AI-DLC 로 <b>의도와 실행을 분리</b>하고 Knowledge Base · Human-in-the-Loop 거버넌스를 결합했고, 운영은 중앙 SRE 가 AIOps · SecOps · FinOps 분과에 에이전트를 배치해 변경영향도 분석 · ARB · 이상 탐지 · WAF 대응을 자동화했습니다. Kiro · Amazon Quick · Bedrock AgentCore 를 Supervisor–Domain–Task 계층으로 표준화한 4단계 성숙도 로드맵을 공유했습니다.</p>
+      <ul class="kpis"><li>리드타임 70% 단축</li><li>Toil 0% 지향</li></ul>
+      <div class="actions">
+        <a class="primary" href="https://summitseoul.awslivestream.com/sel-ind225/live/" target="_blank" rel="noopener">세션 영상</a>
+        <button type="button" data-deck-src="decks/case-samsung.pptx">발표 자료 보기</button>
+      </div>
+      <div class="deck" hidden></div>
+    </article>
 
-  <!-- ============ Case 2: 웅진씽크빅 ============ -->
-  <div class="case-card" id="case-woongjin">
-    <div class="case-head">
-      <div class="case-no">2</div>
-      <span class="case-company">웅진씽크빅</span>
-      <h3>웅진씽크빅의 AI-DLC 를 활용한 교육자용 AI 에이전트 구축기</h3>
-    </div>
-    <p class="case-summary">
-      웅진씽크빅은 <strong>학습 컨설턴트의 생산성 향상 및 고객 경험 개선</strong>을 위한
-      AI 에이전트 구축 과제에 직면했을 때,
-      <code>Kiro</code> 와 <strong>AI-DLC 방법론</strong>을 도입하여
-      <strong>개발 속도를 단축</strong>시키고 서비스를 성공적으로 런치하였습니다.
-      본 세션에서는 이러한 웅진씽크빅의 AI 에이전트 구축 여정을 공유합니다.
-    </p>
-    <div class="case-actions">
-      <a href="https://summitseoul.awslivestream.com/sel-ind213/live/" target="_blank">
-        🎬 라이브 스트리밍 보기
-      </a>
-    </div>
-    <div class="case-deck" data-ppt="decks/case-woongjin.pptx" data-ppt-title="웅진씽크빅 AI-DLC 발표 자료"></div>
-  </div>
+    <article class="case" id="case-woongjin" data-tags="kr deck">
+      <div class="meta"><span class="co">웅진씽크빅</span><span class="pill kr">국내</span><span class="pill">교육</span><span class="date">2026 · AWS Summit Seoul</span></div>
+      <h3>AI-DLC 를 활용한 교육자용 AI 에이전트 구축기</h3>
+      <p>학습 컨설턴트의 생산성과 고객 경험을 높이는 AI 에이전트 과제에서 <b>Kiro 와 AI-DLC 방법론</b>을 도입해 개발 기간을 줄이고 서비스를 출시한 여정을 공유했습니다.</p>
+      <div class="actions">
+        <a class="primary" href="https://summitseoul.awslivestream.com/sel-ind213/live/" target="_blank" rel="noopener">세션 영상</a>
+        <button type="button" data-deck-src="decks/case-woongjin.pptx">발표 자료 보기</button>
+      </div>
+      <div class="deck" hidden></div>
+    </article>
 
-  <!-- ============ Case 3: 바비톡 ============ -->
-  <div class="case-card" id="case-babitalk">
-    <div class="case-head">
-      <div class="case-no">3</div>
-      <span class="case-company">바비톡</span>
+    <article class="case" id="case-babitalk" data-tags="kr deck">
+      <div class="meta"><span class="co">바비톡</span><span class="pill kr">국내</span><span class="pill">뷰티 · 플랫폼</span><span class="date">2026 · AWS Summit Seoul</span></div>
       <h3>바비톡의 AX 여정 — 에이전틱 AI 로 K-beauty 를 바꾸다</h3>
-    </div>
-    <p class="case-summary">
-      <strong>1,000만 유저의 바비톡</strong>은 <strong>AI 특공대</strong> 와 <strong>Monthly PoC</strong> 로
-      AX 를 추진하고 있습니다.
-      본 세션에서는 <code>Amazon Bedrock</code> 기반 <strong>K-Beauty 어시스턴트</strong> 등
-      Agentic AI 도입 사례와,
-      <strong>AI-DLC (AI Development Life Cycle)</strong> 를 사용해
-      <strong>마케팅팀과 개발팀 협업 모델 변화</strong>를 통한 개발 문화 및 생산성 혁신 경험을 공유합니다.
-    </p>
-    <div class="case-actions">
-      <a href="https://summitseoul.awslivestream.com/sel-ind211/live/" target="_blank">
-        🎬 라이브 스트리밍 보기
-      </a>
-    </div>
-    <div class="case-deck" data-ppt="decks/case-babitalk.pptx?v=2" data-ppt-title="바비톡 AI-DLC 발표 자료"></div>
+      <p><b>1,000만 유저</b>의 바비톡은 AI 특공대와 Monthly PoC 로 AX 를 추진 중입니다. Amazon Bedrock 기반 K-Beauty 어시스턴트와 함께, AI-DLC 로 <b>마케팅팀과 개발팀의 협업 모델</b>을 바꾼 경험을 공유했습니다.</p>
+      <div class="actions">
+        <a class="primary" href="https://summitseoul.awslivestream.com/sel-ind211/live/" target="_blank" rel="noopener">세션 영상</a>
+        <button type="button" data-deck-src="decks/case-babitalk.pptx?v=2">발표 자료 보기</button>
+      </div>
+      <div class="deck" hidden></div>
+    </article>
+
+    <article class="case" id="case-lg" data-tags="kr deck">
+      <div class="meta"><span class="co">LG전자</span><span class="pill kr">국내</span><span class="pill">전자 · 대규모 코드베이스</span><span class="date">2026 · AWS Summit Seoul</span></div>
+      <h3>AI-DLC 소개와 대규모 코드베이스 적용기</h3>
+      <p>AI-DLC 워크플로우와 그 변화가 개발자·조직·비즈니스에 주는 이점을 소개하고, <b>대규모 코드베이스 환경에서 AI-DLC 를 도입한 LG전자의 사례</b>와 교훈을 공유했습니다.</p>
+      <div class="actions">
+        <a class="primary" href="https://summitseoul.awslivestream.com/sel-dvt203/live/" target="_blank" rel="noopener">세션 영상</a>
+        <button type="button" data-deck-src="decks/case-lg.pptx">발표 자료 보기</button>
+      </div>
+      <div class="deck" hidden></div>
+    </article>
+
+    <article class="case" id="case-jp-isv" data-tags="gl gym">
+      <div class="meta"><span class="co">freee · 누라보 외 ISV SaaS 8개사</span><span class="pill gl">해외</span><span class="pill">일본 · SaaS</span><span class="date">2026.08 · AWS Japan 블로그</span></div>
+      <h3>ISV SaaS 사업자 8개사 합동 AI-DLC Unicorn Gym</h3>
+      <p>サイバーセキュリティクラウド, freee, いえらぶGROUP, モビルス, エムオーテックス, ヌーラボ, テクマトリックス, ヴァル研究所 등 8개사 54명이 각자 제품 테마를 들고 와 <b>Kiro · Claude Code</b> 로 Mob Elaboration · Mob Construction 을 실습했습니다. 8팀 중 6팀이 2일 만에 데모 가능한 구현에 도달했습니다.</p>
+      <ul class="kpis"><li>1개월+ 요구사항 정의 → 2일</li><li>8팀 중 6팀 데모 도달</li></ul>
+      <div class="actions">
+        <a class="primary" href="https://aws.amazon.com/jp/blogs/news/joint-ai-dlc-unicorn-gym-isv-202607/" target="_blank" rel="noopener">블로그 원문 (日)</a>
+      </div>
+    </article>
+
+    <article class="case" id="case-jp-sanrio" data-tags="gl gym">
+      <div class="meta"><span class="co">산리오 · 세븐은행 외 9개사</span><span class="pill gl">해외</span><span class="pill">일본 · 엔터테인먼트 · 금융 · IT</span><span class="date">2026.07–08 · AWS Japan 블로그</span></div>
+      <h3>9개사 합동 Unicorn Gym — '쓰기'에서 '결정하기'로</h3>
+      <p>2026년 6월 11~12일 9개사 11팀 약 90명이 Kiro · Claude Code 로 2일간 AI-DLC 를 실습했습니다. 참가사 산리오의 A팀은 한 기능을 <b>Inception 부터 프로덕션 머지까지 약 5시간</b>에 끝냈고, 기능을 '만들지 않는' 판단도 AI 와 함께 내렸습니다.</p>
+      <ul class="kpis"><li>만족도 4.7 / 5</li><li>체감 공수 절감 평균 74.0%</li><li>Inception→프로덕션 머지 약 5시간 (산리오)</li></ul>
+      <div class="actions">
+        <a class="primary" href="https://aws.amazon.com/jp/blogs/news/joint-ai-dlc-unicorn-gym-202606/" target="_blank" rel="noopener">합동 리포트 (日)</a>
+        <a href="https://aws.amazon.com/jp/blogs/news/sanrio-ai-dlc-unicorn-gym-2026/" target="_blank" rel="noopener">산리오 좌담회 (日)</a>
+      </div>
+    </article>
+
+    <article class="case" id="case-southwest" data-tags="gl">
+      <div class="meta"><span class="co">Southwest Airlines</span><span class="pill gl">해외</span><span class="pill">미국 · 항공</span><span class="date">2026.06 · AWS Summit New York</span></div>
+      <h3>AI 에이전트가 개발을 이끌고 엔지니어가 검증하는 AI-DLC 접근</h3>
+      <p>AWS Summit New York 2026 에서 Southwest 가 AI-DLC 방식을 도입한 사례로 소개됐습니다. <b>2,700명 이상의 개발자가 Kiro</b> 로 기능 구현 · 테스트 자동화 · 클라우드 인프라 생성을 수행하며 Southwest.com 현대화를 진행 중입니다. 출처에 AI-DLC 관련 정량 지표는 없습니다.</p>
+      <ul class="kpis"><li>Kiro 사용 개발자 2,700명+</li></ul>
+      <div class="actions">
+        <a class="primary" href="https://www.aboutamazon.com/news/aws/aws-summit-nyc-2026-ai-agents" target="_blank" rel="noopener">About Amazon 원문</a>
+      </div>
+    </article>
+
+    <article class="case" id="case-hitachi-group" data-tags="gl gym">
+      <div class="meta"><span class="co">히타치 그룹 3개사</span><span class="pill gl">해외</span><span class="pill">일본 · 전자 · IT</span><span class="date">2026.06 · AWS Japan 블로그</span></div>
+      <h3>히타치 그룹 합동 AI-DLC Unicorn Gym</h3>
+      <p>1월 히타치산업제어솔루션즈의 성과를 이어 그룹 3개사 52명(8팀)이 참가했습니다. 참가자 설문에서 <b>90%가 70% 이상, 72%가 85% 이상의 개발 공수 절감</b>을 체감했고, 95%가 3일 안에 동작하는 결과물에 (부분)도달했습니다.</p>
+      <ul class="kpis"><li>만족도 4.67 / 5</li><li>추천 의향 100%</li><li>90%가 70%+ 공수 절감 체감</li></ul>
+      <div class="actions">
+        <a class="primary" href="https://aws.amazon.com/jp/blogs/news/ai-dlc-unicorn-gym-htachi-group-2026/" target="_blank" rel="noopener">블로그 원문 (日)</a>
+      </div>
+    </article>
+
+    <article class="case" id="case-jp-osaka" data-tags="gl gym">
+      <div class="meta"><span class="co">다이킨 · 파나소닉 · 무라타 외 9개사</span><span class="pill gl">해외</span><span class="pill">일본 · 유통 · 전자 · 제조</span><span class="date">2026.06 · AWS Japan 블로그</span></div>
+      <h3>오사카 9개사 합동 Unicorn Gym — AI 와 개발한 3일에서 본 사람의 일</h3>
+      <p>H2O リテイリング, パナソニックコネクト, 村田製作所, 東洋紡, シャープ, ダイキン工業 등 9개사 75명(10팀)이 3일간 Inception · Construction 을 수행했습니다. "평소 1개월, 2~3 스프린트 걸리던 일이 4시간에 끝났다"는 소감과 함께, <b>사람의 일이 코드 작성에서 판단·결정으로 옮겨간다</b>는 점이 핵심 메시지로 정리됐습니다.</p>
+      <ul class="kpis"><li>2~3 스프린트 → 4시간 (참가자 소감)</li></ul>
+      <div class="actions">
+        <a class="primary" href="https://aws.amazon.com/jp/blogs/news/joint-ai-dlc-unicorn-gym-osaka-202605/" target="_blank" rel="noopener">블로그 원문 (日)</a>
+      </div>
+    </article>
+
+    <article class="case" id="case-hitachi-ics" data-tags="gl gym">
+      <div class="meta"><span class="co">히타치산업제어솔루션즈 외 11개사</span><span class="pill gl">해외</span><span class="pill">일본 · 제조 · 인프라 · 서비스</span><span class="date">2026.02–05 · AWS Japan 블로그</span></div>
+      <h3>3인월 개발을 2일에 — 11개사 합동 Unicorn Gym (도쿄)</h3>
+      <p>히타치ICS · 미쓰비시전기빌딩솔루션즈 · DNP · TOPPAN · JR도카이 · JTB · 다이이치산쿄 등 11개사 87명이 참가했습니다. 히타치ICS 팀은 IT 자산·보안 데이터 통합 플랫폼(Lambda 18개 · DynamoDB 9개)을 2일 만에 AWS 에 배포했습니다. 단, <b>프로토타입 범위이며 통합 테스트·보안 리뷰는 제외</b>라는 단서를 명시했습니다.</p>
+      <ul class="kpis"><li>약 530시간(3인월) 추정 → 약 70시간</li><li>8주 계획 → 2일 (합동 리포트)</li></ul>
+      <div class="actions">
+        <a class="primary" href="https://aws.amazon.com/jp/blogs/news/ai-dlc-unicorn-gym-hitachi-ics-202601/" target="_blank" rel="noopener">히타치ICS 사례 (日)</a>
+        <a href="https://aws.amazon.com/jp/blogs/news/joint-ai-dlc-unicorn-gym-202601/" target="_blank" rel="noopener">합동 리포트 (日)</a>
+      </div>
+    </article>
+
+    <article class="case" id="case-fujitsu" data-tags="gl gym">
+      <div class="meta"><span class="co">후지쯔</span><span class="pill gl">해외</span><span class="pill">일본 · SI · IT서비스</span><span class="date">2026.04 · AWS Japan 블로그</span></div>
+      <h3>후지쯔와 함께한 AI-DLC Unicorn Gym 에서 본 개발의 미래</h3>
+      <p>약 40명 7팀이 COBOL 마이그레이션부터 AI 에이전트 플랫폼까지 다양한 테마에 도전해 <b>모든 팀이 3일 안에 동작하는 프로토타입</b>을 완성했습니다. 풀스택 271개 파일 · 7,151줄 구축, 2일 만에 마이크로서비스 3개, COBOL→Java 4,300줄 전환(테스트 182건 전부 통과) 등의 결과가 공유됐습니다.</p>
+      <ul class="kpis"><li>COBOL→Java 4,300줄 · 테스트 182건 통과</li><li>참가자 추정 50인월 → 5인월</li></ul>
+      <div class="actions">
+        <a class="primary" href="https://aws.amazon.com/jp/blogs/news/fujitsu-aidlc/" target="_blank" rel="noopener">블로그 원문 (日)</a>
+      </div>
+    </article>
+
+    <article class="case" id="case-mitsubishi" data-tags="gl gym">
+      <div class="meta"><span class="co">미쓰비시전기 전력ICT센터</span><span class="pill gl">해외</span><span class="pill">일본 · 전력 시스템 제조</span><span class="date">2026.03 · AWS Japan 블로그</span></div>
+      <h3>엔지니어 33명이 3일간 체감한 AI 구동 개발의 가능성</h3>
+      <p>33명 5팀이 실제 업무 과제로 3일간 실습해 일부 팀은 2일차에 동작하는 결과물을 냈습니다. 반면 범위를 너무 넓게 잡아 3일차 오전까지 Inception 에 머문 팀의 사례도 솔직하게 공유해, <b>범위 설정의 중요성</b>을 보여 줍니다. 이후 약 600명 규모의 사내 AI-DLC 커뮤니티로 이어졌습니다.</p>
+      <ul class="kpis"><li>33명 · 5팀 · 3일</li><li>사내 커뮤니티 약 600명</li></ul>
+      <div class="actions">
+        <a class="primary" href="https://aws.amazon.com/jp/blogs/news/mitsubishi-electric-power-ict-ai-dlc-unicorn-gym/" target="_blank" rel="noopener">블로그 원문 (日)</a>
+      </div>
+    </article>
+
+    <article class="case" id="case-wipro" data-tags="gl">
+      <div class="meta"><span class="co">Wipro</span><span class="pill gl">해외</span><span class="pill">인도 · IT서비스</span><span class="date">2025.08 · AWS DevSphere 2025</span></div>
+      <h3>AI-DLC 방법론 첫 공개 무대의 고객 사례</h3>
+      <p>AWS DevSphere 2025(벵갈루루) 기조연설에서 AI-DLC 방법론이 소개됐습니다. Wipro CTO 는 Amazon Q Developer 와 AI-DLC 를 적용해 <b>20시간 만에 프로덕션 수준 모듈 4개</b>를 만들었다고 밝혔습니다. 같은 발표에서 S&amp;P Global · HackerRank · Dhan 도 방법론 활용 기업으로 언급됐습니다.</p>
+      <ul class="kpis"><li>20시간 · 프로덕션 수준 모듈 4개</li></ul>
+      <div class="actions">
+        <a class="primary" href="https://www.aboutamazon.in/news/aws/aws-launches-new-ai-methodology-devsphere" target="_blank" rel="noopener">Amazon India 원문</a>
+      </div>
+    </article>
+
   </div>
 
-  <!-- ============ Case 4: LG전자 ============ -->
-  <div class="case-card" id="case-lg">
-    <div class="case-head">
-      <div class="case-no">4</div>
-      <span class="case-company">LG전자</span>
-      <h3>AI 기반 개발 라이프사이클 (AI-DLC) 소개</h3>
-    </div>
-    <p class="case-summary">
-      <strong>AI-DLC</strong> 는 AI 와 사람의 협업 모델을 기반으로
-      소프트웨어 개발 방식을 근본적으로 혁신하는 <strong>AI 네이티브 개발 방법론</strong>입니다.
-      본 세션에서는 AI-DLC 워크플로우를 소개하고,
-      이러한 패러다임 전환이 <strong>개발자와 조직, 비즈니스에 가져다줄 변화와 이점</strong>을 다룹니다.
-      특히 <strong>큰 규모의 코드베이스 환경에서 AI-DLC 를 도입한 LG전자의 사례</strong>와
-      그 과정에서 얻은 교훈을 공유합니다.
-    </p>
-    <div class="case-actions">
-      <a href="https://summitseoul.awslivestream.com/sel-dvt203/live/" target="_blank">
-        🎬 라이브 스트리밍 보기
-      </a>
-    </div>
-    <div class="case-deck" data-ppt="decks/case-lg.pptx" data-ppt-title="LG전자 AI-DLC 발표 자료"></div>
-  </div>
+  <h2 class="sec" id="internal">내부 사례</h2>
+  <p class="sec-sub">조직 내부의 AI-DLC 적용 사례</p>
+  <div class="note">정리 중입니다. 내부 적용 결과가 모이면 이곳에 같은 형식(배경 · 적용 범위 · 결과 · 교훈)으로 추가합니다.</div>
 
-  <!-- ===================================================== -->
-  <!-- ============ 내부 사례 =================== -->
-  <!-- ===================================================== -->
-  <div class="section-head internal" id="internal">
-    <h2>🏠 내부 사례</h2>
-    <span class="sh-tag">INTERNAL</span>
-    <span class="sh-sub">조직 내 AI-DLC 도입 사례 — 정리 중</span>
-  </div>
-
-  <div class="coming-soon">
-    <span class="cs-icon">🚧</span>
-    <h3>준비 중입니다</h3>
-    <p>
-      조직 내 AI-DLC 도입 사례를 정리하고 있습니다.<br/>
-      추후 업데이트될 예정이니 조금만 기다려 주세요.
-    </p>
-  </div>
-
+  <p class="src">수집 기준: AI-DLC 를 명시적으로 언급한 공개 자료만 포함하며, AWS 자체 사례는 제외했습니다. 최종 확인 2026-09-25.
+    누락되었거나 수정이 필요한 사례는 <a href="https://github.com/nuriguri1228/AIDLC-Guide/issues" target="_blank" rel="noopener">이슈</a>로 알려 주세요.</p>
 </main>
 
-<footer>
-  <p>
-    데이터 출처: AWS Summit Seoul 2026 발표 세션 ·
-    <a href="https://github.com/awslabs/aidlc-workflows" target="_blank">aidlc-workflows</a> (Apache-2.0) ·
-    <a href="index.html">📊 다이어그램</a> ·
-    <a href="effects.html">✨ 효과</a> ·
-    <a href="scenarios.html">🎬 시나리오</a> ·
-    <a href="user-flow.html">🧭 사용자 흐름</a>
-  </p>
+<footer class="home-foot">
+  원본: <a href="https://github.com/awslabs/aidlc-workflows" target="_blank" rel="noopener">awslabs/aidlc-workflows</a> (Apache-2.0) · 각 사례의 저작권은 해당 발표자·출처에 있습니다.
 </footer>
 
 <script>
-  // PPT viewer: data-ppt 경로에 파일이 있으면 Microsoft Office Online Viewer 로 임베드.
-  // 파일이 없거나 file:// 로 열렸으면 placeholder 표시.
+  // 필터 (data-tags 기준)
   (function () {
-    const decks = document.querySelectorAll('.case-deck[data-ppt]');
-    const isHttp = location.protocol === 'http:' || location.protocol === 'https:';
-
-    function showPlaceholder(el, path, title) {
-      el.innerHTML =
-        '<div class="ppt-placeholder">' +
-          '<span class="ppt-icon">📎</span>' +
-          '<div><strong>' + (title || '발표 자료') + ' 추가 예정</strong></div>' +
-          '<div style="margin-top:6px;">파일을 <code>' + path + '</code> 경로에 업로드하면 이 영역에 자동으로 viewer 가 렌더링됩니다.</div>' +
-        '</div>';
+    var cards = Array.prototype.slice.call(document.querySelectorAll('.case'));
+    var chips = document.querySelectorAll('.chip');
+    var count = document.getElementById('count');
+    function match(c, f) { return f === 'all' || (' ' + c.dataset.tags + ' ').indexOf(' ' + f + ' ') >= 0; }
+    function n(f) { return cards.filter(function (c) { return match(c, f); }).length; }
+    function apply(f) {
+      cards.forEach(function (c) { c.hidden = !match(c, f); });
+      chips.forEach(function (ch) { ch.setAttribute('aria-pressed', String(ch.dataset.filter === f)); });
+      count.textContent = n(f) + '개 사례';
     }
+    chips.forEach(function (ch) {
+      var s = document.createElement('span'); s.className = 'n'; s.textContent = n(ch.dataset.filter); ch.appendChild(s);
+      ch.addEventListener('click', function () { apply(ch.dataset.filter); });
+    });
+    apply('all');
+  })();
 
-    function embedDeck(el, path, title) {
-      // file:// 에서는 Office viewer 가 접근 불가 → placeholder.
-      if (!isHttp) { showPlaceholder(el, path, title); return; }
-
-      // 원격 PPT URL 생성 (현재 페이지 기준 절대 경로).
-      const fullUrl = new URL(path, location.href).href;
-      // localhost / 사설망은 Office viewer 가 접근 불가 → placeholder 로 안내.
-      const host = location.hostname;
-      const isLocal = host === 'localhost' || host === '127.0.0.1' || host.endsWith('.local');
-      if (isLocal) {
-        el.innerHTML =
-          '<div class="ppt-placeholder">' +
-            '<span class="ppt-icon">📎</span>' +
-            '<div><strong>' + (title || '발표 자료') + '</strong> — 로컬 서버에서는 viewer 미리보기가 불가합니다.</div>' +
-            '<div style="margin-top:6px;">GitHub Pages 등에 배포된 환경에서 자동 렌더링됩니다. 파일 경로: <code>' + path + '</code></div>' +
-          '</div>';
-        return;
-      }
-
-      const viewerSrc = 'https://view.officeapps.live.com/op/embed.aspx?src=' + encodeURIComponent(fullUrl);
-      el.innerHTML = '<iframe src="' + viewerSrc + '" allowfullscreen title="' + (title || 'PPT viewer') + '"></iframe>';
-    }
-
-    decks.forEach(function (el) {
-      const path = el.getAttribute('data-ppt');
-      const title = el.getAttribute('data-ppt-title') || '';
-      if (!path) { showPlaceholder(el, '(미지정)', title); return; }
-
-      if (!isHttp) { showPlaceholder(el, path, title); return; }
-
-      // 파일 존재 여부를 HEAD 로 확인.
-      fetch(path, { method: 'HEAD' })
-        .then(function (res) {
-          if (res.ok) embedDeck(el, path, title);
-          else showPlaceholder(el, path, title);
-        })
-        .catch(function () { showPlaceholder(el, path, title); });
+  // 발표 자료: 클릭 시에만 Office Online Viewer 로 임베드 (배포 환경 전용)
+  (function () {
+    var host = location.hostname;
+    var embeddable = /^https?:$/.test(location.protocol) && !(host === 'localhost' || host === '127.0.0.1' || host.endsWith('.local'));
+    document.querySelectorAll('[data-deck-src]').forEach(function (btn) {
+      var box = btn.closest('.case').querySelector('.deck');
+      var path = btn.getAttribute('data-deck-src');
+      btn.addEventListener('click', function () {
+        var open = box.hidden;
+        box.hidden = !open;
+        btn.textContent = open ? '발표 자료 닫기' : '발표 자료 보기';
+        if (!open || box.dataset.loaded) return;
+        box.dataset.loaded = '1';
+        if (embeddable) {
+          var iframe = document.createElement('iframe');
+          iframe.src = 'https://view.officeapps.live.com/op/embed.aspx?src=' + encodeURIComponent(new URL(path, location.href).href);
+          iframe.title = '발표 자료';
+          iframe.allowFullscreen = true;
+          box.appendChild(iframe);
+        } else {
+          var ph = document.createElement('div');
+          ph.className = 'ph';
+          ph.appendChild(document.createTextNode('로컬 환경에서는 미리보기를 지원하지 않습니다. '));
+          var link = document.createElement('a');
+          link.href = path.split('?')[0]; link.textContent = 'PPTX 내려받기';
+          ph.appendChild(link);
+          box.appendChild(ph);
+        }
+      });
     });
   })();
 </script>
-
+<script src="assets/site.js?v=20260925"></script>
 </body>
 </html>
